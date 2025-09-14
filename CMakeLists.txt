@@ -30,7 +30,7 @@ function(swift_application)
       -I ${ZEPHYR_BASE}/include
       -I ${CMAKE_CURRENT_BINARY_DIR}/modules/lang-swift/zephyr
       ${SWIFT_SOURCES}
-    DEPENDS ${SWIFT_SOURCES} ZephyrSwift_compile
+    DEPENDS ${SWIFT_SOURCES} Zephyr_compile
     COMMENT "Compiling Swift application ${PROJECT_NAME}")
 
   # Add custom target to ensure Swift compilation happens
@@ -41,8 +41,8 @@ function(swift_application)
   target_sources(app PRIVATE ${APP_SWIFT_OBJ_FILE})
   add_dependencies(app ${PROJECT_NAME}_compile)
 
-  # Link the ZephyrSwift library for additional Swift utilities
-  target_link_libraries(app PRIVATE ZephyrSwift)
+  # Link the Zephyr library for additional Swift utilities
+  target_link_libraries(app PRIVATE Zephyr)
 
   # Set linker language for the app target to ensure proper linking
   set_target_properties(app PROPERTIES LINKER_LANGUAGE C)
