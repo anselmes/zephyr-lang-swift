@@ -1,4 +1,6 @@
-include(${CMAKE_CURRENT_SOURCE_DIR}/toolchain.cmake)
+set(SWIFT_MODULE_DIR
+    "${CMAKE_CURRENT_LIST_DIR}"
+    CACHE INTERNAL "")
 
 add_subdirectory(zephyr-sys)
 add_subdirectory(zephyr)
