@@ -1,0 +1,17 @@
+# Add 'repo' label to any root file changes
+repo:
+  - changed-files:
+      - any-glob-to-any-file: "*"
+
+# Add 'github-actions' label to any changes in the '.github' directory
+github-actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/actions/*
+          - .github/actions/*/**
+          - .github/auto_assign.yml
+          - .github/auto_assign.yml/**
+          - .github/dependabot.yml
+          - .github/dependabot.yml/**
+          - .github/workflows/*
+          - .github/workflows/*/**

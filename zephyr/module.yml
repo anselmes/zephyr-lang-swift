@@ -1,0 +1,11 @@
+name: lang-swift
+
+build:
+  cmake: .
+  kconfig: Kconfig
+
+samples:
+  - samples
+
+tests:
+  - tests
