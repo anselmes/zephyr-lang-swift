@@ -7,22 +7,22 @@ Thank you for your interest in contributing to this project! This document provi
 1. Fork the repository
 2. Clone your fork:
 
-    ```bash
-    git clone https://github.com/YOUR-USERNAME/zephyr-lang-swift.git
-    cd config
-    ```
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/zephyr-lang-swift.git
+   cd config
+   ```
 
 3. Add the upstream repository:
 
-    ```bash
-    git remote add upstream https://github.com/anselmes/zephyr-lang-swift.git
-    ```
+   ```bash
+   git remote add upstream https://github.com/anselmes/zephyr-lang-swift.git
+   ```
 
 4. Create a new branch for your changes:
 
-    ```bash
-    git checkout -b feature/your-feature-name
-    ```
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
 ## Making Changes
 
@@ -30,9 +30,9 @@ Thank you for your interest in contributing to this project! This document provi
 2. Commit your changes with a clear message
 3. Push to your fork:
 
-    ```bash
-    git push origin feature/your-feature-name
-    ```
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
 ## Submitting Changes
 

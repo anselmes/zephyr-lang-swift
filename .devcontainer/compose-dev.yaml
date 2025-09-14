@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+
+---
+services:
+  zephyr:
+    stdin_open: true
+    tty: true
+    user: ubuntu
+    working_dir: /home/ubuntu/workspace
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/home/ubuntu/workspace
+      - ~/.gitconfig:/home/ubuntu/.gitconfig:ro
+      - ~/.gnupg:/home/ubuntu/.gnupg:ro
+      - ~/.ssh:/home/ubuntu/.ssh:ro
+      - ~/.zshrc:/home/ubuntu/.zshrc:ro

@@ -10,7 +10,10 @@ if(SWIFT_SOURCES)
 
   # Get the Swift target architecture from parent scope
   if(CONFIG_RISCV)
-    # FIXME: The RISC-V target triples use 'none-none-eabi' but other architectures use different patterns (e.g., 'aarch64-none-elf'). Consider standardizing the target triple format or documenting why RISC-V requires this specific format.
+    # FIXME: The RISC-V target triples use 'none-none-eabi' but other
+    # architectures use different patterns (e.g., 'aarch64-none-elf'). Consider
+    # standardizing the target triple format or documenting why RISC-V requires
+    # this specific format.
     if(CONFIG_64BIT)
       set(SWIFT_TARGET "riscv64-none-none-eabi")
     else()
@@ -19,7 +22,9 @@ if(SWIFT_SOURCES)
   elseif(CONFIG_ARM64)
     set(SWIFT_TARGET "aarch64-none-elf")
   elseif(CONFIG_CPU_CORTEX_M)
-    if(CONFIG_CPU_CORTEX_M0 OR CONFIG_CPU_CORTEX_M0PLUS OR CONFIG_CPU_CORTEX_M1)
+    if(CONFIG_CPU_CORTEX_M0
+       OR CONFIG_CPU_CORTEX_M0PLUS
+       OR CONFIG_CPU_CORTEX_M1)
       set(SWIFT_TARGET "thumbv6m-none-eabi")
     elseif(CONFIG_CPU_CORTEX_M3)
       set(SWIFT_TARGET "thumbv7m-none-eabi")
@@ -29,7 +34,11 @@ if(SWIFT_SOURCES)
       else()
         set(SWIFT_TARGET "thumbv7em-none-eabi")
       endif()
-    elseif(CONFIG_CPU_CORTEX_M23 OR CONFIG_CPU_CORTEX_M33 OR CONFIG_CPU_CORTEX_M35P OR CONFIG_CPU_CORTEX_M55)
+    elseif(
+      CONFIG_CPU_CORTEX_M23
+      OR CONFIG_CPU_CORTEX_M33
+      OR CONFIG_CPU_CORTEX_M35P
+      OR CONFIG_CPU_CORTEX_M55)
       if(CONFIG_FP_HARDABI)
         set(SWIFT_TARGET "thumbv8m.main-none-eabihf")
       else()
@@ -46,29 +55,21 @@ if(SWIFT_SOURCES)
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
   add_custom_command(
     OUTPUT ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE}
-    COMMAND ${SWIFTC_EXECUTABLE}
-      -target ${SWIFT_TARGET}
-      -parse-as-library
-      -wmo
-      -Osize
-      -enable-experimental-feature Embedded
-      -Xfrontend -function-sections
-      -emit-object -o ${SWIFT_OBJ_FILE}
-      -emit-module -emit-module-path ${SWIFT_MODULE_FILE}
-      -module-name ZephyrSwift
-      ${SWIFT_SOURCES}
+    COMMAND
+      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} -parse-as-library -wmo -Osize
+      -enable-experimental-feature Embedded -Xfrontend -function-sections
+      -emit-object -o ${SWIFT_OBJ_FILE} -emit-module -emit-module-path
+      ${SWIFT_MODULE_FILE} -module-name ZephyrSwift ${SWIFT_SOURCES}
     DEPENDS ${SWIFT_SOURCES}
-    COMMENT "Compiling Swift sources for ZephyrSwift"
-  )
+    COMMENT "Compiling Swift sources for ZephyrSwift")
 
   # Create a static library that contains the Swift object
   add_library(ZephyrSwift STATIC ${SWIFT_OBJ_FILE})
-  set_target_properties(ZephyrSwift PROPERTIES
-    LINKER_LANGUAGE C
-  )
+  set_target_properties(ZephyrSwift PROPERTIES LINKER_LANGUAGE C)
 
   # Add custom target to ensure Swift compilation happens
-  add_custom_target(ZephyrSwift_compile DEPENDS ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE})
+  add_custom_target(ZephyrSwift_compile DEPENDS ${SWIFT_OBJ_FILE}
+                                                ${SWIFT_MODULE_FILE})
   add_dependencies(ZephyrSwift ZephyrSwift_compile)
 
   # Link with zephyr-sys
