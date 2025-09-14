@@ -1,0 +1,4 @@
+{
+  "threshold": 15,
+  "ignore": ["**/*.md", "**/*.txt"]
+}

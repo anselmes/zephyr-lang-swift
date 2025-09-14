@@ -1,0 +1,22 @@
+config SWIFT
+  bool "Swift language support"
+  help
+    Enable support for the Swift programming language.
+
+    This enables the Swift compiler and related tools to be used within
+    the Zephyr build system. Swift is a powerful and intuitive programming
+    language for macOS, iOS, watchOS, tvOS, and beyond.
+
+    Note: Ensure that you have the Swift toolchain installed on your system
+    to use this feature.
+
+config SWIFT_DEBUG_INFO
+  bool "Include debug information in Swift builds"
+  depends on SWIFT
+  default y if DEBUG
+  help
+    When enabled, this option includes debug information in the compiled
+    Swift binaries. This is useful for debugging and development purposes.
+
+    Note: Including debug information may increase the size of the binary
+    and affect performance. Disable this option for production builds.
