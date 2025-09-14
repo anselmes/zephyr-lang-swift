@@ -24,7 +24,6 @@ Valid values include: "swift", "swift-latest", or a specific version identifier.
 
 Specify the Zephyr build target architecture
 This defines the target architecture for the Zephyr RTOS build.
-Format: <arch>-<vendor>-<os>-<abi>
 
     ```bash
     export ZEPHYR_BUILD_TARGET="riscv32-none-none-eabi"
