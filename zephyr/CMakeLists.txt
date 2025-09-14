@@ -1,7 +1,7 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../toolchain.cmake)
 
 # Find all Swift source files
-file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
+file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 
 if(SWIFT_SOURCES)
   message(STATUS "Swift sources: ${SWIFT_SOURCES}")
