@@ -10,6 +10,7 @@ if(SWIFT_SOURCES)
 
   # Get the Swift target architecture from parent scope
   if(CONFIG_RISCV)
+    # FIXME: The RISC-V target triples use 'none-none-eabi' but other architectures use different patterns (e.g., 'aarch64-none-elf'). Consider standardizing the target triple format or documenting why RISC-V requires this specific format.
     if(CONFIG_64BIT)
       set(SWIFT_TARGET "riscv64-none-none-eabi")
     else()

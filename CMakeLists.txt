@@ -55,6 +55,7 @@ function(swift_application)
   set(APP_SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.o")
   set(APP_SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
 
+  # FIXME: This logic duplicates the target architecture mapping found in zephyr/CMakeLists.txt lines 12-42. Consider extracting this into the _swift_map_target function and calling it here to avoid code duplication.
   # Get the Swift target architecture
   if(CONFIG_RISCV)
     if(CONFIG_64BIT)
