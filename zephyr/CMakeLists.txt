@@ -44,7 +44,7 @@ if(SWIFT_SOURCES)
 
   # Add custom target to ensure Swift compilation happens
   add_custom_target(Zephyr_compile DEPENDS ${SWIFT_OBJ_FILE}
-                                                ${SWIFT_MODULE_FILE})
+                                           ${SWIFT_MODULE_FILE})
   add_dependencies(Zephyr_compile syscall_list_h_target)
   add_dependencies(Zephyr Zephyr_compile)
 

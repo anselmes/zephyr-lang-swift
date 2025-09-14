@@ -5,11 +5,13 @@ add_subdirectory(zephyr)
 
 function(swift_application)
   # Find all Swift source files
-  file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift" "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
+  file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift"
+       "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 
   # Create output paths for Swift application
   set(APP_SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.o")
-  set(APP_SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
+  set(APP_SWIFT_MODULE_FILE
+      "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
 
   # Get the Swift target architecture
   _swift_map_target()
@@ -34,7 +36,8 @@ function(swift_application)
     COMMENT "Compiling Swift application ${PROJECT_NAME}")
 
   # Add custom target to ensure Swift compilation happens
-  add_custom_target(${PROJECT_NAME}_compile DEPENDS ${APP_SWIFT_OBJ_FILE} ${APP_SWIFT_MODULE_FILE})
+  add_custom_target(${PROJECT_NAME}_compile DEPENDS ${APP_SWIFT_OBJ_FILE}
+                                                    ${APP_SWIFT_MODULE_FILE})
 
   # Add the Swift object file directly to the app target sources This ensures
   # the Swift object is linked with full access to Zephyr symbols
@@ -54,6 +57,7 @@ function(swift_application)
   add_custom_command(
     TARGET app
     POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app> $<TARGET_FILE:app>
+    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app>
+            $<TARGET_FILE:app>
     COMMENT "Removing .swift_modhash section from final binary")
 endfunction()
