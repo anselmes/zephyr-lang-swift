@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   bot:
-    uses: anselmes/cicd/.github/workflows/bot.yml@042c5469e6121d8aa7578e177c58e12deebff9e1 # v0.2.1
+    uses: anselmes/cicd/.github/workflows/bot.yml@3cca70a2245ec4bedf469088b3c21cbb77dfee2f # v0.2.2
     permissions:
       contents: write
       issues: write
@@ -20,14 +20,14 @@ jobs:
       repository-projects: write
 
   trivy:
-    uses: anselmes/cicd/.github/workflows/trivy.yml@042c5469e6121d8aa7578e177c58e12deebff9e1 # v0.2.1
+    uses: anselmes/cicd/.github/workflows/trivy.yml@3cca70a2245ec4bedf469088b3c21cbb77dfee2f # v0.2.2
     permissions:
       contents: write
       id-token: write
       security-events: write
 
   scorecard:
-    uses: anselmes/cicd/.github/workflows/scorecard.yml@042c5469e6121d8aa7578e177c58e12deebff9e1 # v0.2.1
+    uses: anselmes/cicd/.github/workflows/scorecard.yml@3cca70a2245ec4bedf469088b3c21cbb77dfee2f # v0.2.2
     permissions:
       contents: read
       id-token: write
