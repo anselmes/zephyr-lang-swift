@@ -24,7 +24,7 @@ public struct Entrypoint {
     // should continue running until power is removed
     while true {
       // Pause execution for 1 second
-      sleep(1000)
+      k_msleep(1000)
 
       // Print a status message to indicate the application is still alive
       print("still running...")
