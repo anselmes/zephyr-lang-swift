@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSwift
+import Zephyr
 
 /// The main entry point for the Zephyr Swift application.
 ///
