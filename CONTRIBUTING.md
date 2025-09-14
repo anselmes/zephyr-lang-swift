@@ -38,7 +38,7 @@ Thank you for your interest in contributing to this project! This document provi
 
 1. Ensure your changes follow the project's coding standards
 2. Update documentation as needed
-3. Open a Pull Request at: <https://github.com/anselmes/config/compare>
+3. Open a Pull Request at: <https://github.com/anselmes/zephyr-lang-swift/compare>
 4. Describe your changes in the PR description
 5. Wait for review and address any feedback
 
