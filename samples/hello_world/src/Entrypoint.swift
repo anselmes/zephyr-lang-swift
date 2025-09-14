@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSwift
+import Zephyr
 
 /// The main entry point for the Zephyr Swift application.
 ///
@@ -24,7 +24,7 @@ public struct Entrypoint {
     // should continue running until power is removed
     while true {
       // Pause execution for 1 second
-      sleep(1000)
+      k_msleep(1000)
 
       // Print a status message to indicate the application is still alive
       print("still running...")
