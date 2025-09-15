@@ -459,3 +459,11 @@ function(swift_application)
             $<TARGET_FILE:app>
     COMMENT "Removing .swift_modhash section from final binary")
 endfunction()
+
+# Simple function to add external Swift libraries from GitHub
+function(swift_add_external_library REPO_URL MODULE_NAME)
+  # This function can be extended later to fetch from GitHub
+  # For now, it's a placeholder that could integrate with FetchContent
+  message(STATUS "External library support available for ${MODULE_NAME} from ${REPO_URL}")
+  message(STATUS "Implementation can be added when needed using FetchContent or git submodules")
+endfunction()
