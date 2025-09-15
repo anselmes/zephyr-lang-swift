@@ -3,6 +3,12 @@
 
 import Zephyr
 
+// Timeout interval in milliseconds
+let TIMEOUT_INTERVAL: Double = 1000
+
+// Sleep duration in milliseconds
+let SLEEP_DURATION = Duration.milliseconds(TIMEOUT_INTERVAL)
+
 /// The main entry point for the Zephyr Swift application.
 ///
 /// This struct serves as the application's entry point and contains
@@ -24,7 +30,7 @@ public struct Entrypoint {
     // should continue running until power is removed
     while true {
       // Pause execution for 1 second
-      sleep(Duration.from(milliseconds: 1000))
+      sleep(SLEEP_DURATION)
 
       // Print a status message to indicate the application is still alive
       print("still running...")
