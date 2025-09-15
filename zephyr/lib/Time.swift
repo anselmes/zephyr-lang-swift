@@ -16,9 +16,9 @@ public var SYS_FREQUENCY: Int32 { return CONFIG_SYS_CLOCK_TICKS_PER_SEC }
 // Zephyr can be configured for 64-bit or 32-bit time values.
 // Set USE_64BIT_TICK to true for 64-bit, false for 32-bit.
 #if USE_64BIT_TICK
-public typealias Tick = UInt64
+public typealias Tick = Int64
 #else
-public typealias Tick = UInt32
+public typealias Tick = Int32
 #endif
 
 public protocol TimeoutConvertible {
@@ -80,12 +80,12 @@ public extension Duration {
     Duration(ticks: 0)
   }
 
-  static func from(milliseconds ms: UInt64) -> Duration {
-    Duration(ticks: Tick(ms * UInt64(SYS_FREQUENCY) / 1000))
+  static func from(milliseconds ms: Int64) -> Duration {
+    Duration(ticks: Tick(ms * Int64(SYS_FREQUENCY) / 1000))
   }
 
-  static func from(seconds s: UInt64) -> Duration {
-    Duration(ticks: Tick(s * UInt64(SYS_FREQUENCY)))
+  static func from(seconds s: Int64) -> Duration {
+    Duration(ticks: Tick(s * Int64(SYS_FREQUENCY)))
   }
 }
 
