@@ -24,7 +24,7 @@ lint:
     - swiftformat@0.55.5
     - swiftlint@0.58.2
     - actionlint@1.7.7
-    - checkov@3.2.470
+    - checkov@3.2.471
     - git-diff-check
     - hadolint@2.13.1
     - markdownlint@0.45.0

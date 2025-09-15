@@ -62,5 +62,4 @@
  * @param flags Additional configuration flags (pull-up/down, etc.)
  * @return 0 on success, negative error code on failure
  */
-// int configure_gpio_pin(const struct device *dev, uint8_t pin, gpio_flags_t dir,
-//                        gpio_flags_t flags);
+// int configure_gpio_pin(const struct device *dev, uint8_t pin, gpio_flags_t dir, gpio_flags_t flags);
