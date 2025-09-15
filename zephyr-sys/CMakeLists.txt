@@ -1,3 +1,5 @@
+if(CONFIG_SWIFT)
+
 # Define the zephyr-sys library
 add_library(ZephyrSys STATIC)
 
@@ -11,3 +13,5 @@ target_include_directories(ZephyrSys PUBLIC include)
 
 # Link with Zephyr if available
 target_link_libraries(ZephyrSys PUBLIC zephyr)
+
+endif()

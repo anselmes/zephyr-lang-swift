@@ -1,3 +1,5 @@
+if(CONFIG_SWIFT)
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/../toolchain.cmake)
 
 # Find all Swift source files
@@ -54,4 +56,6 @@ else()
   # Fallback: empty library if no Swift sources
   add_library(Zephyr INTERFACE)
   target_link_libraries(Zephyr INTERFACE ZephyrSys)
+endif()
+
 endif()
