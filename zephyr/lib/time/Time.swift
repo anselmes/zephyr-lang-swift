@@ -28,7 +28,7 @@ public struct Forever: Sendable, TimeoutConvertible {
   public func toTimeout() -> Timeout { Timeout(from: self) }
 }
 
-/// Marker tye for "no wait"
+/// Marker type for "no wait"
 public struct NoWait: Sendable, TimeoutConvertible {
   public func toTimeout() -> Timeout { Timeout(from: self) }
 }

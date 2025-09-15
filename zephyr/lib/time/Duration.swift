@@ -8,7 +8,7 @@ extension Duration: TimeoutConvertible {}
 public extension Duration {
   /// Get the duration as system ticks
   var ticks: Tick {
-    let totalNanoSeconds = self.components.seconds * 1_000_000_000 + Int64(self.components.attoseconds / 1_000_000)
+    let totalNanoSeconds = self.components.seconds * 1_000_000_000 + Int64(self.components.attoseconds / 1_000_000_000)
     let ticksPerNanoSecond = Double(SYS_FREQUENCY) / 1_000_000_000.0
     return Tick(Double(totalNanoSeconds) * ticksPerNanoSecond)
   }
