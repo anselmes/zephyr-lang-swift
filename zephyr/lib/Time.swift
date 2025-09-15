@@ -33,11 +33,8 @@ public struct NoWait: TimeoutConvertible {}
 
 /// Duration appropriate for Zephyr calls that expect a timeout.
 /// The result will be a time interval from "now" (when call is made).
-public struct Duration: Equatable,
-                        Hashable,
-                        CustomDebugStringConvertible,
-                        TimeoutConvertible {
-  public let ticks: Tick
+extension Duration: TimeoutConvertible {
+  public func asTimeout() -> Timeout { Timeout(self) }
 }
 
 /// An Instant appropriate for Zephyr calls that expect an absolute time.
@@ -65,29 +62,11 @@ public struct Timeout: Equatable, CustomDebugStringConvertible, TimeoutConvertib
 public func sleep<T: TimeoutConvertible>(_ timeout: T) -> Duration {
   let val = timeout.asTimeout()
   let rest: Int64 = kSleep(val.ticks)
-  return Duration(ticks: Tick(rest > 0 ? rest : 0))
+  return .seconds(rest > 0 ? rest : 0)
 }
 
 public extension Forever { func asTimeout() -> Timeout { .forever } }
 public extension NoWait { func asTimeout() -> Timeout { .nowait  } }
-
-public extension Duration {
-  var debugDescription: String { "Duration(\(ticks) ticks)" }
-
-  func asTimeout() -> Timeout { Timeout(self) }
-
-  static func zero() -> Duration {
-    Duration(ticks: 0)
-  }
-
-  static func from(milliseconds ms: Int64) -> Duration {
-    Duration(ticks: Tick(ms * Int64(SYS_FREQUENCY) / 1000))
-  }
-
-  static func from(seconds s: Int64) -> Duration {
-    Duration(ticks: Tick(s * Int64(SYS_FREQUENCY)))
-  }
-}
 
 public extension Timeout {
   static let K_NO_WAIT: Int64 = 0
@@ -105,7 +84,12 @@ public extension Timeout {
   }
 
   init(_ duration: Duration) {
-    self.ticks = Int64(duration.ticks)
+    // Convert Swift's Duration to ticks (system clock intervals)
+    // Duration is in seconds, so multiply by SYS_FREQUENCY
+    let seconds = duration.components.seconds
+    let subsec = duration.components.attoseconds / 1_000_000_000_000_000_000 // attoseconds to seconds
+    let totalSeconds = seconds + subsec
+    self.ticks = Int64(totalSeconds) * Int64(SYS_FREQUENCY)
     assert(
       self.ticks != Timeout.K_NO_WAIT && self.ticks != Timeout.K_FOREVER,
       "Duration cannot be K_NO_WAIT nor K_FOREVER",
@@ -143,7 +127,7 @@ public extension Instant {
 
 // MARK: - Private API
 
-func getUptimeTicks() -> Tick { return Tick(k_uptime_ticks()) }
+func getUptimeTicks() -> Tick { return Tick(Int64(k_uptime_ticks())) }
 
 func kSleep(_ ticks: Int64) -> Int64 {
   let timeout = k_timeout_t(ticks: Int64(ticks))
