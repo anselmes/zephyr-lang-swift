@@ -48,7 +48,7 @@
  * @param port_name Name of the GPIO port (e.g., "GPIO_0", "GPIO_1")
  * @return Pointer to the GPIO device, or NULL if the device is not found
  */
-const struct device *get_gpio_device(const char *port_name);
+// const struct device *get_gpio_device(const char *port_name);
 
 /**
  * @brief Configure a GPIO pin for the specified direction and flags
@@ -62,5 +62,5 @@ const struct device *get_gpio_device(const char *port_name);
  * @param flags Additional configuration flags (pull-up/down, etc.)
  * @return 0 on success, negative error code on failure
  */
-int configure_gpio_pin(const struct device *dev, uint8_t pin, gpio_flags_t dir,
-                       gpio_flags_t flags);
+// int configure_gpio_pin(const struct device *dev, uint8_t pin, gpio_flags_t dir,
+//                        gpio_flags_t flags);
