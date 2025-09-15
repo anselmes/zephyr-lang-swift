@@ -399,7 +399,9 @@ function(swift_application)
       list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
       list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")
     endif()
-  endforeach()  # Build dependency targets for compilation order
+  endforeach()
+
+  # Build dependency targets for compilation order
   set(COMPILE_DEPS ${SWIFT_SOURCES})
 
   # Always depend on Zephyr if it exists

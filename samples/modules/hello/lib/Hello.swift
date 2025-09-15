@@ -23,7 +23,7 @@ public func hello(timeout: Int = 1000) {
   // This pattern is common in embedded systems where the application
   // should continue running until power is removed
   while true {
-    // Pause execution for 1 second
+    // Pause execution for the duration specified by the timeout parameter (in milliseconds)
     sleep(duration)
 
     // Print a status message to indicate the application is still alive
