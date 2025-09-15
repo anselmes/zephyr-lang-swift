@@ -4,7 +4,7 @@
 import Zephyr
 
 public struct Hello {
-  static func run(timeout: Int = 1000) {
+  public static func run(timeout: Int = 1000) {
     hello(timeout: timeout)
   }
 }
