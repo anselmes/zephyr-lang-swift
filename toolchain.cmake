@@ -55,3 +55,12 @@ function(_swift_map_target)
     message(FATAL_ERROR "Swift: Add support for other target architectures")
   endif()
 endfunction()
+
+function(_enable_swift)
+  enable_language(Swift)
+
+  # Configure Swift compiler settings
+  set(CMAKE_Swift_COMPILER_TARGET ${BUILD_TARGET})        # Set target triple for Swift compiler
+  set(CMAKE_Swift_COMPILATION_MODE wholemodule)           # Enable whole-module optimization (WMO) required by Embedded Swift
+  set(CMAKE_Swift_COMPILER_WORKS true)                    # Explicitly indicate Swift compiler is functional
+endfunction()

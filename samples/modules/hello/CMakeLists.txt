@@ -9,7 +9,6 @@
 if(CONFIG_HELLO)
 
 project(Hello)
-enable_language(Swift)
 swift_library()
 
 endif()

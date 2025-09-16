@@ -306,6 +306,8 @@ function(swift_add_package REPO_URL)
 endfunction()
 
 function(swift_library)
+  _enable_swift()
+
   # Parse arguments: MODULE_NAME, SOURCES
   cmake_parse_arguments(PARSE_ARGV 0 SWIFTLIB "" "MODULE_NAME" "SOURCES")
 
@@ -375,6 +377,8 @@ function(swift_library)
 endfunction()
 
 function(swift_application)
+  _enable_swift()
+
   # Find all Swift source files
   file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
 
