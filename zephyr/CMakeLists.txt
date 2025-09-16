@@ -1,5 +1,3 @@
-if(CONFIG_SWIFT)
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/../toolchain.cmake)
 
 # Find all Swift source files
@@ -52,8 +50,7 @@ if(SWIFT_SOURCES)
   set_target_properties(Zephyr PROPERTIES LINKER_LANGUAGE C)
 
   # Add custom target to ensure Swift compilation happens
-  add_custom_target(Zephyr_compile DEPENDS ${SWIFT_OBJ_FILE}
-                                           ${SWIFT_MODULE_FILE})
+  add_custom_target(Zephyr_compile DEPENDS ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE})
   add_dependencies(Zephyr_compile syscall_list_h_target)
   add_dependencies(Zephyr Zephyr_compile)
 
@@ -63,6 +60,4 @@ else()
   # Fallback: empty library if no Swift sources
   add_library(Zephyr INTERFACE)
   target_link_libraries(Zephyr INTERFACE ZephyrSys)
-endif()
-
 endif()
