@@ -60,9 +60,7 @@ function(swift_library)
       -emit-object -o ${MODULE_OBJ_FILE}
       -emit-module -emit-module-path ${MODULE_SWIFT_MODULE_FILE}
       -module-name ${SWIFTLIB_MODULE_NAME}
-      ${SWIFT_DEFINES}
-      ${INCLUDE_PATHS}
-      ${SWIFTLIB_SOURCES}
+      ${SWIFT_DEFINES} ${INCLUDE_PATHS} ${SWIFTLIB_SOURCES}
     DEPENDS ${COMPILE_DEPS}
     COMMENT "Compiling Swift library ${SWIFTLIB_MODULE_NAME}")
 

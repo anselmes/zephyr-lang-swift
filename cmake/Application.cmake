@@ -59,15 +59,12 @@ function(swift_application)
       ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} -wmo -Osize
       -enable-experimental-feature Embedded -Xfrontend -function-sections
       -emit-object -o ${APP_SWIFT_OBJ_FILE}
-      ${SWIFT_DEFINES}
-      ${INCLUDE_PATHS}
-      ${SWIFT_APPLICATION} ${SWIFT_SOURCES}
+      ${SWIFT_DEFINES} ${INCLUDE_PATHS} ${SWIFT_APPLICATION} ${SWIFT_SOURCES}
     DEPENDS ${COMPILE_DEPS}
     COMMENT "Compiling Swift application ${PROJECT_NAME} with libraries: ${AVAILABLE_LIBS}")
 
   # Add custom target to ensure Swift compilation happens
-  add_custom_target(${PROJECT_NAME}_compile DEPENDS ${APP_SWIFT_OBJ_FILE}
-                                                    ${APP_SWIFT_MODULE_FILE})
+  add_custom_target(${PROJECT_NAME}_compile DEPENDS ${APP_SWIFT_OBJ_FILE} ${APP_SWIFT_MODULE_FILE})
 
   # Add the Swift object file directly to the app target sources
   target_sources(app PRIVATE ${APP_SWIFT_OBJ_FILE})
@@ -90,7 +87,6 @@ function(swift_application)
   add_custom_command(
     TARGET app
     POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app>
-            $<TARGET_FILE:app>
+    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app> $<TARGET_FILE:app>
     COMMENT "Removing .swift_modhash section from final binary")
 endfunction()

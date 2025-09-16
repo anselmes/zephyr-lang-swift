@@ -39,8 +39,8 @@ if(SWIFT_SOURCES)
       -I ${ZEPHYR_BASE}/include
       -I ${ZEPHYR_SYS_MODULE}/include
       -I ${SYSROOT_DIR}/include
-      -import-bridging-header ${ZEPHYR_SYS_MODULE}/include/BridgingHeader.h
       -Xcc -isysroot=${SYSROOT_DIR}
+      -import-bridging-header ${ZEPHYR_SYS_MODULE}/include/BridgingHeader.h
       ${SWIFT_SOURCES}
     DEPENDS ${SWIFT_SOURCES}
     COMMENT "Compiling Swift sources for Zephyr")
