@@ -56,9 +56,16 @@ Functions
 # Dependency management with other Swift modules - Integration with Zephyr's
 # build system
 #
-function(swift_library)
+function(zephyr_swift_library)
   # Enable Swift language support and configure compiler settings
   _enable_swift()
+
+  # This is needed so that custom driver classes using system calls are taken into
+  # account
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+    zephyr_syscall_include_directories(include)
+    zephyr_include_directories(include)
+  endif()
 
   # Parse function arguments using CMake's argument parsing MODULE_NAME:
   # Optional name for the Swift module (defaults to PROJECT_NAME) SOURCES:
@@ -74,7 +81,8 @@ function(swift_library)
   # library sources are located in lib/ directory
   if(NOT SWIFTLIB_SOURCES)
     file(GLOB_RECURSE SWIFTLIB_SOURCES
-         "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
+       "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift"
+       "${CMAKE_CURRENT_SOURCE_DIR}/lib/**/*.swift")
   endif()
 
   # Validate that we have Swift sources to compile

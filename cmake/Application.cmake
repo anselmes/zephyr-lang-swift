@@ -66,13 +66,14 @@ Functions
 # - Cross-compilation for embedded targets - Integration with Zephyr's build
 # system - Final binary post-processing
 #
-function(swift_application)
+function(zephyr_swift_application)
   # Enable Swift language support and configure compiler settings
   _enable_swift()
 
   # Discover all Swift source files in the src/ directory This follows Zephyr's
   # convention where application sources go in src/
-  file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
+  file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift"
+                                  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
 
   # Include the core Zephyr Swift application bootstrap code This provides the
   # main() function and entrypoint() delegation
