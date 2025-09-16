@@ -1,0 +1,60 @@
+# =============================================================================
+# Swift Application Sample Definition
+# =============================================================================
+#
+# This YAML file defines the metadata and configuration for the Swift
+# application sample. This file is used by Zephyr's sample and testing
+# framework to understand how to build, test, and document this Swift
+# application example.
+#
+# Sample Purpose:
+# ---------------
+# The Swift application sample demonstrates:
+# - Basic Swift application structure for Zephyr RTOS
+# - Proper entry point definition using @_cdecl("entrypoint")
+# - Integration with Zephyr's kernel APIs and system functions
+# - Swift syntax and patterns suitable for embedded development
+# - Configuration and build setup for Swift applications
+#
+# Key Features Demonstrated:
+# --------------------------
+# - Swift application lifecycle and main loop patterns
+# - Basic I/O operations using print statements
+# - Integration with Zephyr's timing and sleep functions
+# - Proper resource management in embedded Swift contexts
+# - Configuration through prj.conf and CMake build system
+#
+# Learning Objectives:
+# --------------------
+# After studying this sample, developers will understand:
+# - How to structure a basic Swift application for Zephyr
+# - The role of the entrypoint function in Swift-Zephyr integration
+# - How to configure Swift compilation for embedded targets
+# - Basic patterns for embedded Swift application development
+# - Integration points between Swift and Zephyr RTOS
+#
+# Testing and Validation:
+# -----------------------
+# This sample can be tested by:
+# - Building for various supported target architectures
+# - Running on QEMU emulation for quick validation
+# - Deploying to physical hardware for real-world testing
+# - Automated testing through Zephyr's twister framework
+#
+# Development Template:
+# ---------------------
+# This sample serves as a template for:
+# - Creating new Swift applications for Zephyr
+# - Understanding basic Swift-Zephyr integration patterns
+# - Learning proper configuration and build setup
+# - Establishing development workflows for Swift on Zephyr
+#
+# =============================================================================
+
+# Sample metadata configuration
+# This section defines the basic information about this Swift application sample
+sample:
+  # Human-readable name for the sample application
+  # This name appears in documentation, test reports, and sample listings
+  # It should clearly identify this as a Swift application example for Zephyr
+  name: Swift Application Sample
