@@ -3,15 +3,10 @@
 
 import ZephyrSys
 
-/// A type that can be converted into a Timeout.
-/// This is implemented by Duration, Instant, and the marker types Forever and NoWait.
-/// This allows functions that take timeouts to accept any of these types.
 public protocol TimeoutConvertible {
   func toTimeout() -> Timeout
 }
 
-/// Wrapper around the timeout type, so we can implement conversions.
-/// This allows `From` and `Info` from the Duration/Instant types into the Zephyr types.
 public struct Timeout: Equatable, Sendable {
   public let value: k_timeout_t
 }

@@ -35,31 +35,3 @@
 
 #include <zephyr/device.h> // Generic device model interfaces for hardware access
 #include <zephyr/drivers/gpio.h> // GPIO interfaces for pin control and interrupts
-
-// ===== C Function Declarations =====
-
-/**
- * @brief Get the GPIO device instance for the specified port
- *
- * Retrieves the Zephyr device structure for the requested GPIO port.
- * This function provides a simplified interface for Swift code to access GPIO
- * devices.
- *
- * @param port_name Name of the GPIO port (e.g., "GPIO_0", "GPIO_1")
- * @return Pointer to the GPIO device, or NULL if the device is not found
- */
-// const struct device *get_gpio_device(const char *port_name);
-
-/**
- * @brief Configure a GPIO pin for the specified direction and flags
- *
- * Sets up a GPIO pin with the specified configuration. This function provides
- * a simplified interface for Swift code to configure GPIO pins.
- *
- * @param dev GPIO device pointer obtained from get_gpio_device()
- * @param pin Pin number to configure
- * @param dir Direction (GPIO_INPUT or GPIO_OUTPUT)
- * @param flags Additional configuration flags (pull-up/down, etc.)
- * @return 0 on success, negative error code on failure
- */
-// int configure_gpio_pin(const struct device *dev, uint8_t pin, gpio_flags_t dir, gpio_flags_t flags);

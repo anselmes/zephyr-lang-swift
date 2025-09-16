@@ -1,28 +1,22 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../toolchain.cmake)
 
-# Find all Swift source files
 file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 
 if(SWIFT_SOURCES)
   message(STATUS "Swift sources: ${SWIFT_SOURCES}")
 
-  # Path to ZephyrSys module
   set(ZEPHYR_SYS_MODULE "${CMAKE_CURRENT_SOURCE_DIR}/../zephyr-sys")
 
-  # Create output paths
   set(SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/Zephyr.o")
   set(SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/Zephyr.swiftmodule")
 
-  # Get the Swift target architecture from parent scope
   _swift_map_target()
 
-  # Set up Swift compilation flags
   set(SWIFT_DEFINES "")
   if(CONFIG_SWIFT_DEBUG_INFO)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
   endif()
 
-  # Custom command to compile Swift sources
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
   add_custom_command(
     OUTPUT ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE}
@@ -45,16 +39,13 @@ if(SWIFT_SOURCES)
     DEPENDS ${SWIFT_SOURCES}
     COMMENT "Compiling Swift sources for Zephyr")
 
-  # Create a static library that contains the Swift object
   add_library(Zephyr STATIC ${SWIFT_OBJ_FILE})
   set_target_properties(Zephyr PROPERTIES LINKER_LANGUAGE C)
 
-  # Add custom target to ensure Swift compilation happens
   add_custom_target(Zephyr_compile DEPENDS ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE})
   add_dependencies(Zephyr_compile syscall_list_h_target)
   add_dependencies(Zephyr Zephyr_compile)
 
-  # Link with zephyr-sys
   target_link_libraries(Zephyr PUBLIC ZephyrSys)
 else()
   # Fallback: empty library if no Swift sources
