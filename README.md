@@ -9,18 +9,21 @@ This module integrates Swift's powerful programming language capabilities with Z
 ## Features
 
 ### Core Capabilities
+
 - **Cross-compilation Support**: Compile Swift code for ARM Cortex-M, RISC-V, and AArch64 targets
 - **Embedded Swift Integration**: Full support for Embedded Swift experimental features
 - **Memory Safety**: Leverage Swift's memory management and safety features in embedded contexts
 - **Performance Optimization**: Whole-module optimization and size-optimized builds for embedded systems
 
 ### Build System Integration
+
 - **CMake Integration**: Native CMake functions for Swift applications and libraries
 - **Kconfig Support**: Configuration options integrated with Zephyr's configuration system
 - **Dependency Management**: Automatic dependency resolution between Swift modules
 - **Module System**: Support for reusable Swift libraries and modules
 
 ### Runtime Support
+
 - **C Runtime Stubs**: Implementation of required C library functions for Swift runtime
 - **Memory Allocation**: Custom aligned memory allocation for Swift's requirements
 - **POSIX Compatibility**: Essential POSIX function stubs for Swift runtime operation
@@ -31,6 +34,7 @@ This module integrates Swift's powerful programming language capabilities with Z
 ### Prerequisites
 
 1. **Swift Toolchain**: Install Swift with Embedded Swift support
+
    ```bash
    # Download and install Swift toolchain with embedded support
    # Follow Swift.org installation instructions for your platform
@@ -41,27 +45,30 @@ This module integrates Swift's powerful programming language capabilities with Z
 ### Enabling Swift Support
 
 1. **Configure your project** (`prj.conf`):
+
    ```kconfig
    CONFIG_SWIFT=y
    CONFIG_SWIFT_DEBUG_INFO=y  # Optional, for debug builds
    ```
 
 2. **Create a Swift application** (`CMakeLists.txt`):
+
    ```cmake
    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
    project(my_swift_app)
-   
+
    swift_application()
    ```
 
 3. **Write Swift code** (`src/main.swift`):
+
    ```swift
    import Zephyr
-   
+
    @_cdecl("entrypoint")
    func entrypoint() {
        print("Hello from Swift on Zephyr!")
-       
+
        while true {
            // Your embedded Swift application logic
            k_sleep(K_MSEC(1000))
@@ -88,7 +95,8 @@ public func myFunction() -> String {
 ## Architecture
 
 ### Module Structure
-```
+
+```empty
 swift/
 ├── CMakeLists.txt          # Main build configuration
 ├── Kconfig                 # Configuration options
@@ -108,7 +116,7 @@ swift/
 ### Compilation Flow
 
 1. **Configuration**: Kconfig options enable Swift support
-2. **Toolchain Setup**: Swift compiler configured for target architecture  
+2. **Toolchain Setup**: Swift compiler configured for target architecture
 3. **Runtime Building**: zephyr-sys C library provides Swift runtime support
 4. **Core Library**: Zephyr Swift library compiled with Zephyr bindings
 5. **Application/Library**: User Swift code compiled and linked
@@ -116,33 +124,36 @@ swift/
 
 ## Supported Architectures
 
-| Architecture | Status | Target Triple |
-|--------------|--------|---------------|
-| ARM Cortex-M0/M0+/M1 | ✅ | `thumbv6m-none-eabi` |
-| ARM Cortex-M3 | ✅ | `thumbv7m-none-eabi` |
-| ARM Cortex-M4/M7 | ✅ | `thumbv7em-none-eabi[hf]` |
-| ARM Cortex-M23/M33/M35P/M55 | ✅ | `thumbv8m.main-none-eabi[hf]` |
-| ARM 64-bit (AArch64) | ✅ | `aarch64-none-elf` |
-| RISC-V 32-bit | ✅ | `riscv32-none-none-eabi` |
-| RISC-V 64-bit | ✅ | `riscv64-none-none-eabi` |
+| Architecture                | Status | Target Triple                 |
+| --------------------------- | ------ | ----------------------------- |
+| ARM Cortex-M0/M0+/M1        | ✅     | `thumbv6m-none-eabi`          |
+| ARM Cortex-M3               | ✅     | `thumbv7m-none-eabi`          |
+| ARM Cortex-M4/M7            | ✅     | `thumbv7em-none-eabi[hf]`     |
+| ARM Cortex-M23/M33/M35P/M55 | ✅     | `thumbv8m.main-none-eabi[hf]` |
+| ARM 64-bit (AArch64)        | ✅     | `aarch64-none-elf`            |
+| RISC-V 32-bit               | ✅     | `riscv32-none-none-eabi`      |
+| RISC-V 64-bit               | ✅     | `riscv64-none-none-eabi`      |
 
 ## Examples
 
 ### Basic Application
+
 See `samples/app/` for a complete Swift application example.
 
-### Swift Library Module  
+### Swift Library Module
+
 See `samples/modules/hello/` for a reusable Swift library example.
 
 ### Advanced Integration
+
 Check the `tests/` directory for comprehensive integration examples.
 
 ## Configuration Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `CONFIG_SWIFT` | Enable Swift language support | `n` |
-| `CONFIG_SWIFT_DEBUG_INFO` | Include debug information | `y` if `DEBUG` |
+| Option                    | Description                   | Default        |
+| ------------------------- | ----------------------------- | -------------- |
+| `CONFIG_SWIFT`            | Enable Swift language support | `n`            |
+| `CONFIG_SWIFT_DEBUG_INFO` | Include debug information     | `y` if `DEBUG` |
 
 ## Development
 
@@ -182,6 +193,7 @@ To add new C runtime functions:
 ### Debug Information
 
 Enable debug builds for better error messages:
+
 ```kconfig
 CONFIG_SWIFT_DEBUG_INFO=y
 CONFIG_DEBUG=y

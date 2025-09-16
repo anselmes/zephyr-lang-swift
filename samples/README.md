@@ -17,12 +17,14 @@ The samples are organized to demonstrate progressive complexity and different us
 Complete Swift applications that can be built and run on Zephyr boards.
 
 **Key Features Demonstrated:**
+
 - Swift application structure and entry points
 - Integration with Zephyr's main application framework
 - Basic Swift syntax and embedded-appropriate programming patterns
 - Configuration through `prj.conf` and CMake
 
 **Files in Application Samples:**
+
 - `src/Entrypoint.swift`: Main Swift application logic
 - `CMakeLists.txt`: Build configuration using `swift_application()`
 - `prj.conf`: Zephyr configuration enabling Swift support
@@ -33,12 +35,14 @@ Complete Swift applications that can be built and run on Zephyr boards.
 Reusable Swift libraries that demonstrate how to create modular Swift code for Zephyr.
 
 **Key Features Demonstrated:**
+
 - Swift library/module creation and organization
 - Module configuration through Kconfig
 - Inter-module dependencies and imports
 - Public API design for Swift libraries
 
 **Example: Hello Module (`modules/hello/`)**
+
 - `lib/Hello.swift`: Swift library implementation
 - `zephyr/module.yml`: Zephyr module definition
 - `CMakeLists.txt`: Library build configuration
@@ -57,11 +61,13 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 #### Basic Application Sample
 
 1. **Navigate to the application directory:**
+
    ```bash
    cd samples/app/
    ```
 
 2. **Build for your target board:**
+
    ```bash
    west build -b <your_board>
    ```
@@ -75,11 +81,13 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 #### Library Module Sample
 
 1. **Navigate to a project that uses the library:**
+
    ```bash
    cd samples/app/  # This app can import the hello module
    ```
 
 2. **Ensure the library module is in the build path:**
+
    ```bash
    # The build system automatically discovers modules in samples/modules/
    ```
@@ -96,17 +104,19 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 **Purpose**: Demonstrates basic Swift application structure for Zephyr.
 
 **Features:**
+
 - Simple Swift entry point with `@_cdecl("entrypoint")`
 - Basic print statements and control flow
 - Integration with Zephyr's sleep and timing functions
 - Proper configuration for Swift compilation
 
 **Code Highlights:**
+
 ```swift
 @_cdecl("entrypoint")
 func entrypoint() {
     print("Hello from Swift!!!")
-    
+
     while true {
         print("still running...")
         // Use Zephyr's sleep function
@@ -120,12 +130,14 @@ func entrypoint() {
 **Purpose**: Demonstrates creating reusable Swift libraries for Zephyr.
 
 **Features:**
+
 - Swift library with public API
 - Module configuration through Kconfig
 - Integration with Zephyr's module system
 - Template for creating custom libraries
 
 **Code Highlights:**
+
 ```swift
 public func greet(_ name: String) -> String {
     return "Hello, \(name) from Swift library!"
@@ -141,6 +153,7 @@ public struct HelloConfig {
 ### Application Development
 
 **Entry Point Pattern:**
+
 ```swift
 @_cdecl("entrypoint")
 func entrypoint() {
@@ -149,13 +162,14 @@ func entrypoint() {
 ```
 
 **Zephyr Integration:**
+
 ```swift
 import Zephyr
 
 func useZephyrAPIs() {
     // Access Zephyr kernel functions
     k_sleep(K_MSEC(1000))
-    
+
     // Use Zephyr device APIs
     // let gpio = device_get_binding("GPIO_0")
 }
@@ -164,6 +178,7 @@ func useZephyrAPIs() {
 ### Library Development
 
 **Public API Design:**
+
 ```swift
 // Make functions and types public for other modules
 public func libraryFunction() -> String {
@@ -179,6 +194,7 @@ public struct LibraryType {
 ```
 
 **Module Configuration:**
+
 - Use Kconfig for optional features
 - Provide sensible defaults
 - Document configuration options
@@ -186,6 +202,7 @@ public struct LibraryType {
 ## Configuration Examples
 
 ### Basic Swift Application (`prj.conf`)
+
 ```kconfig
 # Enable Swift language support
 CONFIG_SWIFT=y
@@ -200,6 +217,7 @@ CONFIG_UART_CONSOLE=y
 ```
 
 ### Application with Library Modules
+
 ```kconfig
 # Enable Swift and specific modules
 CONFIG_SWIFT=y
@@ -224,11 +242,13 @@ west twister -T samples/ --platform qemu_riscv32
 ### Manual Testing
 
 1. **Build for QEMU:**
+
    ```bash
    west build -b qemu_riscv32
    ```
 
 2. **Run in emulation:**
+
    ```bash
    west build -t run
    ```
@@ -241,6 +261,7 @@ west twister -T samples/ --platform qemu_riscv32
 ### Creating New Applications
 
 1. **Copy the basic app structure:**
+
    ```bash
    cp -r samples/app/ my_new_app/
    ```
@@ -254,6 +275,7 @@ west twister -T samples/ --platform qemu_riscv32
 ### Creating New Libraries
 
 1. **Copy the hello module structure:**
+
    ```bash
    cp -r samples/modules/hello/ samples/modules/my_library/
    ```

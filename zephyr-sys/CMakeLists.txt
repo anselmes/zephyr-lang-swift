@@ -39,27 +39,26 @@ applications and libraries to provide the necessary runtime support.
 
 #]=======================================================================]
 
-# Create the ZephyrSys static library target
-# This library contains C runtime stubs and bridging code needed by Swift
+# Create the ZephyrSys static library target This library contains C runtime
+# stubs and bridging code needed by Swift
 add_library(ZephyrSys STATIC)
 
-# Discover all C source files in the zephyr-sys directory structure
-# src/: Core runtime stub implementations (e.g., aligned_alloc, getentropy)
-# lib/: Additional C libraries and utilities for Swift interop
-file(GLOB_RECURSE C_SOURCES
-     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+# Discover all C source files in the zephyr-sys directory structure src/: Core
+# runtime stub implementations (e.g., aligned_alloc, getentropy) lib/:
+# Additional C libraries and utilities for Swift interop
+file(GLOB_RECURSE C_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
      "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.c")
 
-# Add all discovered C sources to the ZephyrSys library
-# These provide the runtime functions that Swift code expects to be available
+# Add all discovered C sources to the ZephyrSys library These provide the
+# runtime functions that Swift code expects to be available
 target_sources(ZephyrSys PRIVATE ${C_SOURCES})
 
-# Make the include directory publicly available
-# This contains bridging headers and module maps that Swift imports
-# PUBLIC visibility means other targets linking to ZephyrSys get these includes
+# Make the include directory publicly available This contains bridging headers
+# and module maps that Swift imports PUBLIC visibility means other targets
+# linking to ZephyrSys get these includes
 target_include_directories(ZephyrSys PUBLIC include)
 
-# Link with the core Zephyr kernel and libraries
-# PUBLIC linking means that targets depending on ZephyrSys also get Zephyr
-# This ensures Swift code has access to all Zephyr RTOS functionality
+# Link with the core Zephyr kernel and libraries PUBLIC linking means that
+# targets depending on ZephyrSys also get Zephyr This ensures Swift code has
+# access to all Zephyr RTOS functionality
 target_link_libraries(ZephyrSys PUBLIC zephyr)
