@@ -80,9 +80,7 @@ function(zephyr_swift_library)
   # Discover Swift source files if not explicitly provided Convention: Swift
   # library sources are located in lib/ directory
   if(NOT SWIFTLIB_SOURCES)
-    file(GLOB_RECURSE SWIFTLIB_SOURCES
-       "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift"
-       "${CMAKE_CURRENT_SOURCE_DIR}/lib/**/*.swift")
+    file(GLOB_RECURSE SWIFTLIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.swift")
   endif()
 
   # Validate that we have Swift sources to compile
@@ -95,15 +93,15 @@ function(zephyr_swift_library)
   # Set up output file paths for the compiled Swift module Object file: Contains
   # the compiled machine code for the library
   set(MODULE_OBJ_FILE
-      ${CMAKE_CURRENT_BINARY_DIR}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.o
+    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.o
   )
   # Module file: Contains Swift interface information for importing
   set(MODULE_SWIFT_MODULE_FILE
-      ${CMAKE_CURRENT_BINARY_DIR}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
+    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
   )
 
   # Create the output directory for module artifacts
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${SWIFTLIB_MODULE_NAME})
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME})
 
   # Determine the Swift target triple based on Zephyr's CPU configuration
   _swift_map_target()
