@@ -5,6 +5,9 @@ import Zephyr
 
 public struct Hello {
   public static func run(timeout: Int = 1000) {
+    #if SWIFT_DEBUG_INFO
+      print("Module Hello compiled with debug info")
+    #endif
     hello(timeout: timeout)
   }
 }
