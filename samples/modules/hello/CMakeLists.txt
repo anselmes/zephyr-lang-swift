@@ -77,27 +77,26 @@ For this module to be usable by applications:
 # ==============================================================================
 
 # ==== Conditional Module Compilation ====
-# Only build this Swift module when it's explicitly enabled through Kconfig
-# This demonstrates resource-efficient building where unused modules are skipped
+# Only build this Swift module when it's explicitly enabled through Kconfig This
+# demonstrates resource-efficient building where unused modules are skipped
 
-# Check if the Hello module is enabled in the project configuration
-# CONFIG_HELLO is defined in this module's Kconfig file and can be enabled
-# in the application's prj.conf with: CONFIG_HELLO=y
+# Check if the Hello module is enabled in the project configuration CONFIG_HELLO
+# is defined in this module's Kconfig file and can be enabled in the
+# application's prj.conf with: CONFIG_HELLO=y
 if(CONFIG_HELLO)
 
   # ==== Swift Library Module Definition ====
   # Define the Swift library module project and compile it into a static library
 
   # ==== Swift Library Compilation ====
-  # Compile Swift source files into a static library module
-  # This function handles:
-  # - Discovery of Swift source files in lib/ directory
-  # - Cross-compilation for the target embedded architecture
-  # - Generation of Swift module interface (.swiftmodule) files
-  # - Creation of static library target for linking with applications
-  # - Integration with Zephyr's dependency and build systems
+  # Compile Swift source files into a static library module This function
+  # handles: - Discovery of Swift source files in lib/ directory -
+  # Cross-compilation for the target embedded architecture - Generation of Swift
+  # module interface (.swiftmodule) files - Creation of static library target
+  # for linking with applications - Integration with Zephyr's dependency and
+  # build systems
   swift_library(MODULE_NAME Hello)
 
-# End conditional compilation block
-# If CONFIG_HELLO is not enabled, this entire module is skipped during build
+  # End conditional compilation block If CONFIG_HELLO is not enabled, this
+  # entire module is skipped during build
 endif()

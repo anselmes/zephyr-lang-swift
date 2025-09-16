@@ -6,9 +6,9 @@
  * @brief ZephyrSys Main Module - Swift Runtime Support for Zephyr RTOS
  *
  * This file serves as the main module for the ZephyrSys library, which provides
- * essential C runtime support for Swift code running on Zephyr RTOS. The ZephyrSys
- * library bridges the gap between Swift's runtime expectations and Zephyr's minimal
- * embedded C environment.
+ * essential C runtime support for Swift code running on Zephyr RTOS. The
+ * ZephyrSys library bridges the gap between Swift's runtime expectations and
+ * Zephyr's minimal embedded C environment.
  *
  * ## Purpose
  *
@@ -30,7 +30,8 @@
  *
  * This module works in conjunction with:
  * - `BridgingHeader.h`: Exposes Zephyr APIs to Swift code
- * - `module.modulemap`: Provides Clang module mapping for Swift interoperability
+ * - `module.modulemap`: Provides Clang module mapping for Swift
+ * interoperability
  * - Swift-specific runtime stubs implemented elsewhere in the ZephyrSys library
  *
  * ## Build Integration
@@ -61,8 +62,7 @@
  * @note This function is currently a placeholder and performs no operations.
  *       It may be extended in the future to initialize runtime state if needed.
  */
-void zephyr_sys_init(void)
-{
+void zephyr_sys_init(void) {
   /* Currently no initialization is required for ZephyrSys.
    * Runtime stubs are stateless and ready to use immediately.
    * This function serves as a placeholder for future expansion.

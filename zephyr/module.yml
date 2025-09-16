@@ -59,10 +59,10 @@ build:
 # Contains example Swift applications that demonstrate how to use
 # Swift with Zephyr RTOS for various embedded use cases
 samples:
-  - samples  # Directory containing Swift sample projects
+  - samples # Directory containing Swift sample projects
 
 # Test cases directory
 # Contains automated tests to validate Swift functionality and
 # ensure proper integration with Zephyr RTOS
 tests:
-  - tests   # Directory containing Swift test cases
+  - tests # Directory containing Swift test cases

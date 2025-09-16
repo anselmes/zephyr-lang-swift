@@ -50,20 +50,22 @@ Configuration Options
 # Only enable Swift support when explicitly configured in Zephyr
 if(CONFIG_SWIFT)
 
-  # Store the Swift module directory path for use by other CMake functions
-  # This allows Swift support functions to locate resources and templates
-  set(SWIFT_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "Path to Swift module directory")
+  # Store the Swift module directory path for use by other CMake functions This
+  # allows Swift support functions to locate resources and templates
+  set(SWIFT_MODULE_DIR
+      "${CMAKE_CURRENT_LIST_DIR}"
+      CACHE INTERNAL "Path to Swift module directory")
 
-  # Build the low-level C runtime support library first
-  # This provides necessary C stubs and bridging headers for Swift
+  # Build the low-level C runtime support library first This provides necessary
+  # C stubs and bridging headers for Swift
   add_subdirectory(zephyr-sys)
 
-  # Build the core Zephyr Swift library
-  # This provides Swift bindings for Zephyr RTOS functionality
+  # Build the core Zephyr Swift library This provides Swift bindings for Zephyr
+  # RTOS functionality
   add_subdirectory(zephyr)
 
-  # Include Swift application and library building functions
-  # This makes swift_application() and swift_library() functions available
+  # Include Swift application and library building functions This makes
+  # swift_application() and swift_library() functions available
   include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/SwiftSupport.cmake)
 
 endif()

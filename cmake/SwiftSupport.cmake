@@ -16,10 +16,8 @@ integration with the Zephyr build system automatically.
 
 #]=======================================================================]
 
-# Include Swift library building functions
-# Provides: swift_library()
+# Include Swift library building functions Provides: swift_library()
 include(${CMAKE_CURRENT_LIST_DIR}/Library.cmake)
 
-# Include Swift application building functions
-# Provides: swift_application()
+# Include Swift application building functions Provides: swift_application()
 include(${CMAKE_CURRENT_LIST_DIR}/Application.cmake)
