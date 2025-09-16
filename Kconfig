@@ -1,22 +1,90 @@
+# =============================================================================
+# Swift Language Support Configuration Options
+# =============================================================================
+#
+# This Kconfig file defines configuration options for Swift language support
+# in Zephyr RTOS. These options control the availability and behavior of
+# Swift compilation and runtime features within the Zephyr build system.
+#
+# Configuration Options:
+# ----------------------
+# - SWIFT: Master enable for Swift language support
+# - SWIFT_DEBUG_INFO: Control debug information inclusion in Swift builds
+#
+# Usage in prj.conf:
+# -------------------
+# To enable Swift support in your project, add to your prj.conf:
+#   CONFIG_SWIFT=y
+#   CONFIG_SWIFT_DEBUG_INFO=y  # Optional, for debug builds
+#
+# Build System Integration:
+# -------------------------
+# When CONFIG_SWIFT is enabled, the build system:
+# 1. Includes Swift compilation CMake functions
+# 2. Builds zephyr-sys C runtime support library
+# 3. Builds core Zephyr Swift library
+# 4. Makes swift_application() and swift_library() functions available
+#
+# =============================================================================
+
+# Master configuration option for Swift language support
+# This is the primary switch that enables all Swift functionality in Zephyr
 config SWIFT
   bool "Swift language support"
   help
-    Enable support for the Swift programming language.
+    Enable support for the Swift programming language in Zephyr RTOS.
 
     This enables the Swift compiler and related tools to be used within
     the Zephyr build system. Swift is a powerful and intuitive programming
-    language for macOS, iOS, watchOS, tvOS, and beyond.
+    language that provides memory safety, modern syntax, and performance
+    suitable for embedded systems development.
 
-    Note: Ensure that you have the Swift toolchain installed on your system
-    to use this feature.
+    When enabled, this option provides:
+    - Swift compiler integration with Zephyr's CMake build system
+    - Cross-compilation support for embedded ARM, RISC-V, and other targets
+    - Swift runtime support through the zephyr-sys library
+    - C-Swift interoperability through bridging headers
+    - swift_application() and swift_library() CMake functions
 
+    Requirements:
+    - Swift toolchain must be installed on the build system
+    - Embedded Swift experimental features support is required
+    - Target architecture must be supported by Swift compiler
+
+    Note: Ensure that you have a compatible Swift toolchain installed
+    on your system to use this feature. The Swift compiler must support
+    the target architecture of your Zephyr board.
+
+# Debug information control for Swift compilation
+# This option controls whether Swift code is compiled with debug symbols
 config SWIFT_DEBUG_INFO
   bool "Include debug information in Swift builds"
   depends on SWIFT
   default y if DEBUG
   help
     When enabled, this option includes debug information in the compiled
-    Swift binaries. This is useful for debugging and development purposes.
+    Swift binaries. This adds the -DSWIFT_DEBUG_INFO preprocessor define
+    to Swift compilation, enabling conditional debug code compilation.
+
+    Debug information enables:
+    - Swift debugging symbols for debugger support
+    - Conditional compilation of debug-only Swift code
+    - Better error messages and stack traces
+    - Development and testing assistance
+
+    This option automatically defaults to enabled when Zephyr's global
+    DEBUG option is enabled, ensuring consistent debug behavior across
+    C and Swift code.
+
+    Trade-offs:
+    - Increased binary size due to debug symbols and additional code
+    - Potentially reduced runtime performance in debug builds
+    - Better development experience and easier troubleshooting
+
+    Recommendation:
+    - Enable for development and testing builds
+    - Disable for production/release builds to minimize binary size
+    - Consider per-project needs for debug information requirements
 
     Note: Including debug information may increase the size of the binary
     and affect performance. Disable this option for production builds.

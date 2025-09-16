@@ -1,2 +1,50 @@
+# =============================================================================
+# Hello Swift Module Sample Definition
+# =============================================================================
+#
+# This YAML file defines the metadata and configuration for the "Hello" Swift
+# sample module. This file is used by Zephyr's sample and testing framework
+# to understand how to build, test, and document this sample module.
+#
+# Sample Purpose:
+# ---------------
+# The Hello sample module demonstrates:
+# - Creating reusable Swift libraries for Zephyr RTOS
+# - Proper Swift module structure and organization
+# - Integration with Zephyr's module and configuration systems
+# - Template for developers creating custom Swift modules
+# - Best practices for Swift library development in embedded contexts
+#
+# Integration with Zephyr:
+# ------------------------
+# This sample integrates with Zephyr's framework by:
+# - Providing metadata for the sample discovery system
+# - Enabling automated testing through the twister framework
+# - Documenting the sample for inclusion in documentation builds
+# - Following Zephyr's sample organization standards
+#
+# Usage by Developers:
+# --------------------
+# Developers can use this sample to:
+# 1. Learn Swift module creation patterns for Zephyr
+# 2. Copy and adapt the structure for custom modules
+# 3. Understand proper Kconfig integration for Swift modules
+# 4. See examples of Swift library API design for embedded use
+#
+# Testing Integration:
+# --------------------
+# This sample can be tested using:
+# - Manual compilation and testing
+# - Integration with applications that import the module
+# - Automated testing through Zephyr's test framework
+# - Validation of module build and dependency resolution
+#
+# =============================================================================
+
+# Sample metadata configuration
+# This section defines the basic information about this Swift sample module
 sample:
-  name: Hello Sample Module
+  # Human-readable name for the sample module
+  # This name appears in documentation, test reports, and sample listings
+  # It should clearly identify this as a Swift library sample for Zephyr
+  name: Hello Swift Sample Module
