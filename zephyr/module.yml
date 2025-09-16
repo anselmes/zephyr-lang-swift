@@ -1,11 +1,68 @@
+# =============================================================================
+# Zephyr Module Definition for Swift Language Support
+# =============================================================================
+#
+# This YAML file defines the Swift language module for Zephyr RTOS, enabling
+# the integration of Swift programming language support into the Zephyr build
+# system. It specifies how Zephyr should discover, build, and integrate Swift
+# language support as an external module.
+#
+# Module Purpose:
+# ---------------
+# The Swift language module provides comprehensive Swift programming language
+# support for Zephyr RTOS, including:
+# - Swift compiler integration with Zephyr's build system
+# - Cross-compilation support for embedded targets
+# - Swift runtime support libraries
+# - C-Swift interoperability through bridging headers
+# - Sample applications and test cases
+#
+# Integration with Zephyr:
+# ------------------------
+# This module integrates with Zephyr's module system by:
+# 1. Providing CMake build scripts for Swift compilation
+# 2. Offering Kconfig options for Swift feature configuration
+# 3. Including sample projects demonstrating Swift usage
+# 4. Providing test cases to validate Swift functionality
+#
+# Directory Structure:
+# --------------------
+# The module follows Zephyr's standard module layout:
+# - CMakeLists.txt: Main CMake build script
+# - Kconfig: Configuration options for Swift features
+# - samples/: Example Swift applications for Zephyr
+# - tests/: Test cases for Swift functionality validation
+# - zephyr-sys/: Low-level C runtime support for Swift
+# - zephyr/: Core Swift library with Zephyr bindings
+#
+# =============================================================================
+
+# Module identification name used by Zephyr's module system
+# This name is used internally by Zephyr to reference this module
+# and must match the directory structure expectations
 name: lang-swift
 
+# Build configuration section
+# Specifies how Zephyr should build this module
 build:
+  # CMake build script location (relative to this file)
+  # Points to the main CMakeLists.txt that handles Swift compilation
+  # The "." indicates the CMakeLists.txt is in the same directory as this YAML file
   cmake: .
+
+  # Kconfig configuration file location (relative to this file)
+  # Defines configuration options like CONFIG_SWIFT and CONFIG_SWIFT_DEBUG_INFO
+  # These options control Swift feature availability and compilation behavior
   kconfig: Kconfig
 
+# Sample applications directory
+# Contains example Swift applications that demonstrate how to use
+# Swift with Zephyr RTOS for various embedded use cases
 samples:
-  - samples
+  - samples  # Directory containing Swift sample projects
 
+# Test cases directory
+# Contains automated tests to validate Swift functionality and
+# ensure proper integration with Zephyr RTOS
 tests:
-  - tests
+  - tests   # Directory containing Swift test cases

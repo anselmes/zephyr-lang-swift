@@ -29,9 +29,10 @@
 
 // ===== Zephyr Kernel APIs =====
 
-#include <zephyr/kernel.h> // Core kernel functionality including scheduling, threading, and synchronization
+// Core kernel functionality including scheduling, threading, and synchronization
+#include <zephyr/kernel.h>
 
 // ===== Device and Hardware APIs =====
 
-#include <zephyr/device.h> // Generic device model interfaces for hardware access
-#include <zephyr/drivers/gpio.h> // GPIO interfaces for pin control and interrupts
+#include <zephyr/device.h>        // Generic device model interfaces for hardware access
+#include <zephyr/drivers/gpio.h>  // GPIO interfaces for pin control and interrupts

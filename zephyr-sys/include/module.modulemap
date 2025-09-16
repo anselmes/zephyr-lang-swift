@@ -1,3 +1,68 @@
+/**
+ * @file module.modulemap
+ * @brief Clang Module Map for ZephyrSys Swift-C Interoperability
+ *
+ * This module map defines how Swift code can import and use C APIs from the
+ * ZephyrSys library and Zephyr RTOS. It provides the interface definitions
+ * that enable Swift's C interoperability features to work with Zephyr's
+ * C-based APIs.
+ *
+ * ## Purpose
+ *
+ * Module maps serve as the bridge between C APIs and Swift's module system.
+ * They tell the Swift compiler how to interpret C headers and make C functions,
+ * types, and constants available in Swift code with appropriate type safety
+ * and Swift-friendly interfaces.
+ *
+ * ## Module Definition
+ *
+ * The ZephyrSys module is marked as a [system] module, which means:
+ * - It's treated as a system library (external dependency)
+ * - Compiler warnings from this module are suppressed
+ * - The module is trusted to provide stable C APIs
+ *
+ * ## Header Integration
+ *
+ * The module exports all symbols from BridgingHeader.h, which includes:
+ * - Zephyr kernel APIs (threading, scheduling, synchronization)
+ * - Device management APIs (GPIO, hardware abstraction)
+ * - Project configuration (Kconfig-generated settings)
+ * - Runtime support functions (memory allocation, etc.)
+ *
+ * ## Usage in Swift
+ *
+ * Swift code can import this module to access Zephyr functionality:
+ *
+ * ```swift
+ * import ZephyrSys
+ *
+ * // Now you can use Zephyr APIs directly in Swift
+ * let device = device_get_binding("GPIO_0")
+ * k_sleep(K_MSEC(100))
+ * ```
+ *
+ * ## Build Integration
+ *
+ * This module map is automatically processed by the Swift compiler when:
+ * - The ZephyrSys include directory is in the Swift compiler's search path
+ * - Swift code imports the ZephyrSys module
+ * - The bridging header is specified via -import-bridging-header flag
+ *
+ * @see BridgingHeader.h For the actual C API definitions
+ */
+
+/**
+ * @brief ZephyrSys Module Definition
+ *
+ * Defines the ZephyrSys module as a system module that exports all symbols
+ * from the BridgingHeader.h file. This makes Zephyr RTOS APIs available
+ * to Swift code through C interoperability.
+ *
+ * Module attributes:
+ * - [system]: Treats this as a system library with suppressed warnings
+ * - header: Specifies the main header file containing C API definitions
+ * - export *: Makes all symbols from the header available to importing Swift code
+ */
 module ZephyrSys [system] {
   header "BridgingHeader.h"
   export *

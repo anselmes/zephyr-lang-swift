@@ -1,0 +1,84 @@
+# =============================================================================
+# Hello Swift Module Configuration Options
+# =============================================================================
+#
+# This Kconfig file defines configuration options for the "Hello" sample Swift
+# module. This module serves as a demonstration of how to create reusable Swift
+# libraries for Zephyr RTOS applications and how to configure them through
+# Zephyr's Kconfig system.
+#
+# Module Purpose:
+# ---------------
+# The Hello module is a sample Swift library that demonstrates:
+# - Basic Swift module structure and organization
+# - Swift function and type definitions for embedded use
+# - Integration with Zephyr's configuration system
+# - Template for creating custom Swift modules
+# - Best practices for Swift module development in Zephyr
+#
+# Configuration Integration:
+# --------------------------
+# This configuration option allows users to:
+# - Enable/disable the Hello module in their projects
+# - Control resource usage by excluding unused modules
+# - Provide conditional compilation for the Hello module
+# - Demonstrate Kconfig integration with Swift modules
+#
+# Usage in Projects:
+# ------------------
+# To use the Hello module in your Swift application:
+# 1. Enable CONFIG_HELLO=y in your project's prj.conf
+# 2. Ensure CONFIG_SWIFT=y is also enabled
+# 3. Import the module in your Swift code: `import Hello`
+# 4. Use the module's functions and types as needed
+#
+# Module Structure:
+# -----------------
+# When enabled, the Hello module provides:
+# - Swift library functions for demonstration purposes
+# - Example of proper Swift module organization
+# - Template code that can be adapted for custom modules
+# - Integration examples with Zephyr RTOS functionality
+#
+# =============================================================================
+
+# Main configuration option for the Hello Swift sample module
+# This controls whether the Hello module is built and available for import
+config HELLO
+  bool "Enable Hello Swift Sample Module"
+  help
+    This option enables the Hello Swift sample module, which provides
+    basic greeting functionalities and serves as a demonstration of how
+    to create reusable Swift libraries for Zephyr RTOS applications.
+
+    The Hello module demonstrates:
+    - Swift module structure and organization best practices
+    - Integration with Zephyr's build and configuration systems
+    - Basic Swift functions and types suitable for embedded use
+    - Template code for creating custom Swift modules
+    - Proper dependency management and linking
+
+    When enabled, the Hello module:
+    - Compiles Swift source files into a static library
+    - Creates a Swift module interface for importing
+    - Integrates with the Zephyr build dependency chain
+    - Becomes available for import in Swift applications
+
+    Usage example in Swift code:
+      import Hello
+      Hello.run()
+
+    Resource considerations:
+    - Adds compiled Swift code to the final binary
+    - Increases build time due to additional Swift compilation
+    - May increase memory usage depending on module functionality
+    - Can be safely disabled if not needed for your application
+
+    This module is primarily useful for:
+    - Learning Swift development with Zephyr RTOS
+    - Testing Swift module functionality
+    - Demonstrating Swift library creation
+    - Providing a template for custom Swift modules
+
+    If you do not need this demonstration module, you can disable it
+    to save build time and reduce binary size.
