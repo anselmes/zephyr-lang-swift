@@ -306,6 +306,8 @@ function(swift_add_package REPO_URL)
 endfunction()
 
 function(swift_library)
+  _enable_swift()
+
   # Parse arguments: MODULE_NAME, SOURCES
   cmake_parse_arguments(PARSE_ARGV 0 SWIFTLIB "" "MODULE_NAME" "SOURCES")
 
@@ -337,6 +339,12 @@ function(swift_library)
   # Get the Swift target architecture
   _swift_map_target()
 
+  # Set up Swift compilation flags
+  set(SWIFT_DEFINES "")
+  if(CONFIG_SWIFT_DEBUG_INFO)
+    list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
+  endif()
+
   # Build include paths - always include Zephyr, others are optional
   set(INCLUDE_PATHS "")
   list(APPEND INCLUDE_PATHS "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
@@ -359,6 +367,7 @@ function(swift_library)
       -emit-object -o ${MODULE_OBJ_FILE}
       -emit-module -emit-module-path ${MODULE_SWIFT_MODULE_FILE}
       -module-name ${SWIFTLIB_MODULE_NAME}
+      ${SWIFT_DEFINES}
       ${INCLUDE_PATHS}
       ${SWIFTLIB_SOURCES}
     DEPENDS ${COMPILE_DEPS}
@@ -375,6 +384,8 @@ function(swift_library)
 endfunction()
 
 function(swift_application)
+  _enable_swift()
+
   # Find all Swift source files
   file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
 
@@ -419,6 +430,12 @@ function(swift_application)
   # Get the Swift target architecture
   _swift_map_target()
 
+  # Set up Swift compilation flags
+  set(SWIFT_DEFINES "")
+  if(CONFIG_SWIFT_DEBUG_INFO)
+    list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
+  endif()
+
   # Custom command to compile Swift main application
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
   add_custom_command(
@@ -427,6 +444,7 @@ function(swift_application)
       ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} -wmo -Osize
       -enable-experimental-feature Embedded -Xfrontend -function-sections
       -emit-object -o ${APP_SWIFT_OBJ_FILE}
+      ${SWIFT_DEFINES}
       ${INCLUDE_PATHS}
       ${SWIFT_APPLICATION} ${SWIFT_SOURCES}
     DEPENDS ${COMPILE_DEPS}

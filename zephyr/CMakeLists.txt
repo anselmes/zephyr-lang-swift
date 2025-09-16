@@ -18,6 +18,12 @@ if(SWIFT_SOURCES)
   # Get the Swift target architecture from parent scope
   _swift_map_target()
 
+  # Set up Swift compilation flags
+  set(SWIFT_DEFINES "")
+  if(CONFIG_SWIFT_DEBUG_INFO)
+    list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
+  endif()
+
   # Custom command to compile Swift sources
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
   add_custom_command(
@@ -28,6 +34,7 @@ if(SWIFT_SOURCES)
       -emit-object -o ${SWIFT_OBJ_FILE}
       -emit-module -emit-module-path ${SWIFT_MODULE_FILE}
       -module-name Zephyr
+      ${SWIFT_DEFINES}
       -I ${CMAKE_BINARY_DIR}/zephyr/include/generated
       -I ${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr
       -I ${CMAKE_BINARY_DIR}/zephyr/include

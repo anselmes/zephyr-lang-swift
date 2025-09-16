@@ -21,8 +21,7 @@ set(ZEPHYR_TOOLCHAIN_VARIANT $ENV{ZEPHYR_TOOLCHAIN_VARIANT})  # Toolchain varian
 
 # Add custom Zephyr modules (e.g., for Swift support)
 # Uncomment and set the path to your custom Zephyr modules if needed
-# set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/../modules/lang/swift)
-# set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/../modules/hello)
+set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/modules/hello)
 
 # Find and include Zephyr RTOS package
 # This initializes Zephyr's build system and makes its build targets available
@@ -30,12 +29,6 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 # ==== Configuration ====
 
-# Configure Swift compiler settings
-set(CMAKE_Swift_COMPILER_TARGET ${BUILD_TARGET})        # Set target triple for Swift compiler
-set(CMAKE_Swift_COMPILATION_MODE wholemodule)           # Enable whole-module optimization (WMO) required by Embedded Swift
-set(CMAKE_Swift_COMPILER_WORKS true)                    # Explicitly indicate Swift compiler is functional
-
 # Define the project with Swift language support
 project(app)
-enable_language(Swift)
 swift_application()
