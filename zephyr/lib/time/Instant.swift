@@ -3,8 +3,6 @@
 
 import ZephyrSys
 
-/// An Instant appropriate for Zephyr calls that expect an absolute time.
-/// The result will be an absolute time in terms of system ticks.
 #if CONFIG_TIMEOUT_64BIT
 public struct Instant: Equatable, Comparable, Sendable, TimeoutConvertible {
   public let ticks: Tick
