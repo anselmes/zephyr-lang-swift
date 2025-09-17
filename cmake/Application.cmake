@@ -2,71 +2,97 @@
 Swift Application Building Functions
 =====================================
 
-This module provides the ``swift_application()`` function for building Swift
-applications that run on Zephyr RTOS.
+This module provides the ``zephyr_swift_application()`` function for building Swift
+applications that integrate seamlessly with Zephyr RTOS.
 
 Functions
 ---------
 
-.. cmake:command:: swift_application
+.. cmake:command:: zephyr_swift_application
 
-  Builds a Swift application for Zephyr RTOS.
+  Builds a Swift application with automatic library discovery and Zephyr integration.
 
   .. code-block:: cmake
 
-    swift_application()
+    zephyr_swift_application()
 
-  This function:
+  **Key Features:**
 
-  * Discovers Swift source files in the ``src/`` directory
-  * Compiles them with the Zephyr Swift runtime
-  * Links against available Swift libraries automatically
-  * Integrates with the Zephyr ``app`` target
-  * Handles cross-compilation for embedded targets
+  * **Automatic Source Discovery:** Finds all ``.swift`` files in the ``src/`` directory
+  * **Intelligent Library Discovery:** Automatically discovers and links Swift libraries from extra modules
+  * **Cross-Compilation Support:** Handles embedded target compilation with proper optimization
+  * **Zephyr Integration:** Seamlessly integrates with Zephyr's ``app`` target and build system
+  * **Module Path Resolution:** Resolves Swift module dependencies from ``ZEPHYR_EXTRA_MODULES``
 
   **Source File Discovery:**
 
-  The function automatically finds all ``.swift`` files in the ``src/``
-  directory of your project. No manual file listing is required.
+  The function automatically discovers all ``.swift`` files in your project's ``src/``
+  directory, following Zephyr's standard application structure convention.
 
-  **Library Discovery:**
+  **Advanced Library Discovery:**
 
-  The function automatically discovers and links against Swift libraries
-  that have been built in the current project, including:
+  The function performs sophisticated library discovery by:
 
-  * Core Zephyr Swift library (always included)
-  * Project-specific Swift libraries (if present)
-  * Common utility libraries (Hello, Utils, Common)
+  * Scanning ``ZEPHYR_EXTRA_MODULES`` and ``EXTRA_ZEPHYR_MODULES`` for Swift libraries
+  * Reading the global ``ZEPHYR_SWIFT_LIBRARY_INFO`` registry for available modules
+  * Automatically configuring include paths for discovered Swift modules
+  * Establishing proper compilation dependencies between libraries and applications
 
-  **Integration:**
+  **Cross-Compilation & Optimization:**
 
-  The compiled Swift code is automatically integrated with the Zephyr
-  ``app`` target, so no additional CMake configuration is needed.
+  * Automatically determines Swift target triple based on Zephyr's CPU configuration
+  * Applies embedded-specific optimizations (``-Osize``, ``-wmo``)
+  * Enables Embedded Swift features and function sectioning for optimal binary size
+  * Integrates with Zephyr's build system for seamless compilation
 
   **Example Project Structure:**
 
   .. code-block:: text
 
     my_project/
-    ├── CMakeLists.txt          # Contains swift_application()
+    ├── CMakeLists.txt          # Contains zephyr_swift_application()
     ├── prj.conf                # Contains CONFIG_SWIFT=y
-    └── src/
-        ├── entrypoint.swift    # Your Swift application code
-        └── utils.swift         # Additional Swift files (optional)
+    ├── src/
+    │   ├── Entrypoint.swift    # Application entry point (defines entrypoint())
+    │   └── Utils.swift         # Additional Swift modules (optional)
+    └── modules/
+        └── my_swift_lib/       # Custom Swift library (auto-discovered)
+            ├── CMakeLists.txt  # Contains zephyr_swift_library()
+            └── *.swift         # Swift library sources
+
+  **Configuration Requirements:**
+
+  Ensure your ``prj.conf`` includes:
+
+  .. code-block:: kconfig
+
+    CONFIG_SWIFT=y
+    CONFIG_SWIFT_DEBUG_INFO=y  # Optional: enable debug information
 
 #]=======================================================================]
 
-# .rst: .. cmake:command:: swift_application
+# .rst: .. cmake:command:: zephyr_swift_application
 #
-# Compiles Swift application sources and integrates them with Zephyr's app
-# target.
+# Compiles Swift application sources with intelligent library discovery and
+# seamless Zephyr integration.
 #
-# This function handles the complete build process for Swift applications: -
-# Source file discovery in src/ directory - Swift library dependency resolution
-# - Cross-compilation for embedded targets - Integration with Zephyr's build
-# system - Final binary post-processing
+# This function provides a comprehensive build pipeline for Swift applications:
 #
-function(swift_application)
+# **Core Functionality:**
+# - Automatic Swift source file discovery in the ``src/`` directory
+# - Advanced Swift library dependency resolution via module registry
+# - Intelligent module path resolution from ``ZEPHYR_EXTRA_MODULES``
+# - Cross-compilation targeting with embedded-specific optimizations
+# - Complete integration with Zephyr's build system and ``app`` target
+# - Post-build binary optimization (removal of unnecessary Swift metadata)
+#
+# **Library Discovery Process:**
+# The function performs sophisticated dependency resolution by scanning the
+# global ``ZEPHYR_SWIFT_LIBRARY_INFO`` registry, filtering for libraries
+# within the configured extra module directories, and automatically setting
+# up include paths and link dependencies.
+#
+function(zephyr_swift_application)
   # Enable Swift language support and configure compiler settings
   _enable_swift()
 
@@ -91,21 +117,80 @@ function(swift_application)
   list(APPEND INCLUDE_PATHS "-I"
        "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
 
-  # Discover available Swift libraries to link against TODO: Make this discovery
-  # dynamic by scanning for *_compile targets
+  # Discover available Swift libraries registered during configuration
   set(AVAILABLE_LIBS "")
-  set(POSSIBLE_MODULES "Hello" "Utils" "Common") # Common Swift library names
 
-  # Check for each possible Swift library and add to includes/linking if found
-  foreach(MODULE_NAME ${POSSIBLE_MODULES})
-    if(TARGET ${MODULE_NAME}_compile)
-      # Add the module's output directory to Swift include paths
-      set(MODULE_PATH
-          "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}")
-      list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
-      # Track this library for linking later
-      list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")
+  # Build a comprehensive list of extra module directories for Swift library discovery
+  # This includes both ZEPHYR_EXTRA_MODULES (user-specified) and EXTRA_ZEPHYR_MODULES
+  # (Zephyr's merged list). We normalize all paths to absolute, real paths to ensure
+  # consistent matching during library discovery.
+  set(_SWIFT_EXTRA_MODULE_DIRS "")
+  foreach(_SWIFT_MODULE_ROOT ${ZEPHYR_EXTRA_MODULES} ${EXTRA_ZEPHYR_MODULES})
+    if(NOT _SWIFT_MODULE_ROOT)
+      continue()
     endif()
+    # Convert relative paths to absolute paths based on current source directory
+    set(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT}")
+    if(NOT IS_ABSOLUTE "${_SWIFT_MODULE_ROOT_ABS}")
+      get_filename_component(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT_ABS}" ABSOLUTE
+                             BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+    # Resolve any symbolic links to get the canonical path
+    get_filename_component(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT_ABS}" REALPATH)
+    if(IS_DIRECTORY "${_SWIFT_MODULE_ROOT_ABS}")
+      list(APPEND _SWIFT_EXTRA_MODULE_DIRS "${_SWIFT_MODULE_ROOT_ABS}")
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES _SWIFT_EXTRA_MODULE_DIRS)
+
+  # Discover available Swift libraries from the global registry
+  # The ZEPHYR_SWIFT_LIBRARY_INFO property contains entries in "name|source_dir" format
+  # We filter these to include only libraries within our configured extra module directories
+  set(POSSIBLE_MODULES "")
+  get_property(_SWIFT_LIBRARY_REGISTRY GLOBAL PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO)
+  if(_SWIFT_LIBRARY_REGISTRY)
+    foreach(_ENTRY ${_SWIFT_LIBRARY_REGISTRY})
+      # Parse the registry entry format: "module_name|source_directory"
+      string(FIND "${_ENTRY}" "|" _ENTRY_SEPARATOR)
+      if(_ENTRY_SEPARATOR LESS 0)
+        continue() # Skip malformed entries
+      endif()
+      string(SUBSTRING "${_ENTRY}" 0 ${_ENTRY_SEPARATOR} _REGISTERED_MODULE_NAME)
+      math(EXPR _ENTRY_VALUE_START "${_ENTRY_SEPARATOR} + 1")
+      string(SUBSTRING "${_ENTRY}" ${_ENTRY_VALUE_START} -1 _REGISTERED_SOURCE_DIR)
+
+      # Check if this library's source directory is within our extra module paths
+      # This ensures we only link libraries that are part of the current project's modules
+      set(_MODULE_IN_EXTRA FALSE)
+      foreach(_MODULE_DIR ${_SWIFT_EXTRA_MODULE_DIRS})
+        string(FIND "${_REGISTERED_SOURCE_DIR}/" "${_MODULE_DIR}/" _MATCH_POS)
+        if(_MATCH_POS EQUAL 0)
+          set(_MODULE_IN_EXTRA TRUE)
+          break()
+        endif()
+      endforeach()
+
+      # Skip libraries that aren't in our extra module directories
+      if(NOT _MODULE_IN_EXTRA)
+        continue()
+      endif()
+
+      # Verify that the library's compilation target exists before including it
+      if(NOT TARGET ${_REGISTERED_MODULE_NAME}_compile)
+        continue()
+      endif()
+
+      list(APPEND POSSIBLE_MODULES "${_REGISTERED_MODULE_NAME}")
+    endforeach()
+    list(REMOVE_DUPLICATES POSSIBLE_MODULES)
+  endif()
+
+  foreach(MODULE_NAME ${POSSIBLE_MODULES})
+    # Add the module's output directory to Swift include paths
+    set(MODULE_PATH "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}")
+    list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
+    # Track this library for linking later
+    list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")
   endforeach()
 
   # Build the dependency chain to ensure proper compilation order Start with the

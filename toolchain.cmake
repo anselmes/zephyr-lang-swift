@@ -26,10 +26,29 @@ Functions
   the SWIFT_TARGET variable in the parent scope to the correct Swift
   target triple for cross-compilation.
 
-  Supported architectures:
-  - ARM Cortex-M (M0, M0+, M1, M3, M4, M7, M23, M33, M35P, M55)
-  - ARM64 (AArch64)
-  - RISC-V (32-bit and 64-bit)
+  **Supported Architectures:**
+
+  * **ARM Cortex-M Series:**
+
+    - Cortex-M0/M0+/M1 → ``thumbv6m-none-eabi`` (ARMv6-M, Thumb-only)
+    - Cortex-M3 → ``thumbv7m-none-eabi`` (ARMv7-M, Thumb-2)
+    - Cortex-M4/M7 → ``thumbv7em-none-eabi[hf]`` (ARMv7E-M, optional FPU)
+    - Cortex-M23/M33/M35P/M55 → ``thumbv8m.main-none-eabi[hf]`` (ARMv8-M, TrustZone)
+
+  * **ARM 64-bit (AArch64):**
+
+    - ARM64 processors → ``aarch64-none-elf``
+
+  * **RISC-V:**
+
+    - RV32 → ``riscv32-none-none-eabi`` (32-bit RISC-V)
+    - RV64 → ``riscv64-none-none-eabi`` (64-bit RISC-V)
+
+  **Floating-Point ABI Selection:**
+
+  The toolchain automatically selects hard-float ABI variants (``hf`` suffix)
+  when ``CONFIG_FP_HARDABI`` is enabled in Zephyr configuration, providing
+  optimal performance for targets with dedicated floating-point units.
 
   **Internal use only** - Called automatically by Swift compilation functions.
 
@@ -62,24 +81,41 @@ endfunction()
 
 # .rst: .. cmake:command:: _swift_map_target
 #
-# Maps Zephyr CPU configuration to Swift target triples.
+# Maps Zephyr CPU configuration to Swift target triples for cross-compilation.
 #
-# This internal function analyzes Zephyr's CPU configuration variables and
-# determines the appropriate Swift target triple for cross-compilation. The
-# target triple is set in the SWIFT_TARGET variable in the parent scope.
+# This internal function performs sophisticated analysis of Zephyr's CPU and
+# floating-point configuration to determine the optimal Swift target triple.
+# The resulting target is stored in the ``SWIFT_TARGET`` variable in parent scope.
 #
-# **Supported Architectures:**
+# **Configuration Analysis:**
 #
-# * **ARM Cortex-M Series:** - Cortex-M0/M0+/M1: thumbv6m-none-eabi - Cortex-M3:
-#   thumbv7m-none-eabi - Cortex-M4/M7: thumbv7em-none-eabi[hf] (hf = hardware
-#   floating point) - Cortex-M23/M33/M35P/M55: thumbv8m.main-none-eabi[hf]
+# The function examines Zephyr configuration variables including:
 #
-# * **ARM 64-bit:** aarch64-none-elf
+# * ``CONFIG_CPU_CORTEX_M*`` - Cortex-M series processor detection
+# * ``CONFIG_ARM64`` - ARM 64-bit architecture detection
+# * ``CONFIG_RISCV`` - RISC-V architecture detection
+# * ``CONFIG_FP_HARDABI`` - Hardware floating-point ABI availability
+# * ``CONFIG_64BIT`` - 64-bit vs 32-bit architecture selection
 #
-# * **RISC-V:** riscv32/riscv64-none-none-eabi
+# **Target Triple Format:**
 #
-# The function automatically detects floating-point ABI configuration and
-# selects the appropriate hard-float variant when available.
+# Swift target triples follow the format: ``{arch}-{vendor}-{os}[-{abi}]``
+#
+# * **arch**: CPU architecture (``thumbv*``, ``aarch64``, ``riscv*``)
+# * **vendor**: Typically ``none`` for embedded systems
+# * **os**: Operating system or environment (``eabi``, ``elf``)
+# * **abi**: Optional ABI specification (``hf`` for hard-float)
+#
+# **Floating-Point ABI Selection:**
+#
+# When hardware floating-point is available (``CONFIG_FP_HARDABI=y``),
+# the function automatically selects hard-float ABI variants for optimal
+# performance. This affects Cortex-M4/M7 and ARMv8-M targets specifically.
+#
+# **Error Handling:**
+#
+# Unsupported or unrecognized CPU configurations result in a fatal CMake
+# error with guidance to extend the function for new architectures.
 #
 function(_swift_map_target)
   # ARM Cortex-M family processors
