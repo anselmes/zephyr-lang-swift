@@ -6,9 +6,6 @@ This directory contains comprehensive examples demonstrating how to use Swift wi
 
 The samples are organized to demonstrate progressive complexity and different use cases:
 
-- **Basic Applications**: Simple Swift programs that run on Zephyr
-- **Library Modules**: Reusable Swift libraries that can be imported by applications
-- **Advanced Examples**: Complex integrations showcasing advanced Swift and Zephyr features
 
 ## Sample Structure
 
@@ -18,17 +15,9 @@ Complete Swift applications that can be built and run on Zephyr boards.
 
 **Key Features Demonstrated:**
 
-- Swift application structure and entry points
-- Integration with Zephyr's main application framework
-- Basic Swift syntax and embedded-appropriate programming patterns
-- Configuration through `prj.conf` and CMake
 
 **Files in Application Samples:**
 
-- `src/Entrypoint.swift`: Main Swift application logic
-- `CMakeLists.txt`: Build configuration using `swift_application()`
-- `prj.conf`: Zephyr configuration enabling Swift support
-- `sample.yml`: Sample metadata for testing and documentation
 
 ### Library Module Samples (`modules/`)
 
@@ -36,17 +25,9 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 
 **Key Features Demonstrated:**
 
-- Swift library/module creation and organization
-- Module configuration through Kconfig
-- Inter-module dependencies and imports
-- Public API design for Swift libraries
 
 **Example: Hello Module (`modules/hello/`)**
 
-- `lib/Hello.swift`: Swift library implementation
-- `zephyr/module.yml`: Zephyr module definition
-- `CMakeLists.txt`: Library build configuration
-- `Kconfig`: Module-specific configuration options
 
 ## Getting Started
 
@@ -105,10 +86,6 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 
 **Features:**
 
-- Simple Swift entry point with `@_cdecl("entrypoint")`
-- Basic print statements and control flow
-- Integration with Zephyr's sleep and timing functions
-- Proper configuration for Swift compilation
 
 **Code Highlights:**
 
@@ -131,10 +108,6 @@ func entrypoint() {
 
 **Features:**
 
-- Swift library with public API
-- Module configuration through Kconfig
-- Integration with Zephyr's module system
-- Template for creating custom libraries
 
 **Code Highlights:**
 
@@ -195,9 +168,6 @@ public struct LibraryType {
 
 **Module Configuration:**
 
-- Use Kconfig for optional features
-- Provide sensible defaults
-- Document configuration options
 
 ## Configuration Examples
 
@@ -292,20 +262,12 @@ west twister -T samples/ --platform qemu_riscv32
 
 ### Performance Considerations
 
-- Use `@_optimize(speed)` or `@_optimize(size)` attributes where appropriate
-- Prefer value types over reference types for better performance
-- Minimize dynamic memory allocation in embedded contexts
 
 ### Memory Management
 
-- Be aware of Swift's automatic reference counting (ARC)
-- Use `@_unsafeInheritExecutor` for performance-critical code
-- Consider memory constraints of your target platform
 
 ### Debugging
 
-- Enable `CONFIG_SWIFT_DEBUG_INFO=y` during development
-- Use conditional compilation for debug-only code:
   ```swift
   #if SWIFT_DEBUG_INFO
       print("Debug: operation completed")
@@ -314,9 +276,6 @@ west twister -T samples/ --platform qemu_riscv32
 
 ### Integration
 
-- Follow Zephyr's naming conventions for consistency
-- Use Zephyr's error handling patterns
-- Integrate properly with Zephyr's device model when needed
 
 ## Troubleshooting
 
@@ -338,8 +297,3 @@ west twister -T samples/ --platform qemu_riscv32
    - Verify module.yml configuration
 
 ### Getting Help
-
-- Check the main README.md for general Swift support information
-- Review Zephyr documentation for board-specific requirements
-- Examine build logs for specific error messages
-- Test with QEMU emulation before hardware deployment
