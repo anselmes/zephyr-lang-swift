@@ -57,7 +57,7 @@ This module integrates Swift's powerful programming language capabilities with Z
    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
    project(my_swift_app)
 
-   swift_application()
+    zephyr_swift_application()
    ```
 
 3. **Write Swift code** (`src/main.swift`):
@@ -82,7 +82,7 @@ Create reusable Swift libraries for your projects:
 
 ```cmake
 # In your library's CMakeLists.txt
-swift_library(MODULE_NAME MyLibrary)
+zephyr_swift_library(MODULE_NAME MyLibrary)
 ```
 
 ```swift
@@ -108,8 +108,8 @@ swift/
 │   ├── lib/                # Swift Zephyr bindings
 │   └── src/                # Application bootstrap
 ├── cmake/                  # CMake helper functions
-│   ├── Application.cmake   # swift_application() function
-│   └── Library.cmake       # swift_library() function
+│   ├── Application.cmake   # zephyr_swift_application() function
+│   └── Library.cmake       # zephyr_swift_library() function
 └── samples/                # Example applications and libraries
 ```
 
