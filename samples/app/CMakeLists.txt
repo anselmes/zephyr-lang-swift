@@ -96,16 +96,6 @@ set(SYSROOT_DIR $ENV{SYSROOT_DIR})
 # for compilation Options: zephyr, gnuarmemb, xtools, cross-compile
 set(ZEPHYR_TOOLCHAIN_VARIANT $ENV{ZEPHYR_TOOLCHAIN_VARIANT})
 
-# ==== Additional Module Configuration ====
-# Configure additional Zephyr modules that this application depends on This
-# allows the application to import and use Swift libraries from other modules
-
-# Add the Hello Swift module as an extra module for this application This makes
-# the Hello module available for import in Swift code The path is relative to
-# this CMakeLists.txt file location After this configuration, Swift code can
-# use: import Hello
-set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/modules/hello)
-
 # ==== Zephyr Package Discovery and Configuration ====
 # Locate and configure the Zephyr RTOS package and build system This step is
 # essential for all Zephyr applications and must come before project()

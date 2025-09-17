@@ -59,7 +59,7 @@ Ensure your ``prj.conf`` includes:
 #]=======================================================================]
 
 # Include Swift library building functions Provides: swift_library()
-include(${CMAKE_CURRENT_LIST_DIR}/Library.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/SwiftLibrary.cmake)
 
 # Include Swift application building functions Provides: swift_application()
-include(${CMAKE_CURRENT_LIST_DIR}/Application.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/SwiftApplication.cmake)

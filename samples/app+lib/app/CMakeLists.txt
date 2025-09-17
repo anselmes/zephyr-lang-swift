@@ -100,6 +100,8 @@ set(ZEPHYR_TOOLCHAIN_VARIANT $ENV{ZEPHYR_TOOLCHAIN_VARIANT})
 # Configure additional Zephyr modules that this application depends on This
 # allows the application to import and use Swift libraries from other modules
 
+set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/..)
+
 # ==== Zephyr Package Discovery and Configuration ====
 # Locate and configure the Zephyr RTOS package and build system This step is
 # essential for all Zephyr applications and must come before project()

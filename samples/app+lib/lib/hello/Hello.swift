@@ -72,7 +72,7 @@ public struct Hello {
     // Conditional compilation example: include debug output only when
     // CONFIG_SWIFT_DEBUG_INFO is enabled in the Zephyr configuration
     #if SWIFT_DEBUG_INFO
-      print("Module Hello compiled with debug info")
+      print("debug: Module Hello compiled with debug info")
     #endif
 
     // Delegate to the main implementation function

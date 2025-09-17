@@ -120,9 +120,9 @@ function(zephyr_swift_library)
     zephyr_include_directories(include)
   endif()
 
-  # Parse function arguments using CMake's argument parsing MODULE_NAME:
-  # Optional name for the Swift module (defaults to PROJECT_NAME) SOURCES:
-  # Optional list of Swift source files (auto-discovered if not provided)
+  # Parse function arguments using CMake's argument parsing
+  # MODULE_NAME: Optional name for the Swift module (defaults to PROJECT_NAME)
+  # SOURCES: Optional list of Swift source files (auto-discovered if not provided)
   cmake_parse_arguments(PARSE_ARGV 0 SWIFTLIB "" "MODULE_NAME" "SOURCES")
 
   # Determine the module name - use provided name or fall back to project name
@@ -156,7 +156,8 @@ function(zephyr_swift_library)
   # Module interface file: Contains Swift type information for importing by other modules
   set(MODULE_SWIFT_MODULE_FILE
     ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
-  )  # Create the output directory for module artifacts
+  )
+  # Create the output directory for module artifacts
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME})
 
   # Determine the Swift target triple based on Zephyr's CPU configuration
