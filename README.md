@@ -57,7 +57,7 @@ This module integrates Swift's powerful programming language capabilities with Z
    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
    project(my_swift_app)
 
-    zephyr_swift_application()
+   zephyr_swift_application()
    ```
 
 3. **Write Swift code** (`src/main.swift`):
