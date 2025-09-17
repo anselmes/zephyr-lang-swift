@@ -187,7 +187,7 @@ function(zephyr_swift_application)
 
   foreach(MODULE_NAME ${POSSIBLE_MODULES})
     # Add the module's output directory to Swift include paths
-    set(MODULE_PATH "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}")
+    set(MODULE_PATH "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}")
     list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
     # Track this library for linking later
     list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")

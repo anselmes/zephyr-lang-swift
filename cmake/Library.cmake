@@ -76,11 +76,11 @@ Functions
 
   **Output Path Structure:**
 
-  Compiled artifacts are placed in a structured directory:
+  Compiled artifacts are placed in a clean directory structure:
 
   .. code-block:: text
 
-    ${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}/
+    ${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/
     ├── ${MODULE_NAME}.o           # Compiled object file
     └── ${MODULE_NAME}.swiftmodule # Module interface
 
@@ -145,21 +145,19 @@ function(zephyr_swift_library)
   endif()
 
   # Configure structured output paths for compiled Swift module artifacts
-  # Using a nested directory structure: modules/{module_name}/{module_name}/
+  # Using a clean directory structure: modules/{module_name}/
   # This organization enables clean separation of different module artifacts and
   # provides predictable paths for Swift applications to discover compiled modules
 
   # Object file: Contains the compiled machine code for the library
   set(MODULE_OBJ_FILE
-    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.o
+    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.o
   )
   # Module interface file: Contains Swift type information for importing by other modules
   set(MODULE_SWIFT_MODULE_FILE
-    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
-  )
-
-  # Create the output directory for module artifacts
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME})
+    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
+  )  # Create the output directory for module artifacts
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME})
 
   # Determine the Swift target triple based on Zephyr's CPU configuration
   _swift_map_target()
