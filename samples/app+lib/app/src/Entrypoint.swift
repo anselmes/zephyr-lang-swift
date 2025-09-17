@@ -86,9 +86,9 @@ import Hello
  */
 @_cdecl("entrypoint")
 func entrypoint() {
-	print("Hello from Swift app+lib!!!")
-	print(hello())
-	while true {
-		k_sleep(K_MSEC(2000))
-	}
+  print("Hello from Swift app+lib!!!")
+  hello()
+  while true {
+    k_sleep(K_MSEC(2000))
+  }
 }
