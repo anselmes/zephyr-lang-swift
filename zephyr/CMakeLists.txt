@@ -81,32 +81,34 @@ if(SWIFT_SOURCES)
   add_custom_command(
     OUTPUT ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE}
     COMMAND
-      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} # Cross-compilation target
-                                                   # (e.g., thumbv7em-none-eabi)
-      -parse-as-library # Compile as library (not executable)
-      -wmo # Whole-module optimization for better embedded performance
-      -Osize # Optimize for code size (critical for embedded)
-      -enable-experimental-feature Embedded # Enable Embedded Swift features
-      -Xfrontend -function-sections # Separate functions into sections for
-                                    # linker optimization
-      -emit-object -o ${SWIFT_OBJ_FILE} # Generate object file
-      -emit-module -emit-module-path ${SWIFT_MODULE_FILE} # Generate Swift
-                                                          # module interface
-      -module-name Zephyr # Set the Swift module name to "Zephyr"
-      ${SWIFT_DEFINES} # Add any Swift compilation defines
+      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET}                          # Cross-compilation target (e.g., thumbv7em-none-eabi)
+      -parse-as-library                                                     # Compile as library (not executable)
+      -wmo                                                                  # Whole-module optimization for better embedded performance
+      -Osize                                                                # Optimize for code size (critical for embedded)
+      -enable-experimental-feature Embedded                                 # Enable Embedded Swift features
+      -Xfrontend -function-sections                                         # Separate functions into sections for linker optimization
+
+      -emit-object -o ${SWIFT_OBJ_FILE}                                     # Generate object file
+      -emit-module -emit-module-path ${SWIFT_MODULE_FILE}                   # Generate Swift module interface
+      -module-name Zephyr                                                   # Set the Swift module name to "Zephyr"
+      ${SWIFT_DEFINES}                                                      # Add any Swift compilation defines
+
       # Include paths for Zephyr headers (order matters for proper resolution)
-      -I ${CMAKE_BINARY_DIR}/zephyr/include/generated # Generated Zephyr headers
-      -I ${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr # Generated
-                                                             # Zephyr-specific
-                                                             # headers
-      -I ${CMAKE_BINARY_DIR}/zephyr/include # Built Zephyr headers
-      -I ${ZEPHYR_BASE}/include # Source Zephyr headers
-      -I ${ZEPHYR_SYS_MODULE}/include # ZephyrSys bridging headers
-      -I ${SYSROOT_DIR}/include # System headers
-      -Xcc -isysroot=${SYSROOT_DIR} # Set system root for C headers
+      -I ${CMAKE_BINARY_DIR}/zephyr/include/generated                       # Generated Zephyr headers
+      -I ${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr                # Generated Zephyr-specific headers
+      -I ${CMAKE_BINARY_DIR}/zephyr/include                                 # Built Zephyr headers
+      -I ${ZEPHYR_BASE}/include                                             # Source Zephyr headers
+      -I ${ZEPHYR_SYS_MODULE}/include                                       # ZephyrSys bridging headers
+      -I ${SYSROOT_DIR}/include                                             # System headers
+
+      # Set system root for C headers
+      -Xcc -isysroot=${SYSROOT_DIR}
+
       # Import the bridging header to make C APIs available to Swift
       -import-bridging-header ${ZEPHYR_SYS_MODULE}/include/BridgingHeader.h
-      ${SWIFT_SOURCES} # Swift source files to compile
+
+      # Swift source files to compile
+      ${SWIFT_SOURCES}
     DEPENDS ${SWIFT_SOURCES}
     COMMENT "Compiling Swift sources for Zephyr")
 

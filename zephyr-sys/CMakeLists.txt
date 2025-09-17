@@ -46,7 +46,8 @@ add_library(ZephyrSys STATIC)
 # Discover all C source files in the zephyr-sys directory structure src/: Core
 # runtime stub implementations (e.g., aligned_alloc, getentropy) lib/:
 # Additional C libraries and utilities for Swift interop
-file(GLOB_RECURSE C_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+file(GLOB_RECURSE C_SOURCES
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
      "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.c")
 
 # Add all discovered C sources to the ZephyrSys library These provide the
