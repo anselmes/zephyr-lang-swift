@@ -2,59 +2,112 @@
 Swift Library Building Functions
 =================================
 
-This module provides the ``swift_library()`` function for building Swift
-static libraries that can be used in Zephyr RTOS projects.
+This module provides the ``zephyr_swift_library()`` function for building Swift
+static libraries that integrate seamlessly with Zephyr RTOS projects and the
+Swift application build system.
 
 Functions
 ---------
 
-.. cmake:command:: swift_library
+.. cmake:command:: zephyr_swift_library
 
-  Builds a Swift static library from Swift source files.
+  Builds a Swift static library with automatic registration and Zephyr integration.
 
   .. code-block:: cmake
 
-    swift_library([MODULE_NAME <name>] [SOURCES <file1> <file2> ...])
+    zephyr_swift_library([MODULE_NAME <name>] [SOURCES <file1> <file2> ...])
 
-  **Options:**
+  **Parameters:**
 
   ``MODULE_NAME <name>``
     Optional. Name of the Swift module. Defaults to ``${PROJECT_NAME}``.
+    This name is used for the module interface and library target.
 
   ``SOURCES <file1> <file2> ...``
-    Optional. List of Swift source files. If not provided, automatically
-    discovers all ``.swift`` files in the ``lib/`` directory.
+    Optional. List of Swift source files to compile. If not provided,
+    automatically discovers all ``.swift`` files in the current directory
+    and subdirectories.
 
-  **Example:**
+  **Key Features:**
+
+  * **Automatic Source Discovery:** Recursively finds all ``.swift`` files in the library directory
+  * **Global Registration:** Automatically registers the library in ``ZEPHYR_SWIFT_LIBRARY_INFO`` for application discovery
+  * **Zephyr Integration:** Supports Zephyr system call includes and directory structures
+  * **Optimized Compilation:** Uses embedded-specific optimizations and whole-module optimization
+  * **Module Interface Generation:** Creates ``.swiftmodule`` files for import by other Swift code
+
+  **Examples:**
 
   .. code-block:: cmake
 
-    # Automatic discovery (uses all .swift files in lib/)
-    swift_library()
+    # Automatic discovery (uses all .swift files in current directory tree)
+    zephyr_swift_library()
 
     # Explicit module name
-    swift_library(MODULE_NAME MySwiftLib)
+    zephyr_swift_library(MODULE_NAME MySwiftLib)
 
-    # Explicit sources
-    swift_library(SOURCES src/module.swift src/utils.swift)
+    # Explicit sources with custom module name
+    zephyr_swift_library(
+      MODULE_NAME CustomLib
+      SOURCES lib/Core.swift lib/Utils.swift
+    )
+
+  **Generated Artifacts:**
 
   The function creates:
 
   * A static library target named ``${MODULE_NAME}``
   * A compilation target named ``${MODULE_NAME}_compile``
-  * Swift module file for import by other Swift code
-  * Proper dependency chain with the Zephyr Swift runtime
+  * Swift module interface file (``${MODULE_NAME}.swiftmodule``)
+  * Compiled object file (``${MODULE_NAME}.o``)
+  * Global registry entry for automatic application discovery
+
+  **Directory Structure Integration:**
+
+  The library supports Zephyr's standard directory conventions:
+
+  .. code-block:: text
+
+    my_swift_library/
+    ├── CMakeLists.txt          # Contains zephyr_swift_library()
+    ├── Kconfig                 # Library configuration options
+    ├── include/                # C headers (automatically included)
+    └── *.swift                 # Swift source files (auto-discovered)
+
+  **Output Path Structure:**
+
+  Compiled artifacts are placed in a structured directory:
+
+  .. code-block:: text
+
+    ${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}/
+    ├── ${MODULE_NAME}.o           # Compiled object file
+    └── ${MODULE_NAME}.swiftmodule # Module interface
 
 #]=======================================================================]
 
-# .rst: .. cmake:command:: swift_library
+# .rst: .. cmake:command:: zephyr_swift_library
 #
-# Compiles Swift source files into a static library for embedded use.
+# Compiles Swift source files into a static library with global registration
+# and comprehensive Zephyr integration.
 #
-# This function handles all aspects of Swift library compilation including: -
-# Source file discovery and compilation - Module interface generation -
-# Dependency management with other Swift modules - Integration with Zephyr's
-# build system
+# This function provides a complete library build pipeline including:
+#
+# **Core Compilation:**
+# - Recursive Swift source file discovery throughout the library directory
+# - Embedded-optimized Swift compilation with whole-module optimization
+# - Generation of both object files and Swift module interfaces
+# - Proper dependency management with the Zephyr Swift runtime
+#
+# **Zephyr Integration:**
+# - Automatic integration with Zephyr's include directory conventions
+# - Support for system call header includes when ``include/`` directory exists
+# - Seamless linking with Zephyr's build system and other Swift components
+#
+# **Global Registration:**
+# - Automatic registration in ``ZEPHYR_SWIFT_LIBRARY_INFO`` global property
+# - Enables automatic discovery by Swift applications during build process
+# - Maintains source directory associations for module path resolution
 #
 function(zephyr_swift_library)
   # Enable Swift language support and configure compiler settings
@@ -77,8 +130,9 @@ function(zephyr_swift_library)
     set(SWIFTLIB_MODULE_NAME ${PROJECT_NAME})
   endif()
 
-  # Discover Swift source files if not explicitly provided Convention: Swift
-  # library sources are located in lib/ directory
+  # Discover Swift source files if not explicitly provided
+  # Convention: Swift library sources are discovered recursively from the current
+  # source directory, allowing flexible organization within the library directory
   if(NOT SWIFTLIB_SOURCES)
     file(GLOB_RECURSE SWIFTLIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.swift")
   endif()
@@ -90,12 +144,16 @@ function(zephyr_swift_library)
     return()
   endif()
 
-  # Set up output file paths for the compiled Swift module Object file: Contains
-  # the compiled machine code for the library
+  # Configure structured output paths for compiled Swift module artifacts
+  # Using a nested directory structure: modules/{module_name}/{module_name}/
+  # This organization enables clean separation of different module artifacts and
+  # provides predictable paths for Swift applications to discover compiled modules
+
+  # Object file: Contains the compiled machine code for the library
   set(MODULE_OBJ_FILE
     ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.o
   )
-  # Module file: Contains Swift interface information for importing
+  # Module interface file: Contains Swift type information for importing by other modules
   set(MODULE_SWIFT_MODULE_FILE
     ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
   )
