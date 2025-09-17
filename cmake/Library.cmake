@@ -171,4 +171,11 @@ function(zephyr_swift_library)
   # Make the library target depend on successful compilation This ensures the
   # Swift code is compiled before the library is considered "built"
   add_dependencies(${SWIFTLIB_MODULE_NAME} ${SWIFTLIB_MODULE_NAME}_compile)
+
+  # Register this Swift library so applications can discover it later
+  get_filename_component(_SWIFT_LIBRARY_SOURCE_DIR
+                         "${CMAKE_CURRENT_SOURCE_DIR}"
+                         REALPATH)
+  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO
+               "${SWIFTLIB_MODULE_NAME}|${_SWIFT_LIBRARY_SOURCE_DIR}")
 endfunction()

@@ -91,21 +91,68 @@ function(zephyr_swift_application)
   list(APPEND INCLUDE_PATHS "-I"
        "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
 
-  # Discover available Swift libraries to link against TODO: Make this discovery
-  # dynamic by scanning for *_compile targets
+  # Discover available Swift libraries registered during configuration
   set(AVAILABLE_LIBS "")
-  set(POSSIBLE_MODULES "Hello" "Utils" "Common") # Common Swift library names
 
-  # Check for each possible Swift library and add to includes/linking if found
-  foreach(MODULE_NAME ${POSSIBLE_MODULES})
-    if(TARGET ${MODULE_NAME}_compile)
-      # Add the module's output directory to Swift include paths
-      set(MODULE_PATH
-          "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}")
-      list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
-      # Track this library for linking later
-      list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")
+  # Collect candidate module directories from ZEPHYR_EXTRA_MODULES and
+  # EXTRA_ZEPHYR_MODULES (the latter is how Zephyr stores the merged list).
+  set(_SWIFT_EXTRA_MODULE_DIRS "")
+  foreach(_SWIFT_MODULE_ROOT ${ZEPHYR_EXTRA_MODULES} ${EXTRA_ZEPHYR_MODULES})
+    if(NOT _SWIFT_MODULE_ROOT)
+      continue()
     endif()
+    set(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT}")
+    if(NOT IS_ABSOLUTE "${_SWIFT_MODULE_ROOT_ABS}")
+      get_filename_component(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT_ABS}" ABSOLUTE
+                             BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+    get_filename_component(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT_ABS}" REALPATH)
+    if(IS_DIRECTORY "${_SWIFT_MODULE_ROOT_ABS}")
+      list(APPEND _SWIFT_EXTRA_MODULE_DIRS "${_SWIFT_MODULE_ROOT_ABS}")
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES _SWIFT_EXTRA_MODULE_DIRS)
+
+  set(POSSIBLE_MODULES "")
+  get_property(_SWIFT_LIBRARY_REGISTRY GLOBAL PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO)
+  if(_SWIFT_LIBRARY_REGISTRY)
+    foreach(_ENTRY ${_SWIFT_LIBRARY_REGISTRY})
+      string(FIND "${_ENTRY}" "|" _ENTRY_SEPARATOR)
+      if(_ENTRY_SEPARATOR LESS 0)
+        continue()
+      endif()
+      string(SUBSTRING "${_ENTRY}" 0 ${_ENTRY_SEPARATOR} _REGISTERED_MODULE_NAME)
+      math(EXPR _ENTRY_VALUE_START "${_ENTRY_SEPARATOR} + 1")
+      string(SUBSTRING "${_ENTRY}" ${_ENTRY_VALUE_START} -1 _REGISTERED_SOURCE_DIR)
+
+      set(_MODULE_IN_EXTRA FALSE)
+      foreach(_MODULE_DIR ${_SWIFT_EXTRA_MODULE_DIRS})
+        string(FIND "${_REGISTERED_SOURCE_DIR}/" "${_MODULE_DIR}/" _MATCH_POS)
+        if(_MATCH_POS EQUAL 0)
+          set(_MODULE_IN_EXTRA TRUE)
+          break()
+        endif()
+      endforeach()
+
+      if(NOT _MODULE_IN_EXTRA)
+        continue()
+      endif()
+
+      if(NOT TARGET ${_REGISTERED_MODULE_NAME}_compile)
+        continue()
+      endif()
+
+      list(APPEND POSSIBLE_MODULES "${_REGISTERED_MODULE_NAME}")
+    endforeach()
+    list(REMOVE_DUPLICATES POSSIBLE_MODULES)
+  endif()
+
+  foreach(MODULE_NAME ${POSSIBLE_MODULES})
+    # Add the module's output directory to Swift include paths
+    set(MODULE_PATH "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}/${MODULE_NAME}")
+    list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
+    # Track this library for linking later
+    list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")
   endforeach()
 
   # Build the dependency chain to ensure proper compilation order Start with the
