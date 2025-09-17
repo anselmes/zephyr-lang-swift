@@ -84,4 +84,11 @@ import Hello
  *       The infinite loop ensures the application continues running until
  *       the system is powered down or reset.
  */
-public func entrypoint() { Hello.run() }
+@_cdecl("entrypoint")
+func entrypoint() {
+  print("Hello from Swift app+lib!!!")
+  hello()
+  while true {
+    k_sleep(K_MSEC(2000))
+  }
+}

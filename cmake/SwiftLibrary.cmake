@@ -120,9 +120,9 @@ function(zephyr_swift_library)
     zephyr_include_directories(include)
   endif()
 
-  # Parse function arguments using CMake's argument parsing MODULE_NAME:
-  # Optional name for the Swift module (defaults to PROJECT_NAME) SOURCES:
-  # Optional list of Swift source files (auto-discovered if not provided)
+  # Parse function arguments using CMake's argument parsing
+  # MODULE_NAME: Optional name for the Swift module (defaults to PROJECT_NAME)
+  # SOURCES: Optional list of Swift source files (auto-discovered if not provided)
   cmake_parse_arguments(PARSE_ARGV 0 SWIFTLIB "" "MODULE_NAME" "SOURCES")
 
   # Determine the module name - use provided name or fall back to project name
@@ -139,8 +139,7 @@ function(zephyr_swift_library)
 
   # Validate that we have Swift sources to compile
   if(NOT SWIFTLIB_SOURCES)
-    message(
-      WARNING "No Swift sources found for library ${SWIFTLIB_MODULE_NAME}")
+    message(WARNING "No Swift sources found for library ${SWIFTLIB_MODULE_NAME}")
     return()
   endif()
 
@@ -155,8 +154,9 @@ function(zephyr_swift_library)
   )
   # Module interface file: Contains Swift type information for importing by other modules
   set(MODULE_SWIFT_MODULE_FILE
-    ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule
-  )  # Create the output directory for module artifacts
+      ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME}/${SWIFTLIB_MODULE_NAME}.swiftmodule)
+
+  # Create the output directory for module artifacts
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME})
 
   # Determine the Swift target triple based on Zephyr's CPU configuration
@@ -172,8 +172,7 @@ function(zephyr_swift_library)
   # Build Swift module search paths for compilation Include the core Zephyr
   # Swift module so libraries can import Zephyr functionality
   set(INCLUDE_PATHS "")
-  list(APPEND INCLUDE_PATHS "-I"
-       "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
+  list(APPEND INCLUDE_PATHS "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
 
   # Set up compilation dependencies to ensure proper build order Always depend
   # on the source files themselves
@@ -192,22 +191,20 @@ function(zephyr_swift_library)
   add_custom_command(
     OUTPUT ${MODULE_OBJ_FILE} ${MODULE_SWIFT_MODULE_FILE}
     COMMAND
-      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} # Cross-compilation target
-                                                   # (e.g., thumbv7em-none-eabi)
-      -parse-as-library # Compile as library (not executable)
-      -wmo # Whole-module optimization for better embedded performance
-      -Osize # Optimize for code size (critical for embedded)
-      -enable-experimental-feature Embedded # Enable Embedded Swift features
-      -Xfrontend -function-sections # Separate functions into sections for
-                                    # linker optimization
-      -emit-object -o ${MODULE_OBJ_FILE} # Generate object file
-      -emit-module -emit-module-path ${MODULE_SWIFT_MODULE_FILE} # Generate
-                                                                 # module
-                                                                 # interface
-      -module-name ${SWIFTLIB_MODULE_NAME} # Set the Swift module name
-      ${SWIFT_DEFINES} # Add any Swift compilation defines
-      ${INCLUDE_PATHS} # Add module search paths
-      ${SWIFTLIB_SOURCES} # Source files to compile
+      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET}                # Cross-compilation target (e.g., thumbv7em-none-eabi)
+      -parse-as-library                                           # Compile as library (not executable)
+      -wmo                                                        # Whole-module optimization for better embedded performance
+      -Osize                                                      # Optimize for code size (critical for embedded)
+      -enable-experimental-feature Embedded                       # Enable Embedded Swift features
+      -Xfrontend -function-sections                               # Separate functions into sections for linker optimization
+
+      -emit-object -o ${MODULE_OBJ_FILE}                          # Generate object file
+      -emit-module -emit-module-path ${MODULE_SWIFT_MODULE_FILE}  # Generate module interface
+      -module-name ${SWIFTLIB_MODULE_NAME}                        # Set the Swift module name
+
+      ${SWIFT_DEFINES}                                            # Add any Swift compilation defines
+      ${INCLUDE_PATHS}                                            # Add module search paths
+      ${SWIFTLIB_SOURCES}                                         # Source files to compile
     DEPENDS ${COMPILE_DEPS}
     COMMENT "Compiling Swift library ${SWIFTLIB_MODULE_NAME}")
 
@@ -229,9 +226,6 @@ function(zephyr_swift_library)
   add_dependencies(${SWIFTLIB_MODULE_NAME} ${SWIFTLIB_MODULE_NAME}_compile)
 
   # Register this Swift library so applications can discover it later
-  get_filename_component(_SWIFT_LIBRARY_SOURCE_DIR
-                         "${CMAKE_CURRENT_SOURCE_DIR}"
-                         REALPATH)
-  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO
-               "${SWIFTLIB_MODULE_NAME}|${_SWIFT_LIBRARY_SOURCE_DIR}")
+  get_filename_component(_SWIFT_LIBRARY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" REALPATH)
+  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO "${SWIFTLIB_MODULE_NAME}|${_SWIFT_LIBRARY_SOURCE_DIR}")
 endfunction()

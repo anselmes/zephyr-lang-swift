@@ -108,14 +108,12 @@ function(zephyr_swift_application)
   # Contains the compiled machine code for the application
   set(APP_SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.o")
   # Module file: Contains Swift interface information (for debugging/tooling)
-  set(APP_SWIFT_MODULE_FILE
-      "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
+  set(APP_SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
 
   # Build Swift module search paths for compilation Start with the core Zephyr
   # Swift module (always required)
   set(INCLUDE_PATHS "")
-  list(APPEND INCLUDE_PATHS "-I"
-       "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
+  list(APPEND INCLUDE_PATHS "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
 
   # Discover available Swift libraries registered during configuration
   set(AVAILABLE_LIBS "")
@@ -228,26 +226,25 @@ function(zephyr_swift_application)
   add_custom_command(
     OUTPUT ${APP_SWIFT_OBJ_FILE} ${APP_SWIFT_MODULE_FILE}
     COMMAND
-      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} # Cross-compilation target
-                                                   # (e.g., thumbv7em-none-eabi)
-      -wmo # Whole-module optimization for better performance
-      -Osize # Optimize for code size (critical for embedded)
-      -enable-experimental-feature Embedded # Enable Embedded Swift features
-      -Xfrontend -function-sections # Separate functions into sections for
-                                    # linker optimization
-      -emit-object -o ${APP_SWIFT_OBJ_FILE} # Generate object file for linking
-      ${SWIFT_DEFINES} # Add any Swift compilation defines
-      ${INCLUDE_PATHS} # Add module search paths
-      ${SWIFT_APPLICATION} # Include Zephyr application bootstrap
-      ${SWIFT_SOURCES} # Include user application sources
+      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET}  # Cross-compilation target (e.g., thumbv7em-none-eabi)
+      -wmo                                          # Whole-module optimization for better performance
+      -Osize                                        # Optimize for code size (critical for embedded)
+      -enable-experimental-feature Embedded         # Enable Embedded Swift features
+      -Xfrontend -function-sections                 # Separate functions into sections for linker optimization
+      -emit-object -o ${APP_SWIFT_OBJ_FILE}         # Generate object file for linking
+
+      ${SWIFT_DEFINES}                              # Add any Swift compilation defines
+      ${INCLUDE_PATHS}                              # Add module search paths
+      ${SWIFT_APPLICATION}                          # Include Zephyr application bootstrap
+      ${SWIFT_SOURCES}                              # Include user application sources
     DEPENDS ${COMPILE_DEPS}
-    COMMENT
-      "Compiling Swift application ${PROJECT_NAME} with libraries: ${AVAILABLE_LIBS}"
-  )
+    COMMENT "Compiling Swift application ${PROJECT_NAME} with libraries: ${AVAILABLE_LIBS}")
 
   # Create a compilation target to track Swift application build completion
-  add_custom_target(${PROJECT_NAME}_compile DEPENDS ${APP_SWIFT_OBJ_FILE}
-                                                    ${APP_SWIFT_MODULE_FILE})
+  add_custom_target(${PROJECT_NAME}_compile
+                    DEPENDS
+                    ${APP_SWIFT_OBJ_FILE}
+                    ${APP_SWIFT_MODULE_FILE})
 
   # Integrate the compiled Swift object file with Zephyr's app target This adds
   # the Swift code to the final executable
@@ -276,7 +273,6 @@ function(zephyr_swift_application)
   add_custom_command(
     TARGET app
     POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app>
-            $<TARGET_FILE:app>
+    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app> $<TARGET_FILE:app>
     COMMENT "Removing .swift_modhash section from final binary")
 endfunction()
