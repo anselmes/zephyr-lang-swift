@@ -7,9 +7,18 @@ public protocol TimeoutConvertible {
   func toTimeout() -> Timeout
 }
 
-public struct Timeout: Equatable, Sendable {
+public struct Timeout {
   public let value: k_timeout_t
 }
+
+// MARK: - Extension
+
+extension Timeout:
+  Equatable,
+  Sendable
+  {}
+
+// MARK: - Public
 
 public extension Timeout {
   static let forever = k_timeout_t(ticks: -1)

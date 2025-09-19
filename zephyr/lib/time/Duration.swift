@@ -3,7 +3,11 @@
 
 import ZephyrSys
 
+// MARK: - Extension
+
 extension Duration: TimeoutConvertible {}
+
+// MARK: - Public
 
 public extension Duration {
   var ticks: Tick {
