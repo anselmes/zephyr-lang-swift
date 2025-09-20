@@ -63,7 +63,8 @@
  * - header: Specifies the main header file containing C API definitions
  * - export *: Makes all symbols from the header available to importing Swift code
  */
-module ZephyrSys [system] {
-  header "BridgingHeader.h"
+module ZephyrSys {
+  umbrella header "BridgingHeader.h"
+  link "ZephyrSys"
   export *
 }
