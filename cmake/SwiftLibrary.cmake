@@ -169,10 +169,11 @@ function(zephyr_swift_library)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
   endif()
 
-  # Build Swift module search paths for compilation Include the core Zephyr
-  # Swift module so libraries can import Zephyr functionality
-  set(INCLUDE_PATHS "")
-  list(APPEND INCLUDE_PATHS "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
+  # Discover available Swift libraries using the shared discovery function
+  # Exclude the current library to avoid circular dependencies
+  _swift_discover_libraries(EXCLUDE_MODULE "${SWIFTLIB_MODULE_NAME}")
+  set(INCLUDE_PATHS "${SWIFT_INCLUDE_PATHS}")
+  set(AVAILABLE_LIBS "${SWIFT_AVAILABLE_LIBS}")
 
   # Set up compilation dependencies to ensure proper build order Always depend
   # on the source files themselves
@@ -183,6 +184,14 @@ function(zephyr_swift_library)
   if(TARGET Zephyr_compile)
     list(APPEND COMPILE_DEPS Zephyr_compile)
   endif()
+
+  # Add dependencies on all discovered Swift libraries This ensures they are
+  # compiled before the current library
+  foreach(LIB ${AVAILABLE_LIBS})
+    if(TARGET ${LIB}_compile)
+      list(APPEND COMPILE_DEPS ${LIB}_compile)
+    endif()
+  endforeach()
 
   # Locate the Swift compiler executable
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)

@@ -110,86 +110,10 @@ function(zephyr_swift_application)
   # Module file: Contains Swift interface information (for debugging/tooling)
   set(APP_SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
 
-  # Build Swift module search paths for compilation Start with the core Zephyr
-  # Swift module (always required)
-  set(INCLUDE_PATHS "")
-  list(APPEND INCLUDE_PATHS "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
-
-  # Discover available Swift libraries registered during configuration
-  set(AVAILABLE_LIBS "")
-
-  # Build a comprehensive list of extra module directories for Swift library discovery
-  # This includes both ZEPHYR_EXTRA_MODULES (user-specified) and EXTRA_ZEPHYR_MODULES
-  # (Zephyr's merged list). We normalize all paths to absolute, real paths to ensure
-  # consistent matching during library discovery.
-  set(_SWIFT_EXTRA_MODULE_DIRS "")
-  foreach(_SWIFT_MODULE_ROOT ${ZEPHYR_EXTRA_MODULES} ${EXTRA_ZEPHYR_MODULES})
-    if(NOT _SWIFT_MODULE_ROOT)
-      continue()
-    endif()
-    # Convert relative paths to absolute paths based on current source directory
-    set(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT}")
-    if(NOT IS_ABSOLUTE "${_SWIFT_MODULE_ROOT_ABS}")
-      get_filename_component(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT_ABS}" ABSOLUTE
-                             BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-    endif()
-    # Resolve any symbolic links to get the canonical path
-    get_filename_component(_SWIFT_MODULE_ROOT_ABS "${_SWIFT_MODULE_ROOT_ABS}" REALPATH)
-    if(IS_DIRECTORY "${_SWIFT_MODULE_ROOT_ABS}")
-      list(APPEND _SWIFT_EXTRA_MODULE_DIRS "${_SWIFT_MODULE_ROOT_ABS}")
-    endif()
-  endforeach()
-  list(REMOVE_DUPLICATES _SWIFT_EXTRA_MODULE_DIRS)
-
-  # Discover available Swift libraries from the global registry
-  # The ZEPHYR_SWIFT_LIBRARY_INFO property contains entries in "name|source_dir" format
-  # We filter these to include only libraries within our configured extra module directories
-  set(POSSIBLE_MODULES "")
-  get_property(_SWIFT_LIBRARY_REGISTRY GLOBAL PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO)
-  if(_SWIFT_LIBRARY_REGISTRY)
-    foreach(_ENTRY ${_SWIFT_LIBRARY_REGISTRY})
-      # Parse the registry entry format: "module_name|source_directory"
-      string(FIND "${_ENTRY}" "|" _ENTRY_SEPARATOR)
-      if(_ENTRY_SEPARATOR LESS 0)
-        continue() # Skip malformed entries
-      endif()
-      string(SUBSTRING "${_ENTRY}" 0 ${_ENTRY_SEPARATOR} _REGISTERED_MODULE_NAME)
-      math(EXPR _ENTRY_VALUE_START "${_ENTRY_SEPARATOR} + 1")
-      string(SUBSTRING "${_ENTRY}" ${_ENTRY_VALUE_START} -1 _REGISTERED_SOURCE_DIR)
-
-      # Check if this library's source directory is within our extra module paths
-      # This ensures we only link libraries that are part of the current project's modules
-      set(_MODULE_IN_EXTRA FALSE)
-      foreach(_MODULE_DIR ${_SWIFT_EXTRA_MODULE_DIRS})
-        string(FIND "${_REGISTERED_SOURCE_DIR}/" "${_MODULE_DIR}/" _MATCH_POS)
-        if(_MATCH_POS EQUAL 0)
-          set(_MODULE_IN_EXTRA TRUE)
-          break()
-        endif()
-      endforeach()
-
-      # Skip libraries that aren't in our extra module directories
-      if(NOT _MODULE_IN_EXTRA)
-        continue()
-      endif()
-
-      # Verify that the library's compilation target exists before including it
-      if(NOT TARGET ${_REGISTERED_MODULE_NAME}_compile)
-        continue()
-      endif()
-
-      list(APPEND POSSIBLE_MODULES "${_REGISTERED_MODULE_NAME}")
-    endforeach()
-    list(REMOVE_DUPLICATES POSSIBLE_MODULES)
-  endif()
-
-  foreach(MODULE_NAME ${POSSIBLE_MODULES})
-    # Add the module's output directory to Swift include paths
-    set(MODULE_PATH "${CMAKE_BINARY_DIR}/modules/${MODULE_NAME}")
-    list(APPEND INCLUDE_PATHS "-I" "${MODULE_PATH}")
-    # Track this library for linking later
-    list(APPEND AVAILABLE_LIBS "${MODULE_NAME}")
-  endforeach()
+  # Discover available Swift libraries using the shared discovery function
+  _swift_discover_libraries()
+  set(INCLUDE_PATHS "${SWIFT_INCLUDE_PATHS}")
+  set(AVAILABLE_LIBS "${SWIFT_AVAILABLE_LIBS}")
 
   # Build the dependency chain to ensure proper compilation order Start with the
   # application's Swift source files
