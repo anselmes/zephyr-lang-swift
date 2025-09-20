@@ -27,11 +27,17 @@
 // all the project configuration settings from prj.conf
 #include <autoconf.h>
 
+// Standard C library headers
+#include <errno.h>
+
 // ===== Zephyr Kernel APIs =====
 
 // Core kernel functionality including scheduling, threading, and
 // synchronization
 #include <zephyr/kernel.h>
+
+// Random number generation APIs
+#include <zephyr/random/random.h>
 
 // ===== Device and Hardware APIs =====
 

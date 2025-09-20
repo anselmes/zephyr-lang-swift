@@ -3,8 +3,6 @@
 
 import ZephyrSys
 
-// MARK: - Public API
-
 #if CONFIG_TIMEOUT_64BIT
 public typealias Tick = Int64
 #else
@@ -13,13 +11,27 @@ public typealias Tick = Int32
 
 public var SYS_FREQUENCY: Int32 { return CONFIG_SYS_CLOCK_TICKS_PER_SEC }
 
-public struct Forever: Sendable, TimeoutConvertible {
+public struct Forever {
   public func toTimeout() -> Timeout { Timeout(from: self) }
 }
 
-public struct NoWait: Sendable, TimeoutConvertible {
+public struct NoWait {
   public func toTimeout() -> Timeout { Timeout(from: self) }
 }
+
+// MARK: - Extension
+
+extension Forever:
+  Sendable,
+  TimeoutConvertible
+  {}
+
+extension NoWait:
+  Sendable,
+  TimeoutConvertible
+ {}
+
+// MARK: - Public
 
 @discardableResult
 public func sleep<T: TimeoutConvertible>(_ timeout: T) -> Duration {
@@ -34,7 +46,7 @@ public func now() -> Instant {
 }
 #endif
 
-// MARK: - Internal API
+// MARK: - Internal
 
 func checkedCast<T: BinaryInteger, U: BinaryInteger>(_ value: T) -> U {
   #if DEBUG

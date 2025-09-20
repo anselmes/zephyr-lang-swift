@@ -4,9 +4,20 @@
 import ZephyrSys
 
 #if CONFIG_TIMEOUT_64BIT
-public struct Instant: Equatable, Comparable, Sendable, TimeoutConvertible {
+public struct Instant {
   public let ticks: Tick
 }
+
+// MARK: - Extension
+
+extension Instant:
+  Comparable,
+  Equatable ,
+  Sendable,
+  TimeoutConvertible
+  {}
+
+// MARK: - Public
 
 public extension Instant {
   init(ticks: Tick) { self.ticks = ticks }
