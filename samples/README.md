@@ -43,40 +43,42 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 
 1. **Navigate to the application directory:**
 
-   ```bash
-   cd samples/app/
-   ```
+    ```bash
+    cd samples/app/
+    ```
 
 2. **Build for your target board:**
 
-   ```bash
-   west build -b <your_board>
-   ```
+    ```bash
+    west build -b <your_board>
+    ```
 
 3. **Flash and run:**
-   ```bash
-   west flash
-   west attach
-   ```
+
+    ```bash
+    west flash
+    west attach
+    ```
 
 #### Library Module Sample
 
 1. **Navigate to a project that uses the library:**
 
-   ```bash
-   cd samples/app/  # This app can import the hello module
-   ```
+    ```bash
+    cd samples/app/  # This app can import the hello module
+    ```
 
 2. **Ensure the library module is in the build path:**
 
-   ```bash
-   # The build system automatically discovers modules in samples/modules/
-   ```
+    ```bash
+    # The build system automatically discovers modules in samples/modules/
+    ```
 
 3. **Build with library support:**
-   ```bash
-   west build -b <your_board>
-   ```
+
+    ```bash
+    west build -b <your_board>
+    ```
 
 ### Sample Applications
 
@@ -90,15 +92,14 @@ Reusable Swift libraries that demonstrate how to create modular Swift code for Z
 **Code Highlights:**
 
 ```swift
-@_cdecl("entrypoint")
 func entrypoint() {
-    print("Hello from Swift!!!")
+  print("Hello from Swift!!!")
 
-    while true {
-        print("still running...")
-        // Use Zephyr's sleep function
-        k_sleep(K_MSEC(2000))
-    }
+  while true {
+    print("still running...")
+    // Use Zephyr's sleep function
+    k_sleep(K_MSEC(2000))
+  }
 }
 ```
 
@@ -113,11 +114,11 @@ func entrypoint() {
 
 ```swift
 public func greet(_ name: String) -> String {
-    return "Hello, \(name) from Swift library!"
+  return "Hello, \(name) from Swift library!"
 }
 
 public struct HelloConfig {
-    public static let version = "1.0.0"
+  public static let version = "1.0.0"
 }
 ```
 
@@ -128,9 +129,8 @@ public struct HelloConfig {
 **Entry Point Pattern:**
 
 ```swift
-@_cdecl("entrypoint")
 func entrypoint() {
-    // Your application logic here
+  // Your application logic here
 }
 ```
 
@@ -140,11 +140,11 @@ func entrypoint() {
 import Zephyr
 
 func useZephyrAPIs() {
-    // Access Zephyr kernel functions
-    k_sleep(K_MSEC(1000))
+  // Access Zephyr kernel functions
+  k_sleep(K_MSEC(1000))
 
-    // Use Zephyr device APIs
-    // let gpio = device_get_binding("GPIO_0")
+  // Use Zephyr device APIs
+  // let gpio = device_get_binding("GPIO_0")
 }
 ```
 
@@ -155,14 +155,14 @@ func useZephyrAPIs() {
 ```swift
 // Make functions and types public for other modules
 public func libraryFunction() -> String {
-    return "Library response"
+  return "Library response"
 }
 
 public struct LibraryType {
-    public let value: Int
-    public init(value: Int) {
-        self.value = value
-    }
+  public let value: Int
+  public init(value: Int) {
+    self.value = value
+  }
 }
 ```
 
@@ -213,18 +213,18 @@ west twister -T samples/ --platform qemu_riscv32
 
 1. **Build for QEMU:**
 
-   ```bash
-   west build -b qemu_riscv32
-   ```
+    ```bash
+    west build -b qemu_riscv32
+    ```
 
 2. **Run in emulation:**
 
-   ```bash
-   west build -t run
-   ```
+    ```bash
+    west build -t run
+    ```
 
 3. **Verify output:**
-   Look for Swift print statements in the console output.
+  Look for Swift print statements in the console output.
 
 ## Customizing Samples
 
@@ -232,31 +232,31 @@ west twister -T samples/ --platform qemu_riscv32
 
 1. **Copy the basic app structure:**
 
-   ```bash
-   cp -r samples/app/ my_new_app/
-   ```
+    ```bash
+    cp -r samples/app/ my_new_app/
+    ```
 
 2. **Modify the Swift code:**
-   Edit `src/Entrypoint.swift` with your application logic.
+  Edit `src/Entrypoint.swift` with your application logic.
 
 3. **Update configuration:**
-   Modify `prj.conf` and `CMakeLists.txt` as needed.
+  Modify `prj.conf` and `CMakeLists.txt` as needed.
 
 ### Creating New Libraries
 
 1. **Copy the hello module structure:**
 
-   ```bash
-   cp -r samples/modules/hello/ samples/modules/my_library/
-   ```
+    ```bash
+    cp -r samples/modules/hello/ samples/modules/my_library/
+    ```
 
 2. **Update the module definition:**
-   - Change the module name in `zephyr/module.yml`
-   - Update Kconfig options and help text
-   - Modify the CMakeLists.txt module name
+    - Change the module name in `zephyr/module.yml`
+    - Update Kconfig options and help text
+    - Modify the CMakeLists.txt module name
 
 3. **Implement your library:**
-   Replace the Swift code in `lib/` with your implementation.
+  Replace the Swift code in `lib/` with your implementation.
 
 ## Best Practices
 
@@ -282,18 +282,16 @@ west twister -T samples/ --platform qemu_riscv32
 ### Common Issues
 
 1. **Build Failures:**
-   - Verify Swift toolchain installation
-   - Check that CONFIG_SWIFT=y in prj.conf
-   - Ensure target architecture is supported
+    - Verify Swift toolchain installation
+    - Check that CONFIG_SWIFT=y in prj.conf
+    - Ensure target architecture is supported
 
 2. **Runtime Issues:**
-   - Check stack size configuration
-   - Verify memory constraints are met
-   - Enable debug information for better error messages
+    - Check stack size configuration
+    - Verify memory constraints are met
+    - Enable debug information for better error messages
 
 3. **Module Import Issues:**
-   - Ensure module is properly configured in Kconfig
-   - Check that module build dependencies are correct
-   - Verify module.yml configuration
-
-### Getting Help
+    - Ensure module is properly configured in Kconfig
+    - Check that module build dependencies are correct
+    - Verify module.yml configuration
