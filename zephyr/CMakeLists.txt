@@ -86,6 +86,7 @@ if(SWIFT_SOURCES)
       -wmo                                                                  # Whole-module optimization for better embedded performance
       -Osize                                                                # Optimize for code size (critical for embedded)
       -enable-experimental-feature Embedded                                 # Enable Embedded Swift features
+      -enable-experimental-feature CImplementation                          # Enable @c @implementation feature
       -Xfrontend -function-sections                                         # Separate functions into sections for linker optimization
 
       -emit-object -o ${SWIFT_OBJ_FILE}                                     # Generate object file

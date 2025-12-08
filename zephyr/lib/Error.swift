@@ -32,7 +32,7 @@ public extension ZephyrError {
 
 public extension Result where Failure == ZephyrError {
   @inlinable
-  func get() throws -> Success {
+  func get() throws(ZephyrError) -> Success {
     switch self {
     case .success(let value):
       return value
