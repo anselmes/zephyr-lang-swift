@@ -65,14 +65,13 @@ This module integrates Swift's powerful programming language capabilities with Z
    ```swift
    import Zephyr
 
-   @_cdecl("entrypoint")
    func entrypoint() {
-       print("Hello from Swift on Zephyr!")
+    print("Hello from Swift on Zephyr!")
 
-       while true {
-           // Your embedded Swift application logic
-           k_sleep(K_MSEC(1000))
-       }
+    while true {
+      // Your embedded Swift application logic
+      k_sleep(K_MSEC(1000))
+    }
    }
    ```
 
@@ -88,7 +87,7 @@ zephyr_swift_library(MODULE_NAME MyLibrary)
 ```swift
 // In lib/MyLibrary.swift
 public func myFunction() -> String {
-    return "Hello from MyLibrary!"
+  return "Hello from MyLibrary!"
 }
 ```
 
