@@ -90,7 +90,7 @@
     return 0;
  }
  ```
- *
+
  ## Usage from Swift
 
  Swift code can also call these functions:

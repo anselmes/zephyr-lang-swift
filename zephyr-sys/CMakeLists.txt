@@ -71,7 +71,8 @@ if(NOT SWIFT_SOURCES)
   message(FATAL_ERROR "No Swift sources found in ZephyrSys. Swift implementation is required.")
 endif()
 
-message(STATUS "ZephyrSys: Found ${list(LENGTH SWIFT_SOURCES)} Swift source files")
+list(LENGTH SWIFT_SOURCES SWIFT_SOURCES_COUNT)
+message(STATUS "ZephyrSys: Found ${SWIFT_SOURCES_COUNT} Swift source files")
 message(STATUS "ZephyrSys: Swift sources: ${SWIFT_SOURCES}")
 
 # Define output file paths for the compiled Swift components

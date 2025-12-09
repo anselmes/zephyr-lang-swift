@@ -73,7 +73,7 @@
        state using Swift's memory safety and concurrency features.
  */
 @c @implementation
-public func zephyr_sys_init() -> Void {
+public func zephyr_sys_init() {
   // Currently no initialization is required for ZephyrSys.
   // Runtime stubs are stateless and ready to use immediately.
   // This function serves as a placeholder for future expansion.
