@@ -205,6 +205,8 @@ function(zephyr_swift_library)
       -wmo                                                        # Whole-module optimization for better embedded performance
       -Osize                                                      # Optimize for code size (critical for embedded)
       -enable-experimental-feature Embedded                       # Enable Embedded Swift features
+      -enable-experimental-feature CImplementation                # Enable C interop features
+      -enable-experimental-feature Extern                         # Enable extern Swift features
       -Xfrontend -function-sections                               # Separate functions into sections for linker optimization
 
       -emit-object -o ${MODULE_OBJ_FILE}                          # Generate object file

@@ -124,7 +124,8 @@ add_custom_command(
     -wmo                                                    # Whole-module optimization for better embedded performance
     -Osize                                                  # Optimize for code size (critical for embedded systems)
     -enable-experimental-feature Embedded                   # Enable Embedded Swift features (reduced runtime)
-    -enable-experimental-feature CImplementation            # Enable @c @implementation attribute for C interop
+    -enable-experimental-feature CImplementation            # Enable C interop features
+    -enable-experimental-feature Extern                     # Enable extern Swift features
 
     # === Code Generation ===
     -Xfrontend -function-sections                           # Separate functions into sections for linker optimization
