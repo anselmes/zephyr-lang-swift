@@ -117,12 +117,14 @@ if(SWIFT_SOURCES)
       -target ${SWIFT_TARGET}                                 # Cross-compilation target (e.g., thumbv7em-none-eabi)
 
       # === Swift Language Features ===
+      -Osize                                                  # Optimize for code size (critical for embedded systems)
       -parse-as-library                                       # Compile as library (not executable)
-      -wmo                                                    # Whole-module optimization for better embedded performance
-      -Osize                                                  # Optimize for code size (critical for embedded)
-      -enable-experimental-feature Embedded                   # Enable Embedded Swift features
+      -strict-memory-safety                                   # Enforce strict memory safety checks
+      -whole-module-optimization                              # Whole-module optimization for better embedded performance
       -enable-experimental-feature CImplementation            # Enable C interop features
+      -enable-experimental-feature Embedded                   # Enable Embedded Swift features (reduced runtime)
       -enable-experimental-feature Extern                     # Enable extern Swift features
+      -enable-upcoming-feature StrictConcurrency              # Enable strict concurrency checks
 
       # === Code Generation ===
       -Xfrontend -function-sections                           # Separate functions into sections for linker optimization

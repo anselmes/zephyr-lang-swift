@@ -151,11 +151,13 @@ function(zephyr_swift_application)
     OUTPUT ${APP_SWIFT_OBJ_FILE} ${APP_SWIFT_MODULE_FILE}
     COMMAND
       ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET}  # Cross-compilation target (e.g., thumbv7em-none-eabi)
-      -wmo                                          # Whole-module optimization for better performance
       -Osize                                        # Optimize for code size (critical for embedded)
-      -enable-experimental-feature Embedded         # Enable Embedded Swift features
+      -strict-memory-safety                         # Enforce strict memory safety checks
+      -whole-module-optimization                    # Whole-module optimization for better performance
       -enable-experimental-feature CImplementation  # Enable C interop features
+      -enable-experimental-feature Embedded         # Enable Embedded Swift features
       -enable-experimental-feature Extern           # Enable extern Swift features
+      -enable-upcoming-feature StrictConcurrency    # Enable strict concurrency checks
       -Xfrontend -function-sections                 # Separate functions into sections for linker optimization
       -emit-object -o ${APP_SWIFT_OBJ_FILE}         # Generate object file for linking
 
