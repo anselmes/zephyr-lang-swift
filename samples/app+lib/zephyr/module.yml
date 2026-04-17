@@ -1,5 +1,5 @@
 name: app+lib
 
 build:
-  cmake: .
+  cmake: lib
   kconfig: Kconfig

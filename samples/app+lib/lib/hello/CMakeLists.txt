@@ -54,7 +54,7 @@ Usage Pattern
 This CMakeLists.txt serves as a template for Swift library modules:
 
 1. Add conditional compilation check for the module's Kconfig option
-2. Use swift_library(MODULE_NAME <module_name>) to compile Swift sources into a static library
+2. Use zephyr_swift_library(MODULE_NAME <module_name>) to compile Swift sources into a static library
 3. Close the conditional compilation block
 
 Integration Requirements
@@ -86,4 +86,4 @@ For this module to be usable by applications:
 # module interface (.swiftmodule) files - Creation of static library target
 # for linking with applications - Integration with Zephyr's dependency and
 # build systems
-swift_library(MODULE_NAME Hello)
+zephyr_swift_library(MODULE_NAME Hello)
