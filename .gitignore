@@ -273,6 +273,7 @@ target
 # Project Files
 .idea/
 .vscode/
+build/
 
 *.env
 
