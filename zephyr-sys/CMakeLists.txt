@@ -100,14 +100,54 @@ endif()
 #   list(APPEND SWIFT_DEFINES "-DSWIFT_FEATURE_X")
 # endif()
 
-# Locate the Swift compiler executable
-# Swift 6.3+ is required for @c @implementation and embedded features
+# Locate the Swift compiler executable.
+# swiftly's PATH shim respects the TOOLCHAINS env var on all platforms —
+# set TOOLCHAINS="swift" to select the swift.org toolchain.
 find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
 if(NOT SWIFTC_EXECUTABLE)
   message(FATAL_ERROR "Swift compiler not found. Please install Swift 6.3+ with embedded support.")
 endif()
 
 message(STATUS "ZephyrSys: Using Swift compiler: ${SWIFTC_EXECUTABLE}")
+
+# Compute system header flags for Swift cross-compilation.
+# Priority: 1) SYSROOT_DIR env var (cross-compile variant)
+#           2) SDK clang-runtimes headers (zephyr/llvm variant — includes picolibc.h)
+#           3) empty (no system headers — likely to fail at compile time)
+set(SWIFT_SYSROOT_INCLUDE_FLAGS "")
+set(SWIFT_SYSROOT_FLAGS "")
+if(SYSROOT_DIR)
+  list(APPEND SWIFT_SYSROOT_INCLUDE_FLAGS "-I" "${SYSROOT_DIR}/include")
+  list(APPEND SWIFT_SYSROOT_FLAGS "-Xcc" "-isysroot=${SYSROOT_DIR}")
+elseif(ZEPHYR_SDK_INSTALL_DIR AND SWIFT_TARGET)
+  # The Zephyr SDK's clang-runtimes contain both errno.h and picolibc.h
+  # (the generated config header required by picolibc's sys/features.h).
+  # The SDK uses LLVM/clang triple naming (riscv32-none-elf) while Swift embedded
+  # modules use ABI triple naming (riscv32-none-none-eabi) — map as needed.
+  set(_sdk_clang_arch "${SWIFT_TARGET}")
+  string(REGEX REPLACE "^(riscv[0-9]+)-none-none-eabi$" "\\1-none-elf" _sdk_clang_arch "${_sdk_clang_arch}")
+  # Find the first non-exception multilib include directory for this target.
+  file(GLOB _sdk_multilib_incs
+    "${ZEPHYR_SDK_INSTALL_DIR}/llvm/lib/clang-runtimes/${_sdk_clang_arch}/*/include"
+  )
+  foreach(_dir IN LISTS _sdk_multilib_incs)
+    if(NOT "${_dir}" MATCHES "exn_rtti" AND EXISTS "${_dir}/errno.h")
+      set(_sdk_include_dir "${_dir}")
+      break()
+    endif()
+  endforeach()
+  if(_sdk_include_dir)
+    list(APPEND SWIFT_SYSROOT_INCLUDE_FLAGS "-I" "${_sdk_include_dir}")
+    message(STATUS "ZephyrSys: Using SDK clang-runtimes headers: ${_sdk_include_dir}")
+  else()
+    message(WARNING "ZephyrSys: No SDK clang-runtimes headers found for ${SWIFT_TARGET} — standard C headers may be missing")
+  endif()
+  unset(_sdk_multilib_incs)
+  unset(_sdk_include_dir)
+  unset(_sdk_clang_arch)
+else()
+  message(WARNING "ZephyrSys: No sysroot or SDK headers found — standard C headers may be missing")
+endif()
 
 # Create custom command to compile Swift sources with C header implementations
 # This command uses Swift 6.3's embedded mode and @c @implementation features
@@ -146,10 +186,10 @@ add_custom_command(
     -I ${CMAKE_BINARY_DIR}/zephyr/include                   # Built Zephyr headers
     -I ${ZEPHYR_BASE}/include                               # Source Zephyr headers from tree
     -I ${CMAKE_CURRENT_SOURCE_DIR}/include                  # ZephyrSys bridging headers
-    -I ${SYSROOT_DIR}/include                               # Cross-compiler system headers
+    ${SWIFT_SYSROOT_INCLUDE_FLAGS}                          # System C library headers
 
     # === Cross-Compilation Configuration ===
-    -Xcc -isysroot=${SYSROOT_DIR}                           # Set system root for C headers
+    ${SWIFT_SYSROOT_FLAGS}                                  # Sysroot for C headers (cross-compile only)
     -Xcc -DZEPHYR_BUILD_ENV                                 # Define that we're in a Zephyr build environment
 
     # === C Interoperability ===

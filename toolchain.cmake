@@ -41,8 +41,8 @@ Functions
 
   * **RISC-V:**
 
-    - RV32 → ``riscv32-none-none-eabi`` (32-bit RISC-V)
-    - RV64 → ``riscv64-none-none-eabi`` (64-bit RISC-V)
+    - RV32 → ``riscv32-none-elf`` (32-bit RISC-V)
+    - RV64 → ``riscv64-none-elf`` (64-bit RISC-V)
 
   **Floating-Point ABI Selection:**
 
@@ -63,20 +63,32 @@ Functions
 # configuration.
 #
 function(_enable_swift)
-  # Enable Swift as a supported language in this CMake project
+  # Use the Zephyr SDK's llvm-objcopy for binary object copying.
+  # The SDK's cross-compilation llvm-objcopy is always the correct tool here.
+  # CMAKE_OBJCOPY must be set before enable_language(Swift).
+  if(ZEPHYR_SDK_INSTALL_DIR)
+    set(CMAKE_OBJCOPY "${ZEPHYR_SDK_INSTALL_DIR}/llvm/bin/llvm-objcopy"
+        CACHE FILEPATH "Object copy tool" FORCE)
+  endif()
+
+  # Skip the cmake Swift compiler sanity check: it tries to compile a
+  # host-native test executable, which fails for cross-compilation toolchains
+  # that cannot link against the host's system libraries.
+  set(CMAKE_Swift_COMPILER_WORKS TRUE CACHE BOOL "Swift compiler works" FORCE)
+
+  # Enable Swift as a supported language in this CMake project.
+  # On macOS, CMake calls `xcrun --find swiftc` which automatically respects
+  # the TOOLCHAINS env var — set TOOLCHAINS="swift" to select the swift.org
+  # toolchain (required for RISC-V/ARM embedded targets; Xcode Swift lacks
+  # the necessary LLVM backends).
+  # On Linux, CMake searches PATH for swiftc; swiftly's shim also respects TOOLCHAINS.
   enable_language(Swift)
 
   # Set the target triple for the Swift compiler to match Zephyr's build target
-  # This ensures Swift generates code for the correct embedded architecture
   set(CMAKE_Swift_COMPILER_TARGET ${BUILD_TARGET})
 
   # Enable whole-module optimization (WMO) which is required for Embedded Swift
-  # WMO allows better optimization and smaller code size for embedded systems
   set(CMAKE_Swift_COMPILATION_MODE wholemodule)
-
-  # Explicitly indicate that the Swift compiler is functional and ready to use
-  # This prevents CMake from running additional compiler tests
-  set(CMAKE_Swift_COMPILER_WORKS true)
 endfunction()
 
 # .rst: .. cmake:command:: _swift_map_target
@@ -166,12 +178,14 @@ function(_swift_map_target)
     set(SWIFT_TARGET "aarch64-none-elf" PARENT_SCOPE)
 
     # RISC-V processors (both 32-bit and 64-bit variants)
+    # Note: swift.org embedded Swift modules use the "none-none-eabi" triple convention,
+    # which differs from the SDK clang-runtimes directory naming ("none-elf").
   elseif(CONFIG_RISCV)
     if(CONFIG_64BIT)
-      # 64-bit RISC-V target
+      # 64-bit RISC-V target (swift.org embedded module triple)
       set(SWIFT_TARGET "riscv64-none-none-eabi" PARENT_SCOPE)
     else()
-      # 32-bit RISC-V target
+      # 32-bit RISC-V target (swift.org embedded module triple)
       set(SWIFT_TARGET "riscv32-none-none-eabi" PARENT_SCOPE)
     endif()
 
