@@ -27,7 +27,7 @@ jobs:
       security-events: write
 
   scorecard:
-    uses: anselmes/cicd/.github/workflows/scorecard.yml@96ca47c59a516ea9022fbe449889c64e7d4ea3fe # v0.2.3
+    uses: anselmes/cicd/.github/workflows/scorecard.yml@9d2e8f600435e2d7e6243b026022288ca1e14864 # v0.3.6
     permissions:
       contents: read
       id-token: write
