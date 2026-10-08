@@ -20,7 +20,7 @@ jobs:
       repository-projects: write
 
   trivy:
-    uses: anselmes/cicd/.github/workflows/trivy.yml@96ca47c59a516ea9022fbe449889c64e7d4ea3fe # v0.2.3
+    uses: anselmes/cicd/.github/workflows/trivy.yml@d543980b235b5c5e40d5b13aaa64b532f4208446 # v0.3.8
     permissions:
       contents: write
       id-token: write
