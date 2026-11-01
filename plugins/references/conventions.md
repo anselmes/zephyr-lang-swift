@@ -42,7 +42,8 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 | ----------------- | ----------------------------------------------------------- | --------------------------------------- |
 | `__name__`        | Repository name                                             | `blinky`                                |
 | `__owner__`       | GitHub owner                                                | `anselmes`                              |
-| `__app__`         | Application directory and CMake project name                | `app`                                   |
+| `__app__`         | Application directory, relative to the project root         | `app`, `apps/blinky`                    |
+| `__project__`     | CMake project name: `__app__`'s basename, `[A-Za-z0-9_]`    | `app`, `blinky`                         |
 | `__Module__`      | Swift module name of a library, `UpperCamelCase`            | `Sensor`                                |
 | `__module__`      | Directory name of a library, lowercase                      | `sensor`                                |
 | `__MODULE__`      | Kconfig symbol, uppercase, no `CONFIG_` prefix              | `SENSOR`                                |
@@ -79,7 +80,7 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 
 ## Zephyr rules
 
-- An application is a CMake project: `find_package(Zephyr ...)`, `project(__app__)`, then `zephyr_swift_application()`. Its Swift sources live in `src/`.
+- An application is a CMake project: `find_package(Zephyr ...)`, `project(__project__)`, then `zephyr_swift_application()`. Its Swift sources live in `src/`.
 - A library is a Zephyr module: a `zephyr/module.yml` naming it and pointing `build.cmake` and `build.kconfig` at it, a `Kconfig` symbol that gates it,
   and a `CMakeLists.txt` calling `zephyr_swift_library(MODULE_NAME __Module__)` under `add_subdirectory_ifdef`. Apps enable it with `CONFIG___MODULE__=y`
   in `prj.conf` and see it through `ZEPHYR_EXTRA_MODULES`.

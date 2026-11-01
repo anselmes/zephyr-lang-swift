@@ -10,6 +10,6 @@ set(SYSROOT_DIR $ENV{SYSROOT_DIR})
 set(ZEPHYR_TOOLCHAIN_VARIANT $ENV{ZEPHYR_TOOLCHAIN_VARIANT})
 __extra-modules__
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(__app__)
+project(__project__)
 
 zephyr_swift_application()

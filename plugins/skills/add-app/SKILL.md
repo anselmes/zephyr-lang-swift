@@ -25,7 +25,7 @@ stop and name the missing file instead of guessing.
 
 Infer what you can, then ask the user one combined question listing every missing input (see conventions):
 
-- **Directory and name**: `__app__` (default `app`; the CMake project name). Stop if the directory exists and is not empty.
+- **Directory and name**: `__app__` (default `app`; may be nested, such as `apps/blinky`) and `__project__`, its basename with any character outside `[A-Za-z0-9_]` replaced by `_`. CMake derives target names from the project name, so it must not contain a slash. Stop if the directory exists and is not empty.
 - **Title**: a human-readable name for `sample.yml` and the greeting (`__Title__`).
 - **Board**: `__board__`, from `.env`/`.env.example` if present; otherwise ask.
 - **Libraries**: which of the project's `lib/` modules the app enables (their `CONFIG___MODULE__` symbols and `import` names);
