@@ -18,10 +18,10 @@ swift:
           - "*/*.swift"
           - "*/**/*.swift"
 
-# Add 'docs' label to any changes in the 'docs' directory
+# Add 'docs' label to any changes in the 'doc' directory
 docs:
   - changed-files:
       - any-glob-to-any-file:
-          - docs/*
-          - docs/*/**
+          - doc/*
+          - doc/*/**
           - README.md

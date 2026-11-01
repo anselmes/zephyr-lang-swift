@@ -7,11 +7,3 @@ updates:
       interval: daily
     cooldown:
       default-days: 7
-
-  - # Maintain dependencies for Swift
-    package-ecosystem: swift
-    directory: /
-    schedule:
-      interval: weekly
-    cooldown:
-      default-days: 7
