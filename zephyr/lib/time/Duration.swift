@@ -10,16 +10,25 @@ extension Duration: TimeoutConvertible {}
 // MARK: - Public
 
 public extension Duration {
-  /// Whole kernel ticks, rounded to the nearest tick (integer math).
+  /// The duration in whole kernel ticks, rounded to the nearest tick (integer
+  /// math).
   ///
-  /// The sign is kept, so a negative duration gives negative ticks; this is
-  /// not the timeout encoding, which maps negative durations to `K_NO_WAIT` and
-  /// rounds up. Rounding to nearest keeps instant arithmetic exact: durations
-  /// built from ticks convert back to the same tick count.
+  /// The sign is kept, so a negative duration gives negative ticks and zero
+  /// gives zero. This is not the timeout encoding, which rounds up and maps
+  /// negative durations to `K_NO_WAIT`. Rounding to nearest keeps instant
+  /// arithmetic exact: a duration built from ticks converts back to the same
+  /// tick count. Values too long for `Tick` clamp to its limits.
   var ticks: Tick {
     Tick(clamping: nearestKernelTicks)
   }
 
+  /// Creates a duration from a number of kernel ticks.
+  ///
+  /// The sub-second part is rounded to the nearest attosecond, so a tick rate
+  /// that does not divide one second evenly loses at most half an attosecond
+  /// per tick.
+  ///
+  /// - Parameter ticks: The number of kernel ticks.
   init(ticks: Tick) {
     let perSecond = Int64(SYS_FREQUENCY)
     let (seconds, remainder) = Int64(ticks).quotientAndRemainder(dividingBy: perSecond)
@@ -34,5 +43,6 @@ public extension Duration {
       attosecondsComponent: remainder < 0 ? -attoseconds : attoseconds)
   }
 
+  /// A relative timeout for this duration.
   func toTimeout() -> Timeout { .init(from: self) }
 }

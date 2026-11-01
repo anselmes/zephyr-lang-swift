@@ -8,8 +8,14 @@
 /// `aligned_alloc`. Memory comes from the libc arena sized by
 /// `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE`; `free()` releases it.
 ///
-/// - Returns: `0` on success, `EINVAL` for a bad alignment,
-///   `ENOMEM` when the arena is exhausted (POSIX semantics).
+/// - Parameters:
+///   - memptr: Receives the address of the new block on success, and is left
+///     unchanged on failure.
+///   - alignment: The required alignment, a power of two and a multiple of
+///     `sizeof(void *)`.
+///   - size: The number of bytes to allocate.
+/// - Returns: `0` on success, `EINVAL` for a bad alignment, `ENOMEM` when the
+///   arena is exhausted (POSIX semantics).
 // swift-format-ignore: AlwaysUseLowerCamelCase
 @c @implementation
 public func posix_memalign(
