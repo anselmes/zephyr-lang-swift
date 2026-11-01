@@ -107,7 +107,7 @@ public func hello(timeout: Int = 1000) {
 
   // Create a Duration object using Swift's type-safe time representation
   // This demonstrates proper integration with Swift's standard library types
-  let duration = Duration.milliseconds(timeout)
+  let duration: Duration = .milliseconds(timeout)
 
   // Main application loop - typical pattern for embedded applications
   // This loop demonstrates:
