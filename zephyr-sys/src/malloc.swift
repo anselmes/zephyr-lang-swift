@@ -10,6 +10,7 @@
 ///
 /// - Returns: `0` on success, `EINVAL` for a bad alignment or null `memptr`,
 ///   `ENOMEM` when the arena is exhausted (POSIX semantics).
+// swift-format-ignore: AlwaysUseLowerCamelCase
 @c @implementation
 public func posix_memalign(
   _ memptr: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,

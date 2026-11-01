@@ -9,6 +9,7 @@ import ZephyrSystem
   public typealias Tick = Int32
 #endif
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 public var SYS_FREQUENCY: Int32 { return CONFIG_SYS_CLOCK_TICKS_PER_SEC }
 
 public struct Forever {

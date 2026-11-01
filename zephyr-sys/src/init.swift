@@ -72,6 +72,7 @@
        improvements and may be extended in the future to initialize runtime
        state using Swift's memory safety and concurrency features.
  */
+// swift-format-ignore: AlwaysUseLowerCamelCase
 @c @implementation
 public func zephyr_sys_init() {
   // Currently no initialization is required for ZephyrSystem.
