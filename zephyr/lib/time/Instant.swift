@@ -6,6 +6,8 @@ import ZephyrSystem
 #if CONFIG_TIMEOUT_64BIT
   public struct Instant {
     public let ticks: Tick
+
+    public init(ticks: Tick) { self.ticks = ticks }
   }
 
   // MARK: - Extension
@@ -20,8 +22,6 @@ import ZephyrSystem
   // MARK: - Public
 
   public extension Instant {
-    init(ticks: Tick) { self.ticks = ticks }
-
     static func < (lhs: Instant, rhs: Instant) -> Bool {
       return lhs.ticks < rhs.ticks
     }

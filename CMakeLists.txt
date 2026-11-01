@@ -170,6 +170,10 @@ function(zephyr_swift_library)
   if(CONFIG_SWIFT_DEBUG_INFO)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
   endif()
+  if(CONFIG_TIMEOUT_64BIT)
+    # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
+    list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
+  endif()
 
   _swift_discover_libraries(EXCLUDE_MODULE "${SWIFTLIB_MODULE_NAME}")
 
@@ -242,6 +246,10 @@ function(zephyr_swift_application)
   set(SWIFT_DEFINES "")
   if(CONFIG_SWIFT_DEBUG_INFO)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
+  endif()
+  if(CONFIG_TIMEOUT_64BIT)
+    # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
+    list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
   endif()
 
   _swift_discover_libraries()

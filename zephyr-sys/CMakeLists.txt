@@ -89,6 +89,10 @@ if(CONFIG_SWIFT_DEBUG_INFO)
   list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")   # Enable Swift debug information when configured in Zephyr
   message(STATUS "ZephyrSystem: Debug information enabled")
 endif()
+if(CONFIG_TIMEOUT_64BIT)
+  # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
+  list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
+endif()
 
 # Additional Swift defines can be added here based on Zephyr configuration:
 # if(CONFIG_SWIFT_FEATURE_X)
