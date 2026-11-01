@@ -49,6 +49,7 @@
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 // ===== Zephyr Kernel APIs =====
 
@@ -127,6 +128,14 @@ extern "C" {
  */
 void zephyr_sys_init(void);
 
+/**
+ @brief POSIX aligned memory allocation (implemented in Swift)
+
+ The Embedded Swift runtime calls this for every heap allocation. It is built
+ on `aligned_alloc` from Zephyr's common libc malloc.
+ */
+int posix_memalign(void **memptr, size_t alignment, size_t size);
+
 // Additional C interface functions can be declared here and implemented in Swift
 // Uncomment and implement as needed:
 //
@@ -135,12 +144,6 @@ void zephyr_sys_init(void);
 //
 // /** @brief Check if ZephyrSystem is initialized (Swift implementation) */
 // int zephyr_sys_is_initialized(void);
-//
-// /** @brief Aligned memory allocation stub (Swift implementation) */
-// void* aligned_alloc(size_t alignment, size_t size);
-//
-// /** @brief POSIX aligned memory allocation stub (Swift implementation) */
-// int posix_memalign(void **memptr, size_t alignment, size_t size);
 //
 // /** @brief Entropy generation stub (Swift implementation) */
 // int getentropy(void *buf, size_t buflen);
