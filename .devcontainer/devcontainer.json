@@ -3,9 +3,7 @@
   "service": "zephyr",
   "workspaceFolder": "/home/ubuntu/workspace",
   "postCreateCommand": "${containerWorkspaceFolder}/.devcontainer/configure.sh",
-  "dockerComposeFile": [
-    "${localWorkspaceFolder}/.devcontainer/compose-dev.yaml"
-  ],
+  "dockerComposeFile": ["${localWorkspaceFolder}/.devcontainer/compose.yaml"],
   "customizations": {
     "vscode": {
       "extensions": [
