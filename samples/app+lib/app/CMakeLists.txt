@@ -18,14 +18,23 @@
 
 cmake_minimum_required(VERSION 3.29)
 
-# `west build -b <board>` wins; otherwise use ZEPHYR_BOARD.
+# Command-line -D arguments (`west build -b <board>`, `-- -DDTC_OVERLAY_FILE=...`)
+# win; otherwise the environment supplies a default.
 if(NOT DEFINED BOARD AND DEFINED ENV{ZEPHYR_BOARD})
   set(BOARD $ENV{ZEPHYR_BOARD})
 endif()
-set(CROSS_COMPILE $ENV{CROSS_COMPILE})
-set(DTC_OVERLAY_FILE $ENV{ZEPHYR_BOARD_OVERLAY})
-set(SYSROOT_DIR $ENV{SYSROOT_DIR})
-set(ZEPHYR_TOOLCHAIN_VARIANT $ENV{ZEPHYR_TOOLCHAIN_VARIANT})
+if(NOT DEFINED CROSS_COMPILE AND DEFINED ENV{CROSS_COMPILE})
+  set(CROSS_COMPILE $ENV{CROSS_COMPILE})
+endif()
+if(NOT DEFINED DTC_OVERLAY_FILE AND DEFINED ENV{ZEPHYR_BOARD_OVERLAY})
+  set(DTC_OVERLAY_FILE $ENV{ZEPHYR_BOARD_OVERLAY})
+endif()
+if(NOT DEFINED SYSROOT_DIR AND DEFINED ENV{SYSROOT_DIR})
+  set(SYSROOT_DIR $ENV{SYSROOT_DIR})
+endif()
+if(NOT DEFINED ZEPHYR_TOOLCHAIN_VARIANT AND DEFINED ENV{ZEPHYR_TOOLCHAIN_VARIANT})
+  set(ZEPHYR_TOOLCHAIN_VARIANT $ENV{ZEPHYR_TOOLCHAIN_VARIANT})
+endif()
 
 # The parent directory is a Zephyr module (zephyr/module.yml) that provides the
 # Hello library. Listing it here lets the build find the library and its Kconfig.
