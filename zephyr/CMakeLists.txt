@@ -91,6 +91,10 @@ if(SWIFT_SOURCES)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
     message(STATUS "Zephyr Swift Library: Debug information enabled")
   endif()
+  if(CONFIG_TIMEOUT_64BIT)
+    # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
+    list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
+  endif()
 
   # Additional feature flags can be added here based on Zephyr configuration
   # Example:
