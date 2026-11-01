@@ -21,6 +21,11 @@ extension Timeout:
 // MARK: - Public
 
 public extension Timeout {
+  /// `K_FOREVER`; kept for source compatibility.
+  static var forever: k_timeout_t { .forever }
+  /// `K_NO_WAIT`; kept for source compatibility.
+  static var nowait: k_timeout_t { .noWait }
+
   init(_ value: k_timeout_t) { self.value = value }
 
   init(from _: Forever) { self.value = .forever }
@@ -34,6 +39,9 @@ public extension Timeout {
   }
 
   #if CONFIG_TIMEOUT_64BIT
-    init(from instant: Instant) { self.value = .absolute(ticks: instant.ticks) }
+    /// An instant at or before boot has already passed, so it is `K_NO_WAIT`.
+    init(from instant: Instant) {
+      self.value = instant.ticks > 0 ? .absolute(ticks: instant.ticks) : .noWait
+    }
   #endif
 }

@@ -11,15 +11,23 @@ extension Duration: TimeoutConvertible {}
 
 public extension Duration {
   /// Whole kernel ticks, rounded up (integer math).
+  ///
+  /// The sign is kept, so a negative duration gives negative ticks; this is
+  /// not the timeout encoding, which maps negative durations to `K_NO_WAIT`.
   var ticks: Tick {
-    Tick(clamping: k_timeout_t(self).ticks)
+    Tick(clamping: kernelTicks)
   }
 
   init(ticks: Tick) {
     let perSecond = Int64(SYS_FREQUENCY)
     let (seconds, remainder) = Int64(ticks).quotientAndRemainder(dividingBy: perSecond)
-    // `remainder < perSecond`, so the product stays far below Int64.max.
-    self = .seconds(seconds) + .nanoseconds(remainder * 1_000_000_000 / perSecond)
+    // `remainder.magnitude < perSecond`, so the 128-bit product divided by
+    // `perSecond` fits in 64 bits and keeps the sub-nanosecond part.
+    let (high, low) = remainder.magnitude.multipliedFullWidth(by: 1_000_000_000_000_000_000)
+    let attoseconds = Int64(UInt64(perSecond).dividingFullWidth((high, low)).quotient)
+    self.init(
+      secondsComponent: seconds,
+      attosecondsComponent: remainder < 0 ? -attoseconds : attoseconds)
   }
 
   func toTimeout() -> Timeout { .init(from: self) }
