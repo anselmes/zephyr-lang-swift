@@ -9,6 +9,7 @@ Every zephyr-swift skill generates code that follows these rules. Read this file
 - [Tokens](#tokens)
 - [Swift files](#swift-files)
 - [Zephyr rules](#zephyr-rules)
+- [Formatting](#formatting)
 - [Verifying](#verifying)
 - [Finishing](#finishing)
 
@@ -83,6 +84,14 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 - `prj.conf` always has `CONFIG_SWIFT=y` and `CONFIG_MINIMAL_LIBC=y`.
 - Board, toolchain and paths come from environment variables in `.env` (copied from `.env.example`, git-ignored); never hard-code them.
 - `.env`, keys and certificates are never committed.
+
+## Formatting
+
+Every generated file honors the target project's `.editorconfig`: 2-space indentation (tabs only in a `Makefile`), LF line endings, UTF-8,
+trailing whitespace trimmed (except in `.md`) and exactly one final newline. `new-project` keeps the `.editorconfig` that the
+`anselmes/repository` template ships; `add-app` and `add-library` read the project's before writing and follow it if it differs.
+Templates in this plugin already conform; when filling tokens, do not change the indentation or add lines that break these rules
+(for example multi-line token values must be indented to match).
 
 ## Verifying
 

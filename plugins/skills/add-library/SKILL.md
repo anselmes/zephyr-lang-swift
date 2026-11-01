@@ -34,7 +34,7 @@ Infer what you can, then ask the user one combined question listing every missin
 
 ## 3. Write it
 
-Follow `references/library.md`. Replace every `__token__`; the output must contain none.
+Follow `references/library.md`, honoring the project's `.editorconfig` (see conventions). Replace every `__token__`; the output must contain none.
 Create the module wiring only if it is missing; never overwrite an existing `lib/CMakeLists.txt`, `lib/Kconfig`, `Kconfig`
 or `zephyr/module.yml`, add to them.
 

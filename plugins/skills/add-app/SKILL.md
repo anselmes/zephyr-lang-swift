@@ -34,7 +34,7 @@ Infer what you can, then ask the user one combined question listing every missin
 
 ## 3. Write it
 
-Fill the templates in `templates/` as `references/app.md` describes. Replace every `__token__`; the output must contain none.
+Fill the templates in `templates/` as `references/app.md` describes, honoring the project's `.editorconfig` (see conventions). Replace every `__token__`; the output must contain none.
 Do not overwrite `.env`; only create `.env.example` when missing and tell the user to copy it.
 
 ## 4. Verify
