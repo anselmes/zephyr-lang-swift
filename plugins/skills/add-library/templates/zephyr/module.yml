@@ -1,0 +1,9 @@
+name: __name__
+
+build:
+  cmake: lib
+  kconfig: Kconfig
+  # zephyr_swift_library() comes from the lang-swift module, so Zephyr must load
+  # it before processing lib/CMakeLists.txt.
+  depends:
+    - lang-swift

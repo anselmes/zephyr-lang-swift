@@ -1,0 +1,43 @@
+name: West build
+
+on:
+  - push
+  - pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: __name__
+      - name: Set up west workspace
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install west pykwalify
+          west init -l __name__
+          west update
+          west packages pip --install
+          echo "VIRTUAL_ENV=${PWD}/.venv" >> "${GITHUB_ENV}"
+          echo "${PWD}/.venv/bin" >> "${GITHUB_PATH}"
+      - name: Install Swift
+        env:
+          SWIFT_VERSION: __swift-version__
+        run: |
+          curl -fsSL "https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz" | tar -xz
+          ./swiftly init --assume-yes --skip-install --quiet-shell-followup
+          . "${SWIFTLY_HOME_DIR:-${HOME}/.local/share/swiftly}/env.sh"
+          swiftly install --assume-yes --use "${SWIFT_VERSION}"
+          swiftc --version
+          echo "${SWIFTLY_BIN_DIR:-${HOME}/.local/share/swiftly/bin}" >> "${GITHUB_PATH}"
+      - name: Install the SDK
+        run: west sdk install --no-gnu-toolchains --llvm
+      - name: Build
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: zephyr/llvm
+        run: west build -p -b __board__ __name__/app

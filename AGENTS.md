@@ -10,17 +10,18 @@ and samples. It has no application or domain logic.
 
 ## Layout
 
-| Path                        | Target / product | Purpose                                                                                                         |
-| --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-| `zephyr-sys/src`            | `ZephyrSystem`   | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `malloc.swift`, `init.swift` |
-| `zephyr-sys/include`        | `ZephyrSystem`   | `BridgingHeader.h` (Zephyr C APIs and `@c @implementation` declarations) and `module.modulemap`                 |
-| `zephyr/lib`                | `Zephyr`         | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `ZephyrError.swift`, `Check.swift`     |
-| `zephyr/src`                | `Zephyr`         | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                     |
-| `CMakeLists.txt`, `Kconfig` | —                | Target mapping, `swiftc` invocations, `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`                              |
-| `zephyr/module.yml`         | —                | Zephyr module definition                                                                                        |
-| `samples/{app,lib,app+lib}` | —                | Sample application, library and combined application with a library                                             |
-| `tests/`                    | —                | Reserved for Ztest/Twister cases (empty today)                                                                  |
-| `doc/`                      | —                | Documentation                                                                                                   |
+| Path                          | Target / product | Purpose                                                                                                                           |
+| ----------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `zephyr-sys/src`              | `ZephyrSystem`   | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `malloc.swift`, `init.swift`                   |
+| `zephyr-sys/include`          | `ZephyrSystem`   | `BridgingHeader.h` (Zephyr C APIs and `@c @implementation` declarations) and `module.modulemap`                                   |
+| `zephyr/lib`                  | `Zephyr`         | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `ZephyrError.swift`, `Check.swift`                       |
+| `zephyr/src`                  | `Zephyr`         | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
+| `CMakeLists.txt`, `Kconfig`   | —                | Target mapping, `swiftc` invocations, `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`                                                |
+| `zephyr/module.yml`           | —                | Zephyr module definition                                                                                                          |
+| `samples/{app,lib,app+lib}`   | —                | Sample application, library and combined application with a library                                                               |
+| `tests/`                      | —                | Reserved for Ztest/Twister cases (empty today)                                                                                    |
+| `doc/`                        | —                | Documentation                                                                                                                     |
+| `plugins/`, `.claude-plugin/` | `zephyr-swift`   | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
 
 `Zephyr` depends on `ZephyrSystem`, never the reverse. Code that only wraps a Zephyr C API or provides runtime support belongs in `ZephyrSystem`;
 Swift-native abstractions over it belong in `Zephyr`.

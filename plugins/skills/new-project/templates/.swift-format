@@ -1,0 +1,26 @@
+{
+  "__copyright__": [
+    "SPDX-License-Identifier: __license__",
+    "Copyright (c) __year__ __author__"
+  ],
+  "version": 1,
+  "lineLength": 180,
+  "indentation": {
+    "spaces": 2
+  },
+  "maximumBlankLines": 1,
+  "multiElementCollectionTrailingCommas": true,
+  "multilineTrailingCommaBehavior": "alwaysUsed",
+  "fileScopedDeclarationPrivacy": {
+    "accessLevel": "private"
+  },
+  "orderedImports": {
+    "includeConditionalImports": false,
+    "shouldGroupImports": true
+  },
+  "rules": {
+    "AlwaysUseLowerCamelCase": true,
+    "NoEmptyLinesOpeningClosingBraces": true,
+    "TypeNamesShouldBeCapitalized": true
+  }
+}

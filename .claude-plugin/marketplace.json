@@ -1,0 +1,15 @@
+{
+  "name": "zephyr-lang-swift",
+  "description": "Claude Code plugins for building Embedded Swift applications and libraries on Zephyr RTOS.",
+  "owner": {
+    "name": "Schubert Anselme",
+    "email": "schubert@anselm.es"
+  },
+  "plugins": [
+    {
+      "name": "zephyr-swift",
+      "source": "./plugins",
+      "description": "Scaffold Zephyr Swift projects, applications and libraries."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+sample:
+  name: "__Title-yaml__"
+tests:
+  app.build:
+    build_only: true
+    platform_allow: __board__

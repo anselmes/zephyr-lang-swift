@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: __license__
+# Copyright (c) __year__ __author__
+
+manifest:
+  version: "1.2"
+
+  self:
+    path: __name__
+
+  remotes:
+    - name: zephyr-source
+      url-base: https://github.com/__zephyr-owner__
+    - name: zephyr-lang-swift-source
+      url-base: https://github.com/anselmes
+
+  projects:
+    - name: zephyr
+      remote: zephyr-source
+      repo-path: __zephyr-repo__
+      revision: __zephyr-rev__
+      import:
+        name-allowlist:
+          - __hal-module__ # repeat this line for each HAL module the board needs
+          - picolibc # Built as a module so headers are visible to Swift
+    # Declared here, not imported: the Zephyr fork keeps Swift in its disabled `optional` group at `main`.
+    - name: zephyr-lang-swift
+      remote: zephyr-lang-swift-source
+      revision: __swift-rev__
+      path: modules/lang/swift

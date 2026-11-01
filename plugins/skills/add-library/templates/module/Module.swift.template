@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: __license__
+// Copyright (c) __year__ __author__
+
+import Zephyr
+
+/// __description__
+public enum __Module__ {
+  /// A placeholder entry point; replace with the library's real API.
+  public static func run() {
+    print("__Module__ is running")
+  }
+}
