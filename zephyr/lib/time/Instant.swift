@@ -4,9 +4,22 @@
 import ZephyrSystem
 
 #if CONFIG_TIMEOUT_64BIT
+  /// A point in time, as kernel ticks since boot.
+  ///
+  /// Available when the build passes `-DCONFIG_TIMEOUT_64BIT`.
+  ///
+  /// ```swift
+  /// let start = now()
+  /// sleep(Duration.milliseconds(250))
+  /// let elapsed = now().duration(since: start)
+  /// ```
   public struct Instant {
+    /// Kernel ticks since boot.
     public let ticks: Tick
 
+    /// Creates an instant from a tick count.
+    ///
+    /// - Parameter ticks: Kernel ticks since boot.
     public init(ticks: Tick) { self.ticks = ticks }
   }
 
@@ -22,25 +35,38 @@ import ZephyrSystem
   // MARK: - Public
 
   public extension Instant {
+    /// Orders instants by tick count.
     static func < (lhs: Instant, rhs: Instant) -> Bool {
       return lhs.ticks < rhs.ticks
     }
 
+    /// Orders instants by tick count.
     static func > (lhs: Instant, rhs: Instant) -> Bool {
       return lhs.ticks > rhs.ticks
     }
 
+    /// An absolute deadline that expires at this instant.
     func toTimeout() -> Timeout { Timeout(from: self) }
 
-    /// Saturates at `Tick.min`/`Tick.max` ticks instead of trapping when the
-    /// difference does not fit.
+    /// The time between an earlier instant and this one.
+    ///
+    /// - Parameter earlier: The instant to measure from.
+    /// - Returns: This instant minus `earlier`; negative when `earlier` is
+    ///   later. A difference that does not fit in `Tick` saturates at its limits
+    ///   instead of trapping.
     func duration(since earlier: Instant) -> Duration {
       let (difference, overflow) = self.ticks.subtractingReportingOverflow(earlier.ticks)
       return Duration(ticks: overflow ? (self.ticks < earlier.ticks ? .min : .max) : difference)
     }
 
-    /// Saturates at `Tick.min`/`Tick.max` ticks instead of trapping when the
-    /// result does not fit.
+    /// The instant a duration after this one.
+    ///
+    /// - Parameter duration: How far to move, forward or backward; rounded to the
+    ///   nearest whole tick.
+    /// - Returns: A new instant at `ticks` plus the full rounded tick count of
+    ///   `duration`, even when that count alone exceeds `Tick`'s range. Only the
+    ///   final sum saturates at `Tick`'s limits instead of trapping, so a long
+    ///   duration added to an opposite-signed instant is still exact.
     func advance(by duration: Duration) -> Instant {
       // Add the whole seconds and the sub-second part separately, in 128 bits:
       // `duration.ticks` is already saturated, so it cannot reveal an overflow.
