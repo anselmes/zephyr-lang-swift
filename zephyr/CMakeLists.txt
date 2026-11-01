@@ -70,6 +70,8 @@ if(SWIFT_SOURCES)
 
   # Define output file paths for the compiled Zephyr Swift library
   # Object file: Contains compiled Swift code for the high-level Zephyr library
+  get_target_property(ZEPHYR_SYS_SWIFT_MODULE_DIR ZephyrSystem SWIFT_MODULE_DIR)
+  set(ZEPHYR_SYS_SWIFT_MODULE "${ZEPHYR_SYS_SWIFT_MODULE_DIR}/ZephyrSystem.swiftmodule")
   set(SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/Zephyr.o")
   # Module file: Contains Swift interface information for importing by other Swift code
   set(SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/Zephyr.swiftmodule")
@@ -181,6 +183,7 @@ if(SWIFT_SOURCES)
       -I ${CMAKE_BINARY_DIR}/zephyr/include                   # Built Zephyr headers
       -I ${ZEPHYR_BASE}/include                               # Source Zephyr headers
       -I ${ZEPHYR_SYS_MODULE}/include                         # ZephyrSystem bridging headers
+      -I ${ZEPHYR_SYS_SWIFT_MODULE_DIR}                       # ZephyrSystem.swiftmodule (Kernel, k_timeout_t helpers)
       ${SWIFT_SYSROOT_INCLUDE_FLAGS}                          # System C library headers
 
       # === Cross-Compilation Configuration ===
@@ -192,7 +195,7 @@ if(SWIFT_SOURCES)
       # === Source Files ===
       ${SWIFT_SOURCES}                                        # Swift source files to compile
 
-    DEPENDS ${SWIFT_SOURCES}
+    DEPENDS ${SWIFT_SOURCES} ${ZEPHYR_SYS_SWIFT_MODULE}
     COMMENT "Compiling Swift sources for Zephyr high-level library")
 
   # Create a static library target containing the compiled Swift code
@@ -212,7 +215,7 @@ if(SWIFT_SOURCES)
   # Ensure Swift compilation happens after Zephyr's syscall headers are generated
   # This dependency is critical because Swift code may use Zephyr system calls
   # and needs the generated syscall interfaces to be available
-  add_dependencies(Zephyr_compile syscall_list_h_target)
+  add_dependencies(Zephyr_compile syscall_list_h_target ZephyrSystem_swift_compile)
 
   # Make the Zephyr library target depend on successful Swift compilation
   # This ensures the library is only created after Swift compilation succeeds

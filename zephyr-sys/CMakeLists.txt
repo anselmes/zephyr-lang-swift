@@ -224,6 +224,11 @@ add_dependencies(ZephyrSystem ZephyrSystem_swift_compile)
 # linking to ZephyrSystem get these includes
 target_include_directories(ZephyrSystem PUBLIC include)
 
+# Directory holding ZephyrSystem.swiftmodule, so dependent Swift builds (the
+# Zephyr library) can add it to their module search path with -I.
+set_target_properties(ZephyrSystem PROPERTIES
+  SWIFT_MODULE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
 # Link with the core Zephyr kernel and libraries PUBLIC linking means that
 # targets depending on ZephyrSystem also get Zephyr This ensures Swift code has
 # access to all Zephyr RTOS functionality
