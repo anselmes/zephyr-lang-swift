@@ -51,7 +51,7 @@ import ZephyrSystem
         low = sum
         high = high &+ (part < 0 ? -1 : 0) &+ (carry ? 1 : 0)
       }
-      add(Duration(secondsComponent: 0, attosecondsComponent: attoseconds).kernelTicks)
+      add(Duration(secondsComponent: 0, attosecondsComponent: attoseconds).nearestKernelTicks)
       add(self.ticks)
       // The 128-bit total fits in `Tick` only if `high` is the sign extension of `low`.
       let fits = high == (Int64(bitPattern: low) < 0 ? -1 : 0)
