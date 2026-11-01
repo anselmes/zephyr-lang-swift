@@ -25,11 +25,9 @@ public extension Duration {
     let (seconds, remainder) = Int64(ticks).quotientAndRemainder(dividingBy: perSecond)
     // `remainder.magnitude < perSecond`, so the 128-bit product divided by
     // `perSecond` fits in 64 bits and keeps the sub-nanosecond part.
-    var (high, low) = remainder.magnitude.multipliedFullWidth(by: 1_000_000_000_000_000_000)
-    // Round to the nearest attosecond so repeated conversions do not drift.
-    let (sum, carry) = low.addingReportingOverflow(UInt64(perSecond) / 2)
-    low = sum
-    if carry { high += 1 }
+    let (high, low) = remainder.magnitude.multipliedFullWidth(by: 1_000_000_000_000_000_000)
+    // Truncate toward zero: the error is under one attosecond, and both the
+    // round-up (timeout) and nearest (instant) conversions recover `ticks`.
     let attoseconds = Int64(UInt64(perSecond).dividingFullWidth((high, low)).quotient)
     self.init(
       secondsComponent: seconds,
