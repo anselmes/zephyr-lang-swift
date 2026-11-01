@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+
+# Swift application sample that uses a Swift library.
+#
+# Shows how to:
+# - enable a Swift library with CONFIG_HELLO=y in prj.conf
+# - import it with `import Hello` and call hello()
+# - make the library known to the build with ZEPHYR_EXTRA_MODULES
+#   (see CMakeLists.txt)
+#
+# There is no `tests:` section, so `west twister` has nothing to run for this
+# sample yet. Build and run it by hand, for example
+# `west build -p -t run` with the environment from .env.example.
+
+sample:
+  name: Swift Application With Library Sample
