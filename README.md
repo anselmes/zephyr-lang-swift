@@ -81,12 +81,15 @@ west update zephyr-lang-swift
 
 ### An application
 
-1. Enable Swift in `prj.conf`. The Embedded Swift runtime allocates from the libc heap, so a libc is required:
+1. Enable Swift in `prj.conf`. The Embedded Swift runtime allocates from the libc heap, so a libc with a nonzero heap is required:
 
    ```kconfig
    CONFIG_SWIFT=y
    CONFIG_MINIMAL_LIBC=y
+   CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE=4096
    ```
+
+   The minimal libc defaults the arena to zero bytes, which leaves no heap and makes every Swift allocation fail. Size it for your board and application.
 
 2. Build the Swift sources in `src/` from `CMakeLists.txt`:
 
