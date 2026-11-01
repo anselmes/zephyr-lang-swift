@@ -26,8 +26,9 @@ public extension Duration {
   ///
   /// The sub-second part is truncated toward zero to whole attoseconds, so a
   /// tick rate that does not divide one second evenly loses less than one
-  /// attosecond per tick. Both `ticks` (nearest) and a timeout (round up)
-  /// convert the result back to the same tick count.
+  /// attosecond per tick. `ticks` (nearest) converts the result back to the
+  /// same tick count. A timeout (round up) does too for positive counts; zero
+  /// and negative counts become `K_NO_WAIT`, which carries zero ticks.
   ///
   /// - Parameter ticks: The number of kernel ticks.
   init(ticks: Tick) {
