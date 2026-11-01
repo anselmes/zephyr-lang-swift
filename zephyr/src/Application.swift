@@ -23,7 +23,7 @@
 public func main() {
   #if SWIFT_DEBUG_INFO
     print("Zephyr Swift Application - Debug info enabled")
-    print("Swift 6.4 Embedded Mode Active")
+    print("Swift Embedded Mode Active")
   #endif
 
   entrypoint()
