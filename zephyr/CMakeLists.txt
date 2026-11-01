@@ -137,7 +137,7 @@ if(SWIFT_SOURCES)
       -enable-experimental-feature Embedded                   # Embedded Swift: no runtime metadata or reflection
       -enable-experimental-feature Extern                     # Enable the @extern attribute
       -enable-upcoming-feature ExistentialAny                 # Require `any` on existential types
-      -enable-upcoming-feature InternalImportsByDefault       # `import` is internal; use `public import` to re-export
+      -enable-upcoming-feature InternalImportsByDefault       # `import` is internal; `public import` lets its types appear in public API
       -enable-upcoming-feature MemberImportVisibility         # Members need their module imported in the file
 
       # === Code Generation ===
