@@ -16,7 +16,7 @@ the ZephyrSys library to offer Swift-native interfaces to Zephyr functionality.
   Swift application scaffolding and entry point implementations
   using @c attributes for C compatibility.
 
-## Swift 6.3 Features
+## Swift 6.4 Features
 
 **@c Attributes**
   Swift functions marked with @c can be called from C code,

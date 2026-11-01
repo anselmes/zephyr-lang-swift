@@ -6,10 +6,10 @@
  @brief Main Application Entry Point for Zephyr Swift Applications
 
  This file provides the main entry point for Swift applications running on
- Zephyr RTOS. It demonstrates Swift 6.3's @c attribute for creating C-compatible
+ Zephyr RTOS. It demonstrates Swift 6.4's @c attribute for creating C-compatible
  main functions that can be called by the Zephyr kernel.
 
- ## Swift 6.3 Features
+ ## Swift 6.4 Features
 
  - **@c attribute**: Creates C-compatible function symbols
  - **Embedded Swift**: Optimized for resource-constrained environments
@@ -68,7 +68,7 @@ public func main() {
   // Enable debug output when configured during build
   #if SWIFT_DEBUG_INFO
   print("Zephyr Swift Application - Debug info enabled")
-  print("Swift 6.3 Embedded Mode Active")
+  print("Swift 6.4 Embedded Mode Active")
   #endif
 
   // Call the application-specific entry point

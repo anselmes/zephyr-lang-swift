@@ -1,14 +1,14 @@
 #[=======================================================================[.rst:
-ZephyrSys - Swift Runtime Support Library (Swift 6.3 Implementation)
+ZephyrSys - Swift Runtime Support Library (Swift 6.4 Implementation)
 =====================================================================
 
-This CMake file builds the ZephyrSys library using Swift 6.3's embedded mode
+This CMake file builds the ZephyrSys library using Swift 6.4's embedded mode
 and enhanced C interoperability features. The library provides essential
 runtime support for Swift code running on Zephyr RTOS.
 
-## Swift 6.3 Features
+## Swift 6.4 Features
 
-This build configuration leverages Swift 6.3's improvements:
+This build configuration leverages Swift 6.4's improvements:
 
 **@c and @implementation Attributes**
   Swift functions can implement C interfaces using @c @implementation,
@@ -46,7 +46,7 @@ This build configuration leverages Swift 6.3's improvements:
 
 ## Dependencies
 
-- Swift 6.3+ compiler with embedded features
+- Swift 6.4+ compiler with embedded features
 - Zephyr RTOS build environment
 - Cross-compilation toolchain (SYSROOT_DIR, CROSS_COMPILE)
 - Generated Zephyr headers and syscall interfaces
@@ -61,7 +61,7 @@ file(GLOB_RECURSE SWIFT_SOURCES
      "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 
 # Ensure Swift sources are available - this is a Swift-only implementation
-# The ZephyrSys library requires Swift 6.3+ for @c @implementation support
+# The ZephyrSys library requires Swift 6.4+ for @c @implementation support
 if(NOT SWIFT_SOURCES)
   message(FATAL_ERROR "No Swift sources found in ZephyrSys. Swift implementation is required.")
 endif()
@@ -100,7 +100,7 @@ endif()
 # set TOOLCHAINS="swift" to select the swift.org toolchain.
 find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
 if(NOT SWIFTC_EXECUTABLE)
-  message(FATAL_ERROR "Swift compiler not found. Please install Swift 6.3+ with embedded support.")
+  message(FATAL_ERROR "Swift compiler not found. Please install Swift 6.4+ with embedded support.")
 endif()
 
 message(STATUS "ZephyrSys: Using Swift compiler: ${SWIFTC_EXECUTABLE}")
@@ -145,7 +145,7 @@ else()
 endif()
 
 # Create custom command to compile Swift sources with C header implementations
-# This command uses Swift 6.3's embedded mode and @c @implementation features
+# This command uses Swift 6.4's embedded mode and @c @implementation features
 add_custom_command(
   OUTPUT ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE}
   COMMAND

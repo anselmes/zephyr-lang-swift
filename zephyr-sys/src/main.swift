@@ -10,9 +10,9 @@
  ZephyrSys library bridges the gap between Swift's runtime expectations and
  Zephyr's minimal embedded C environment.
 
- ## Swift 6.3 Features Used
+ ## Swift 6.4 Features Used
 
- This implementation leverages Swift 6.3's embedded mode improvements:
+ This implementation leverages Swift 6.4's embedded mode improvements:
  - `@c @implementation` attribute for implementing pre-existing C headers
  - Embedded Swift subset for minimal memory footprint
  - Strict concurrency for safe embedded programming
@@ -68,7 +68,7 @@
  - Setting up Swift-based logging infrastructure
  - Implementing hardware-specific initialization routines
 
- @note This function serves as a demonstration of Swift 6.3's C interoperability
+ @note This function serves as a demonstration of Swift 6.4's C interoperability
        improvements and may be extended in the future to initialize runtime
        state using Swift's memory safety and concurrency features.
  */

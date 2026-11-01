@@ -9,9 +9,9 @@
  in the ZephyrSys project. It includes necessary Zephyr RTOS headers to make
  Zephyr functionality available to Swift code through C interoperability.
 
- ## Swift 6.3 Integration
+ ## Swift 6.4 Integration
 
- With Swift 6.3's enhanced C interoperability features, this header enables:
+ With Swift 6.4's enhanced C interoperability features, this header enables:
  - Bidirectional Swift-C function calls
  - Improved tolerance of C signature mismatches
  - Support for @c @implementation attribute
@@ -72,7 +72,7 @@
  that Swift implementations match these exact signatures, ensuring
  type safety and C ABI compatibility.
 
- ## Swift 6.3 Implementation
+ ## Swift 6.4 Implementation
 
  Functions declared here are implemented in main.swift using:
  - @c @implementation for existing C interface compatibility
