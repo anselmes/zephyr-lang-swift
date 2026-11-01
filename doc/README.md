@@ -19,10 +19,10 @@ Clone the `zephyr-lang-swift` repository into your Zephyr modules directory:
 git clone https://github.com/anselmes/zephyr-lang-swift modules/lang/swift
 ```
 
-Then add this line to the application's `CMakeLists.txt`, before `find_package(Zephyr)`:
+Then add this line to the application's `CMakeLists.txt`, before `find_package(Zephyr)`. The clone lives in the Zephyr workspace, so the path starts at `ZEPHYR_WORKSPACE`; replace it with the checkout's location if you keep the clone elsewhere:
 
 ```cmake
-set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/modules/lang/swift)
+set(ZEPHYR_EXTRA_MODULES $ENV{ZEPHYR_WORKSPACE}/modules/lang/swift)
 ```
 
 ### Add through the west manifest
@@ -38,16 +38,23 @@ manifest:
     - name: zephyr-lang-swift
       revision: main
       path: modules/lang/swift
-      remotes: anselmes
+      remote: anselmes
       groups:
         - optional
 ```
 
 This method needs no change to `CMakeLists.txt`.
 
+The fork and the manifest entry both place the module in the `optional` group, which west disables by default. Enable the group and fetch the module before building:
+
+```bash
+west config manifest.group-filter -- +optional
+west update zephyr-lang-swift
+```
+
 ### Use the Zephyr fork
 
-The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork carries the module.
+The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork carries the module. It keeps the module in the same `optional` group, so run the two `west` commands above to enable it.
 
 ## Example
 

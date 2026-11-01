@@ -46,10 +46,10 @@ git clone https://github.com/anselmes/zephyr-lang-swift modules/lang/swift
 
 Then make Zephyr find it, in one of two ways.
 
-**From your application.** Set `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`, before `find_package(Zephyr)`:
+**From your application.** Set `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`, before `find_package(Zephyr)`. The clone lives in the Zephyr workspace, not beside the application, so the path starts at `ZEPHYR_WORKSPACE` (set by the samples' `.env.example`); replace it with the checkout's location if you keep the clone elsewhere:
 
 ```cmake
-set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/modules/lang/swift)
+set(ZEPHYR_EXTRA_MODULES $ENV{ZEPHYR_WORKSPACE}/modules/lang/swift)
 ```
 
 **From the west manifest.** Add the project to `$ZEPHYR_BASE/submanifests/optional.yaml`, which needs no change to `CMakeLists.txt`:
@@ -63,12 +63,19 @@ manifest:
     - name: zephyr-lang-swift
       revision: main
       path: modules/lang/swift
-      remotes: anselmes
+      remote: anselmes
       groups:
         - optional
 ```
 
 The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork also carries the module.
+
+The fork and the manifest entry both place the module in the `optional` group, which west disables by default. Enable the group and fetch the module before building:
+
+```bash
+west config manifest.group-filter -- +optional
+west update zephyr-lang-swift
+```
 
 ## Usage
 
@@ -85,6 +92,7 @@ The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork also carries the 
 
    ```cmake
    cmake_minimum_required(VERSION 3.29)
+   set(BOARD $ENV{ZEPHYR_BOARD})
    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
    project(my_swift_app)
 
@@ -145,6 +153,8 @@ do {
   try check(code)                     // code < 0 is -errno
 } catch ZephyrError.timedOut {
   retry()
+} catch {
+  report(error)                       // every other ZephyrError case
 }
 ```
 
@@ -214,8 +224,8 @@ To add runtime support that Swift needs from C:
 Check a change by building both buildable samples:
 
 ```bash
-cd samples/app && west build -p -t run
-cd samples/app+lib/app && west build -p -t run
+(cd samples/app && west build -p -t run)
+(cd samples/app+lib/app && west build -p -t run)
 ```
 
 ## Troubleshooting
