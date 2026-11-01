@@ -1,0 +1,46 @@
+---
+# Pre-commit Configuration
+# This file configures pre-commit hooks to automatically run code quality checks
+# before commits are made to the repository.
+# See: https://pre-commit.com/
+
+# List of repositories containing pre-commit hooks
+repos:
+  # Official Pre-commit Hooks
+  # Standard collection of pre-commit hooks for common file operations
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0 # Version of the official hooks
+    hooks:
+      - id: end-of-file-fixer # Ensures files end with a newline
+      - id: trailing-whitespace # Removes trailing whitespace from lines
+        args: [--markdown-linebreak-ext=md]
+
+  # gh actions-lock - Workflow Dependency Pinning
+  # Offline check that every action ref in .github/workflows/ has a matching
+  # entry in .github/workflows/actions.lock, catching lockfile drift locally
+  - repo: local
+    hooks:
+      - id: actions-lock-verify
+        entry: gh actions-lock --verify-local
+        files: ^\.github/workflows/
+        language: system
+        name: Verify GitHub Actions lockfile
+        pass_filenames: false
+
+  # swift-format - Swift Formatting and Linting
+  # Formats staged Swift sources in place, then lints them, using .swift-format
+  # Only the files being committed are passed, so unrelated files never block a commit
+  - repo: local
+    hooks:
+      - id: swift-format
+        entry: swift format format --in-place
+        language: system
+        name: Format Swift sources
+        pass_filenames: true
+        types: [swift]
+      - id: swift-format-lint
+        entry: swift format lint --strict
+        language: system
+        name: Lint Swift sources
+        pass_filenames: true
+        types: [swift]

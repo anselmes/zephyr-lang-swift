@@ -7,37 +7,53 @@ cli:
 plugins:
   sources:
     - id: trunk
-      ref: v1.7.2
+      ref: v1.11.0
       uri: https://github.com/trunk-io/plugins
 # Many linters and tools depend on runtimes - configure them here. (https://docs.trunk.io/runtimes)
 runtimes:
   enabled:
     - go@1.21.0
     - node@22.16.0
-    - python@3.10.8
+    - python@3.14.4
 # This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
 lint:
+  definitions:
+    # Trunk runs shfmt where the repository's .editorconfig does not reach, so it would
+    # indent with tabs; pass the two-space indent the rest of the repository uses.
+    - name: shfmt
+      commands:
+        - name: format
+          output: shfmt
+          run: shfmt -w -s -i 2 ${target}
   enabled:
-    - gitleaks@8.28.0
-    - clang-format@16.0.3
+    - actionlint@1.7.8
+    - checkov@3.4.0
+    - clang-format@20.1.0
     - cmake-format@0.6.13
-    - swiftformat@0.55.5
-    - swiftlint@0.58.2
-    - actionlint@1.7.7
-    - checkov@3.2.471
     - git-diff-check
-    - hadolint@2.13.1
-    - markdownlint@0.45.0
-    - prettier@3.6.2
+    - gitleaks@8.29.0
+    - hadolint@2.14.0
+    - markdownlint@0.50.0
+    - pinact@4.0.0
+    - prettier@3.9.10
     - shellcheck@0.11.0
-    - shfmt@3.6.0
-    - trufflehog@3.90.6
-    - yamllint@1.37.1
+    - shfmt@3.13.1
+    - swiftlint@0.58.2
+    - trufflehog@3.90.13
+    - yamllint@1.38.0
 actions:
-  disabled:
+  definitions:
+    - id: pre-commit
+      display_name: pre-commit
+      description: Run hooks from .pre-commit-config.yaml
+      packages_file: ${workspace}/.trunk/pre-commit-requirements.txt
+      runtime: python
+      run: pre-commit run
+      triggers:
+        - git_hooks: [pre-commit]
+  enabled:
+    - pre-commit
+    - trunk-announce
     - trunk-check-pre-push
     - trunk-fmt-pre-commit
-  enabled:
-    - commitlint
-    - trunk-announce
     - trunk-upgrade-available
