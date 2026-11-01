@@ -36,7 +36,7 @@ remembered or placeholder value.
 
 ## Tokens
 
-Templates use `__token__` placeholders. Replace every one; none may remain in the output (`grep -rn '__[a-z-]*__' .` must find nothing).
+Templates use `__token__` placeholders. Replace every one; none may remain in the output (`grep -rn '__[a-zA-Z-]*__' . | grep -v '"__copyright__"'` must find nothing; the `.swift-format` key `__copyright__` is a real key, not a token).
 
 | Token             | Meaning                                                     | Example                                 |
 | ----------------- | ----------------------------------------------------------- | --------------------------------------- |

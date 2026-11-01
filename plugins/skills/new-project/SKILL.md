@@ -60,7 +60,7 @@ If a fetch fails, stop and report it; never substitute guessed or placeholder va
 ## 4. Layer this kit's tooling on top
 
 Apply `references/layout.md`: keep the template's `.editorconfig` and copy `templates/` over the template without replacing files it already ships (except where the reference says),
-fill every `__token__`, write `.swift-format` from `templates/.swift-format` (2-space indent, 180 columns, trailing commas;
+fill every `__token__`, write `.swift-format` from `templates/.swift-format` (mirrors this repository's own `.swift-format`: 2-space indent, 180 columns, trailing commas;
 replacing any the template ships), and copy the `.trunk` settings from zephyr-lang-swift
 (`gh api repos/anselmes/zephyr-lang-swift/contents/.trunk`). Then:
 
