@@ -24,9 +24,10 @@ public extension Duration {
 
   /// Creates a duration from a number of kernel ticks.
   ///
-  /// The sub-second part is rounded to the nearest attosecond, so a tick rate
-  /// that does not divide one second evenly loses at most half an attosecond
-  /// per tick.
+  /// The sub-second part is truncated toward zero to whole attoseconds, so a
+  /// tick rate that does not divide one second evenly loses less than one
+  /// attosecond per tick. Both `ticks` (nearest) and a timeout (round up)
+  /// convert the result back to the same tick count.
   ///
   /// - Parameter ticks: The number of kernel ticks.
   init(ticks: Tick) {
