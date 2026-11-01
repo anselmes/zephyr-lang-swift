@@ -184,3 +184,7 @@ set_target_properties(ZephyrSystem PROPERTIES
 
 # Link the Zephyr kernel; PUBLIC so that dependents get it too.
 target_link_libraries(ZephyrSystem PUBLIC zephyr)
+
+# swiftc puts a module hash in `.swift_modhash`. The Zephyr linker script has no
+# place for it, so ld.lld (--orphan-handling=warn) warns on every link. Discard it.
+zephyr_linker_sources(SECTIONS ${CMAKE_CURRENT_LIST_DIR}/swift_orphans.ld)
