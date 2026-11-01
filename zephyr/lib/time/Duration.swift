@@ -10,12 +10,14 @@ extension Duration: TimeoutConvertible {}
 // MARK: - Public
 
 public extension Duration {
-  /// Whole kernel ticks, rounded up (integer math).
+  /// Whole kernel ticks, rounded to the nearest tick (integer math).
   ///
   /// The sign is kept, so a negative duration gives negative ticks; this is
-  /// not the timeout encoding, which maps negative durations to `K_NO_WAIT`.
+  /// not the timeout encoding, which maps negative durations to `K_NO_WAIT` and
+  /// rounds up. Rounding to nearest keeps instant arithmetic exact: durations
+  /// built from ticks convert back to the same tick count.
   var ticks: Tick {
-    Tick(clamping: kernelTicks)
+    Tick(clamping: nearestKernelTicks)
   }
 
   init(ticks: Tick) {
@@ -23,7 +25,11 @@ public extension Duration {
     let (seconds, remainder) = Int64(ticks).quotientAndRemainder(dividingBy: perSecond)
     // `remainder.magnitude < perSecond`, so the 128-bit product divided by
     // `perSecond` fits in 64 bits and keeps the sub-nanosecond part.
-    let (high, low) = remainder.magnitude.multipliedFullWidth(by: 1_000_000_000_000_000_000)
+    var (high, low) = remainder.magnitude.multipliedFullWidth(by: 1_000_000_000_000_000_000)
+    // Round to the nearest attosecond so repeated conversions do not drift.
+    let (sum, carry) = low.addingReportingOverflow(UInt64(perSecond) / 2)
+    low = sum
+    if carry { high += 1 }
     let attoseconds = Int64(UInt64(perSecond).dividingFullWidth((high, low)).quotient)
     self.init(
       secondsComponent: seconds,

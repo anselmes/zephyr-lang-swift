@@ -72,14 +72,27 @@ extension k_timeout_t {
 }
 
 extension Duration {
-  /// The duration in kernel ticks, as a signed 64-bit count.
+  /// The duration in kernel ticks, as a signed 64-bit count, rounding the
+  /// magnitude up.
   ///
-  /// The magnitude is rounded up to whole ticks straight from the seconds and
-  /// attoseconds, so sub-nanosecond precision is kept and a tick-exact duration
-  /// is not rounded up twice. The sign is kept, which makes this suitable for
-  /// instant arithmetic. Results saturate at `Int64.min` and `Int64.max`; the
-  /// timeout conversions apply their own, tighter limits.
-  public var kernelTicks: Int64 {
+  /// This is the timeout policy: a positive duration is never zero ticks. The
+  /// magnitude is rounded straight from the seconds and attoseconds, so
+  /// sub-nanosecond precision is kept and a tick-exact duration is not rounded
+  /// up twice. The sign is kept. Results saturate at `Int64.min` and
+  /// `Int64.max`; the timeout conversions apply their own, tighter limits. Use
+  /// `nearestKernelTicks` for instant arithmetic.
+  public var kernelTicks: Int64 { kernelTicks(roundingUp: true) }
+
+  /// The duration in kernel ticks, as a signed 64-bit count, rounding the
+  /// magnitude to the nearest tick (halves away from zero).
+  ///
+  /// This is the instant-arithmetic policy. A duration built from ticks and
+  /// then subtracted from another, such as at 60 Hz where one tick is not a
+  /// whole number of attoseconds, converts back to the same tick count instead
+  /// of gaining one. Saturates like `kernelTicks`.
+  public var nearestKernelTicks: Int64 { kernelTicks(roundingUp: false) }
+
+  private func kernelTicks(roundingUp: Bool) -> Int64 {
     let (seconds, attoseconds) = components
     let perSecond = UInt64(CONFIG_SYS_CLOCK_TICKS_PER_SEC)
     let negative = self < .zero
@@ -90,15 +103,24 @@ extension Duration {
     let atto = attoseconds.magnitude
     if atto > 0 {
       // atto < 1e18, so the 128-bit product divided by 1e18 fits in 64 bits.
-      // ceil(p / 1e18) == floor((p - 1) / 1e18) + 1 for p > 0.
       var (high, low) = atto.multipliedFullWidth(by: perSecond)
-      if low == 0 {
-        high -= 1
-        low = .max
+      let divisor = UInt64(1_000_000_000_000_000_000)
+      if roundingUp {
+        // ceil(p / 1e18) == floor((p - 1) / 1e18) + 1 for p > 0.
+        if low == 0 {
+          high -= 1
+          low = .max
+        } else {
+          low -= 1
+        }
+        fraction = divisor.dividingFullWidth((high, low)).quotient + 1
       } else {
-        low -= 1
+        // round(p / 1e18) == floor((p + 1e18 / 2) / 1e18).
+        let (sum, carry) = low.addingReportingOverflow(divisor / 2)
+        low = sum
+        if carry { high += 1 }
+        fraction = divisor.dividingFullWidth((high, low)).quotient
       }
-      fraction = UInt64(1_000_000_000_000_000_000).dividingFullWidth((high, low)).quotient + 1
     }
 
     let (whole, overflow) = seconds.magnitude.multipliedReportingOverflow(by: perSecond)
