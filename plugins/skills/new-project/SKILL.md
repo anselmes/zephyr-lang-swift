@@ -60,8 +60,9 @@ If a fetch fails, stop and report it; never substitute guessed or placeholder va
 ## 4. Layer this kit's tooling on top
 
 Apply `references/layout.md`: keep the template's `.editorconfig` and copy `templates/` over the template without replacing files it already ships (except where the reference says),
-fill every `__token__`, and copy `.swift-format` and the `.trunk` settings from zephyr-lang-swift
-(`gh api repos/anselmes/zephyr-lang-swift/contents/.swift-format`). Then:
+fill every `__token__`, write `.swift-format` from `templates/.swift-format` (2-space indent, 180 columns, trailing commas;
+replacing any the template ships), and copy the `.trunk` settings from zephyr-lang-swift
+(`gh api repos/anselmes/zephyr-lang-swift/contents/.trunk`). Then:
 
 - `LICENSE`: keep the template's for `GPL-3.0`; for another license, stop and ask for the text.
 - `.github/workflows/west.yml`: after filling tokens, run `gh actions-lock` to update `.github/workflows/actions.lock`; never edit the lock by hand.
