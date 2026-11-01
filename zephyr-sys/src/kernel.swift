@@ -26,4 +26,18 @@ public enum Kernel {
   public static func yield() {
     k_yield()
   }
+
+  /// Kernel ticks since boot (`k_uptime_ticks`).
+  public static var uptimeTicks: Int64 {
+    k_uptime_ticks()
+  }
+
+  /// Sleeps for a kernel timeout (`k_sleep`). Pass `.forever` to sleep until
+  /// another thread calls `k_wakeup`.
+  ///
+  /// - Returns: The time left when the sleep ended early, else `.zero`.
+  @discardableResult
+  public static func sleep(timeout: k_timeout_t) -> Duration {
+    .milliseconds(Int(k_sleep(timeout)))
+  }
 }

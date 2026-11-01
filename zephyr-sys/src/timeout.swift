@@ -27,4 +27,36 @@ extension k_timeout_t {
     let ticks = (Int64(milliseconds) * ticksPerSecond + 999) / 1_000
     return k_timeout_t(ticks: ticks)
   }
+
+  /// `K_TICKS(ticks)`.
+  public static func ticks(_ ticks: k_ticks_t) -> k_timeout_t {
+    k_timeout_t(ticks: ticks)
+  }
+
+  /// `K_TIMEOUT_ABS_TICKS(ticks)`: an absolute deadline in kernel ticks since
+  /// boot. Negative values clamp to boot time.
+  public static func absolute(ticks: k_ticks_t) -> k_timeout_t {
+    k_timeout_t(ticks: -1 - max(ticks, 0))
+  }
+
+  /// Converts a `Duration` using integer math only (no floating point).
+  /// Rounds up to whole ticks, so a non-zero duration never becomes
+  /// `K_NO_WAIT`. Zero and negative durations become `K_NO_WAIT`; durations
+  /// too long for `k_ticks_t` clamp to the longest finite timeout.
+  public init(_ duration: Duration) {
+    let (seconds, attoseconds) = duration.components
+    guard seconds >= 0, attoseconds >= 0, seconds > 0 || attoseconds > 0 else {
+      self = .noWait
+      return
+    }
+    let ticksPerSecond = Int64(CONFIG_SYS_CLOCK_TICKS_PER_SEC)
+    // Nanoseconds are at most 1e9 here, so `nanoseconds * ticksPerSecond`
+    // cannot overflow for any tick rate Zephyr supports.
+    let nanoseconds = (attoseconds + 999_999_999) / 1_000_000_000
+    let fractional = (nanoseconds * ticksPerSecond + 999_999_999) / 1_000_000_000
+    let (whole, overflow) = seconds.multipliedReportingOverflow(by: ticksPerSecond)
+    let longest = Int64.max - 1
+    let total = overflow ? longest : (whole > longest - fractional ? longest : whole + fractional)
+    self = k_timeout_t(ticks: total)
+  }
 }
