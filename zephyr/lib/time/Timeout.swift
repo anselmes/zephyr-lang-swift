@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSys
+import ZephyrSystem
 
 public protocol TimeoutConvertible {
   func toTimeout() -> Timeout
@@ -16,7 +16,7 @@ public struct Timeout {
 extension Timeout:
   Equatable,
   Sendable
-  {}
+{}
 
 // MARK: - Public
 
@@ -41,11 +41,11 @@ public extension Timeout {
   }
 
   #if CONFIG_TIMEOUT_64BIT
-  init(from instant: Instant) {
-    let ticks = checkedCast(instant.ticks) as k_ticks_t
-    assert(ticks != Timeout.forever.ticks)
-    assert(ticks != Timeout.nowait.ticks)
-    self.value = k_timeout_t(ticks: -1 - ticks)
-  }
+    init(from instant: Instant) {
+      let ticks = checkedCast(instant.ticks) as k_ticks_t
+      assert(ticks != Timeout.forever.ticks)
+      assert(ticks != Timeout.nowait.ticks)
+      self.value = k_timeout_t(ticks: -1 - ticks)
+    }
   #endif
 }

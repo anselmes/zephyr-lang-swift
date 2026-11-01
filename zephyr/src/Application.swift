@@ -67,8 +67,8 @@
 public func main() {
   // Enable debug output when configured during build
   #if SWIFT_DEBUG_INFO
-  print("Zephyr Swift Application - Debug info enabled")
-  print("Swift 6.4 Embedded Mode Active")
+    print("Zephyr Swift Application - Debug info enabled")
+    print("Swift 6.4 Embedded Mode Active")
   #endif
 
   // Call the application-specific entry point

@@ -1,9 +1,9 @@
 /**
  @file module.modulemap
- @brief Clang Module Map for ZephyrSys Swift-C Interoperability (Swift 6.3)
+ @brief Clang Module Map for ZephyrSystem Swift-C Interoperability (Swift 6.3)
 
  This module map defines how Swift code can import and use C APIs from the
- ZephyrSys library and Zephyr RTOS. With Swift 6.3's enhanced C interoperability,
+ ZephyrSystem library and Zephyr RTOS. With Swift 6.3's enhanced C interoperability,
  this module enables bidirectional interop between Swift implementations and
  C interfaces.
 
@@ -17,7 +17,7 @@
 
  ## Module Structure
 
- The ZephyrSys module provides access to:
+ The ZephyrSystem module provides access to:
  - Zephyr RTOS C APIs through BridgingHeader.h
  - Swift-implemented C functions
  - Bidirectional Swift-C interoperability
@@ -26,7 +26,7 @@
 
  Swift code:
  ```swift
- import ZephyrSys
+ import ZephyrSystem
 
  // Use Zephyr APIs
  let device = device_get_binding("GPIO_0")
@@ -48,17 +48,17 @@
  */
 
 /**
- @brief ZephyrSys Module Definition (Swift 6.3 Enhanced)
+ @brief ZephyrSystem Module Definition (Swift 6.3 Enhanced)
 
- Defines the ZephyrSys module for bidirectional Swift-C interoperability.
+ Defines the ZephyrSystem module for bidirectional Swift-C interoperability.
 
  Module attributes:
  - umbrella header: Main bridging header with Zephyr APIs and C interface
- - link: Links against the ZephyrSys static library containing Swift objects
+ - link: Links against the ZephyrSystem static library containing Swift objects
  - export *: Makes all symbols available to importing code
  */
-module ZephyrSys {
+module ZephyrSystem {
   umbrella header "BridgingHeader.h"
-  link "ZephyrSys"
+  link "ZephyrSystem"
   export *
 }

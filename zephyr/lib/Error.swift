@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Linaro LTD
 // SPDX-License-Identifier: Apache-2.0
 
-import ZephyrSys
+import ZephyrSystem
 
 public typealias ZephyrResult<T> = Swift.Result<T, ZephyrError>
 
@@ -21,7 +21,7 @@ extension ZephyrError:
   CustomStringConvertible,
   Sendable,
   Swift.Error
-  {}
+{}
 
 // MARK: - Public
 
