@@ -24,6 +24,6 @@ public func sleep<T: TimeoutConvertible>(_ timeout: T) -> Duration {
 
 #if CONFIG_TIMEOUT_64BIT
   public func now() -> Instant {
-    return Instant(ticks: Tick(Kernel.uptimeTicks))
+    return .init(ticks: Tick(Kernel.uptimeTicks))
   }
 #endif

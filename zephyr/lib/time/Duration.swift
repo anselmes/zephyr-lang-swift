@@ -22,5 +22,5 @@ public extension Duration {
     self = .seconds(seconds) + .nanoseconds(remainder * 1_000_000_000 / perSecond)
   }
 
-  func toTimeout() -> Timeout { Timeout(from: self) }
+  func toTimeout() -> Timeout { .init(from: self) }
 }

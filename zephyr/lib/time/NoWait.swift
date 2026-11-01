@@ -6,7 +6,7 @@ import ZephyrSystem
 public struct NoWait {
   public init() {}
 
-  public func toTimeout() -> Timeout { Timeout(from: self) }
+  public func toTimeout() -> Timeout { .init(from: self) }
 }
 
 // MARK: - Extension
