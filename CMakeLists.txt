@@ -185,13 +185,16 @@ function(zephyr_swift_library)
     COMMAND
       ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET}
       -Osize
+      -swift-version 6
       -parse-as-library
       -strict-memory-safety
       -whole-module-optimization
       -enable-experimental-feature CImplementation
       -enable-experimental-feature Embedded
       -enable-experimental-feature Extern
-      -enable-upcoming-feature StrictConcurrency
+      -enable-upcoming-feature ExistentialAny
+      -enable-upcoming-feature InternalImportsByDefault
+      -enable-upcoming-feature MemberImportVisibility
       -Xfrontend -function-sections
       -emit-object -o ${MODULE_OBJ_FILE}
       -emit-module -emit-module-path ${MODULE_SWIFT_MODULE_FILE}
@@ -254,12 +257,15 @@ function(zephyr_swift_application)
     COMMAND
       ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET}
       -Osize
+      -swift-version 6
       -strict-memory-safety
       -whole-module-optimization
       -enable-experimental-feature CImplementation
       -enable-experimental-feature Embedded
       -enable-experimental-feature Extern
-      -enable-upcoming-feature StrictConcurrency
+      -enable-upcoming-feature ExistentialAny
+      -enable-upcoming-feature InternalImportsByDefault
+      -enable-upcoming-feature MemberImportVisibility
       -Xfrontend -function-sections
       -emit-object -o ${APP_SWIFT_OBJ_FILE}
       ${SWIFT_DEFINES}

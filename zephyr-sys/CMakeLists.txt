@@ -158,7 +158,6 @@ add_custom_command(
     -Osize                                                  # Optimize for code size (critical for embedded systems)
     -swift-version 6
     -parse-as-library                                       # Compile as library (not executable)
-    -strict-concurrency                                     # Enable strict concurrency checks
     -strict-memory-safety                                   # Enforce strict memory safety checks
     -whole-module-optimization                              # Whole-module optimization for better embedded performance
     -enable-experimental-feature CImplementation            # Enable C interop features
