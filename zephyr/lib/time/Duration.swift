@@ -42,7 +42,8 @@ public extension Duration {
     let attoseconds = Int64(UInt64(perSecond).dividingFullWidth((high, low)).quotient)
     self.init(
       secondsComponent: seconds,
-      attosecondsComponent: remainder < 0 ? -attoseconds : attoseconds)
+      attosecondsComponent: remainder < 0 ? -attoseconds : attoseconds,
+    )
   }
 
   /// A relative timeout for this duration.
