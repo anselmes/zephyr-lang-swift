@@ -37,8 +37,9 @@ if(NOT DEFINED ZEPHYR_TOOLCHAIN_VARIANT AND DEFINED ENV{ZEPHYR_TOOLCHAIN_VARIANT
 endif()
 
 # The parent directory is a Zephyr module (zephyr/module.yml) that provides the
-# Hello library. Listing it here lets the build find the library and its Kconfig.
-set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/..)
+# Hello library. Appending it here lets the build find the library and its Kconfig
+# without dropping modules passed with -DZEPHYR_EXTRA_MODULES.
+list(APPEND ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/..)
 
 # Must come before project().
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})

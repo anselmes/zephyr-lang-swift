@@ -28,7 +28,8 @@ Three samples show how to build Swift applications and libraries for Zephyr with
 
 1. A Swift 6.4 or later toolchain from swift.org with Embedded Swift support. Xcode's Swift lacks the RISC-V and Arm embedded backends. Select the swift.org toolchain with `TOOLCHAINS=swift`.
 2. A Zephyr workspace with the Zephyr SDK (1.0.1 was used) and its LLVM toolchain.
-3. A board, physical or emulated. The samples use QEMU.
+3. This repository registered as a Zephyr module in that workspace. The samples do not register it: without it `CONFIG_SWIFT` and `zephyr_swift_application()` do not exist. Enable it as a west project (`west config manifest.group-filter -- +optional`, then `west update zephyr-lang-swift`) as described in the [installation instructions](../README.md#installation).
+4. A board, physical or emulated. The samples use QEMU.
 
 The samples read the board and toolchain from environment variables. Copy `.env.example` to `.env` in the application directory, adjust `ZEPHYR_WORKSPACE`, and source it:
 
@@ -81,7 +82,7 @@ Hello from Swift!!!
 
 ## Application with a library: app+lib
 
-The application is in `app+lib/app`. Its `CMakeLists.txt` sets `ZEPHYR_EXTRA_MODULES` to the parent directory, which is a Zephyr module (`zephyr/module.yml`) containing the Hello library in `lib/`. The application's `prj.conf` enables the library with `CONFIG_HELLO=y`, and its source imports it:
+The application is in `app+lib/app`. Its `CMakeLists.txt` appends the parent directory to `ZEPHYR_EXTRA_MODULES`, which is a Zephyr module (`zephyr/module.yml`) containing the Hello library in `lib/`. The application's `prj.conf` enables the library with `CONFIG_HELLO=y`, and its source imports it:
 
 ```swift
 import Hello
