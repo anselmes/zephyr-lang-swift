@@ -61,10 +61,12 @@ import ZephyrSystem
 
     /// The instant a duration after this one.
     ///
-    /// - Parameter duration: How far to move, forward or backward; rounded up
-    ///   to whole ticks.
-    /// - Returns: A new instant at `ticks + duration.ticks`. A result that does
-    ///   not fit in `Tick` saturates at its limits instead of trapping.
+    /// - Parameter duration: How far to move, forward or backward; rounded to the
+    ///   nearest whole tick.
+    /// - Returns: A new instant at `ticks` plus the full rounded tick count of
+    ///   `duration`, even when that count alone exceeds `Tick`'s range. Only the
+    ///   final sum saturates at `Tick`'s limits instead of trapping, so a long
+    ///   duration added to an opposite-signed instant is still exact.
     func advance(by duration: Duration) -> Instant {
       // Add the whole seconds and the sub-second part separately, in 128 bits:
       // `duration.ticks` is already saturated, so it cannot reveal an overflow.
