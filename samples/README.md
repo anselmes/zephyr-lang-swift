@@ -28,7 +28,7 @@ Three samples show how to build Swift applications and libraries for Zephyr with
 
 1. A Swift 6.4 or later toolchain from swift.org with Embedded Swift support. Xcode's Swift lacks the RISC-V and Arm embedded backends. Select the swift.org toolchain with `TOOLCHAINS=swift`.
 2. A Zephyr workspace with the Zephyr SDK (1.0.1 was used) and its LLVM toolchain.
-3. This repository registered as a Zephyr module in that workspace. The samples do not register it: without it `CONFIG_SWIFT` and `zephyr_swift_application()` do not exist. Enable it as a west project (`west config manifest.group-filter -- +optional`, then `west update zephyr-lang-swift`) as described in the [installation instructions](../README.md#installation).
+3. This repository registered as a Zephyr module in that workspace. The samples do not register it: without it `CONFIG_SWIFT` and `zephyr_swift_application()` do not exist. Add it to the west manifest first, then enable the `optional` group and fetch it (`west config manifest.group-filter -- +optional`, `west update zephyr-lang-swift`), as described in [Add through the west manifest](../doc/README.md#add-through-the-west-manifest).
 4. A board, physical or emulated. The samples use QEMU.
 
 The samples read the board and toolchain from environment variables. Copy `.env.example` to `.env` in the application directory, adjust `ZEPHYR_WORKSPACE`, and source it:
@@ -129,7 +129,8 @@ Both applications set these options in `prj.conf`:
 | Option                    | Purpose                                                             |
 | ------------------------- | ------------------------------------------------------------------- |
 | `CONFIG_SWIFT`            | Enables Swift support                                               |
-| `CONFIG_MINIMAL_LIBC`     | A libc with a heap, which the Embedded Swift runtime allocates from |
+| `CONFIG_MINIMAL_LIBC`     | The libc that the Embedded Swift runtime allocates through          |
+| `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE` | Heap size in bytes. The minimal libc defaults it to zero, so set it for the board and application |
 | `CONFIG_SWIFT_DEBUG_INFO` | Optional. Defines `SWIFT_DEBUG_INFO` for `#if` blocks; adds no `-g` |
 | `CONFIG_HELLO`            | `app+lib` only. Builds the Hello library                            |
 
