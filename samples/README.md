@@ -56,7 +56,7 @@ From an application directory, with the environment sourced:
 west build -p -t run
 ```
 
-`-p` starts from a clean build directory and `-t run` boots the image in QEMU. Leave QEMU with `Ctrl+a`, then `x`. For another board, pass it with `-b <board>` and use `west flash` and `west attach` instead of `-t run`.
+`-p` starts from a clean build directory and `-t run` boots the image in QEMU. Leave QEMU with `Ctrl+a`, then `x`. For another board, change `ZEPHYR_BOARD` in `.env`, source it again and rebuild with `-p`, then use `west flash` and `west attach` instead of `-t run`. The sample `CMakeLists.txt` files set `BOARD` from `ZEPHYR_BOARD` before Zephyr loads, which overrides `west build -b`.
 
 ## Application: app
 
@@ -148,6 +148,6 @@ To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org. |
 | `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Source `.env` (it sets `zephyr/llvm`).                     |
-| `BOARD is not being defined`                    | `ZEPHYR_BOARD` is not set. Source `.env`, or pass `-b <board>`.                                   |
+| `BOARD is not being defined`                    | `ZEPHYR_BOARD` is not set. Source `.env`; `-b <board>` does not help because the sample overrides it.                                   |
 | `no such module 'Hello'`                        | `CONFIG_HELLO=y` is missing from `prj.conf`, or the module is not in `ZEPHYR_EXTRA_MODULES`.      |
 | `west twister -T samples/` finds nothing        | The `sample.yml` files have no `tests:` section yet, so twister has no test cases to run.         |
