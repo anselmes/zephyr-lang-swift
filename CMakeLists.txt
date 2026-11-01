@@ -150,7 +150,7 @@ function(zephyr_swift_library)
   endif()
 
   if(NOT SWIFTLIB_SOURCES)
-    file(GLOB_RECURSE SWIFTLIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.swift")
+    file(GLOB_RECURSE SWIFTLIB_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.swift")
   endif()
 
   if(NOT SWIFTLIB_SOURCES)
@@ -228,7 +228,7 @@ endfunction()
 function(zephyr_swift_application)
   _enable_swift()
 
-  file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
+  file(GLOB_RECURSE SWIFT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
 
   # Provides main(), which calls the application's entrypoint().
   set(SWIFT_APPLICATION "${SWIFT_MODULE_DIR}/zephyr/src/Application.swift")

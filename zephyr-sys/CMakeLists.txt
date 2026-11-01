@@ -56,7 +56,7 @@ This build configuration leverages Swift 6.4's improvements:
 # Discover all Swift source files in the zephyr-sys directory structure
 # src/: Core Swift implementations of C runtime functions using @c @implementation
 # lib/: Additional Swift libraries and utilities for enhanced functionality
-file(GLOB_RECURSE SWIFT_SOURCES
+file(GLOB_RECURSE SWIFT_SOURCES CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift"
      "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 

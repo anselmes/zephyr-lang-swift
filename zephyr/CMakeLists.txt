@@ -56,7 +56,7 @@ This library integrates with:
 # Discover all Swift source files in the lib/ directory
 # lib/: Core Zephyr Swift library implementation providing high-level APIs
 # These files contain Swift wrappers and enhancements for Zephyr C APIs
-file(GLOB_RECURSE SWIFT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
+file(GLOB_RECURSE SWIFT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 
 # Only build Swift library if we have Swift sources to compile
 # This allows the build to succeed even without Swift library implementation
