@@ -32,12 +32,19 @@ import ZephyrSystem
 
     func toTimeout() -> Timeout { Timeout(from: self) }
 
+    /// Saturates at `Tick.min`/`Tick.max` ticks instead of trapping when the
+    /// difference does not fit.
     func duration(since earlier: Instant) -> Duration {
-      return Duration(ticks: self.ticks - earlier.ticks)
+      let (difference, overflow) = self.ticks.subtractingReportingOverflow(earlier.ticks)
+      return Duration(ticks: overflow ? (self.ticks < earlier.ticks ? .min : .max) : difference)
     }
 
+    /// Saturates at `Tick.min`/`Tick.max` ticks instead of trapping when the
+    /// result does not fit.
     func advance(by duration: Duration) -> Instant {
-      return Instant(ticks: self.ticks + duration.ticks)
+      let delta = duration.ticks
+      let (sum, overflow) = self.ticks.addingReportingOverflow(delta)
+      return Instant(ticks: overflow ? (delta < 0 ? .min : .max) : sum)
     }
   }
 #endif
