@@ -30,7 +30,7 @@ __name__/
 | `.swift-format`              | `templates/.swift-format`              | Always written, replacing any the template ships; read from the repository root |
 | `.trunk/`                    | zephyr-lang-swift on GitHub            | Copy; do not edit                                                               |
 | `README.md`                  | the template's, edited                 | Keep its sections; describe the project, board and `west` steps                 |
-| `.gitignore`                 | the template's, appended               | Add `.west/`, `build/`, `.venv/`, `.env`, `modules/`, `zephyr/` checkouts       |
+| `.gitignore`                 | the template's, appended               | Add `.west/`, `build/`, `.venv/`, `.env`; never ignore `zephyr/` (it holds `module.yml`) |
 
 Do not copy `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` or `SECURITY.md`; they come from the organization's defaults. `.env`, keys and
 certificates are never committed.
@@ -38,5 +38,10 @@ certificates are never committed.
 ## west.yml
 
 `self.path` is the repository name. The `zephyr` project imports Zephyr's own manifest restricted to the modules the board needs;
-`zephyr-lang-swift` is imported through that allowlist (as in `zos/west.yml`) or declared as its own project when the Zephyr
-source does not list it. Pin every `revision` to a tag or full commit SHA found by lookup, never to a branch.
+`zephyr-lang-swift` is declared as its own project (see below). Pin every `revision` to a tag or full commit SHA found by lookup, never to a branch.
+
+The Zephyr source has its own remote (`zephyr-source`, from `__zephyr-owner__`), separate from the repository owner, so creating
+`acme/blinky` against the default `anselmes/zephyr` still fetches `anselmes/zephyr`. The Zephyr fork lists Swift in its disabled
+`optional` group, which an allowlist neither enables nor pins, so `zephyr-lang-swift` is declared as its own top-level project at
+`__swift-rev__`; a project declared in the manifest repository overrides an imported one of the same name. West checks Zephyr out
+beside the manifest repository (`west init -l .`), not inside it.

@@ -24,4 +24,6 @@ jobs:
       - name: Install the SDK
         run: west sdk install --no-gnu-toolchains --llvm
       - name: Build
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: zephyr/llvm
         run: west build -p -b __board__ __name__/app

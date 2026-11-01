@@ -13,7 +13,8 @@
 ## Tokens specific to this skill
 
 - `__extra-modules__`: when the project root is itself a Zephyr module (it has `zephyr/module.yml`, as created by `new-project`),
-  the line `set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/..)` so the app sees the project's libraries. Otherwise remove the token's line.
+  the line `set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/<up>)` so the app sees the project's libraries, where `<up>` is the relative path from
+  the app directory to the directory holding `zephyr/module.yml` (`..` for `app/`, `../..` for `apps/blinky`). Detect that directory by walking up from the app. Otherwise remove the token's line.
 - `__library-configs__`: one `CONFIG___MODULE__=y` line per library the app enables; remove the token's line when there are none.
 - `__library-imports__`: one `import __Module__` line per enabled library, placed after `import Zephyr`; remove the token's line when none.
 

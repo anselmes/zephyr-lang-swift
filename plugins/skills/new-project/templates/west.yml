@@ -8,15 +8,22 @@ manifest:
     path: __name__
 
   remotes:
-    - name: __owner__
-      url-base: https://github.com/__owner__
+    - name: zephyr-source
+      url-base: https://github.com/__zephyr-owner__
+    - name: zephyr-lang-swift-source
+      url-base: https://github.com/anselmes
 
   projects:
     - name: zephyr
-      remote: __owner__
+      remote: zephyr-source
+      repo-path: __zephyr-repo__
       revision: __zephyr-rev__
       import:
         name-allowlist:
           - __hal-module__ # repeat this line for each HAL module the board needs
           - picolibc # Built as a module so headers are visible to Swift
-          - zephyr-lang-swift # Swift language support
+    # Declared here, not imported: the Zephyr fork keeps Swift in its disabled `optional` group at `main`.
+    - name: zephyr-lang-swift
+      remote: zephyr-lang-swift-source
+      revision: __swift-rev__
+      path: modules/lang/swift

@@ -51,6 +51,8 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 | `__author__`      | Author name and email                                       | `Schubert Anselme <schubert@anselm.es>` |
 | `__license__`     | SPDX license identifier                                     | `GPL-3.0`                               |
 | `__zephyr-rev__`  | Zephyr revision, looked up                                  | a release tag                           |
+| `__zephyr-owner__` | GitHub owner of the Zephyr source (default `anselmes`)     | `anselmes`                              |
+| `__zephyr-repo__` | Repository name of the Zephyr source (default `zephyr`)     | `zephyr`                                |
 | `__swift-rev__`   | `zephyr-lang-swift` revision, looked up                     | a tag or commit SHA                     |
 | `__Title__`       | Human-readable application name                             | `Blinky`                                |
 | `__description__` | One-sentence description of the project or library          | `Blinks an LED.`                        |

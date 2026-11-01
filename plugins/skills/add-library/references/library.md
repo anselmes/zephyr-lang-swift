@@ -22,7 +22,8 @@ The project root is the Zephyr module: `zephyr/module.yml` points `build.cmake` 
   `__Module__.swiftmodule` and a static library. Put sources there, with an `include/` directory only for C headers.
 - Only `public` declarations are visible to apps. Keep the API small, value types first, no heap and no `async` (Embedded Swift).
 - A library imports `Zephyr` (and `ZephyrSystem` for raw kernel types) and other libraries by module name. Dependencies between libraries
-  are resolved by the build system when both are enabled; add `depends on`/`select` in the Kconfig for the other library's symbol.
+  are resolved only for libraries registered earlier: `zephyr_swift_library()` discovers previously added libraries, so a library must come before
+  its consumers in `lib/CMakeLists.txt`. Enable both and add `depends on`/`select` in the Kconfig for the other library's symbol.
 - Fallible calls use `throws(E)` with an enum error type; never `Result`.
 - Enabling: `CONFIG___MODULE__=y` in the app's `prj.conf`, and `import __Module__` in its sources. The app's `CMakeLists.txt` must set
   `ZEPHYR_EXTRA_MODULES` to the module root so Zephyr finds the library.

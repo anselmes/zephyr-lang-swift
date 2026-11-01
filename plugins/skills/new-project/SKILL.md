@@ -34,6 +34,7 @@ Infer what you can, then ask the user one combined question listing every missin
 - **Board** (`__board__`) and the **HAL modules** it needs in the manifest's allowlist (for example `hal_espressif` for ESP32).
 - **Title** of the first app; **license** (`GPL-3.0` default), **author**, **year**, one-line **description**.
 - **Zephyr source**: the project that provides Zephyr and its `revision` source (default: `anselmes/zephyr`).
+  Its owner and repository name are `__zephyr-owner__` and `__zephyr-repo__`, independent of `__owner__`.
   Look up the latest release tag, and the latest `zephyr-lang-swift` tag or commit, with `gh` (`__zephyr-rev__`, `__swift-rev__`).
   If a lookup fails, stop and report it; never guess a revision.
 
