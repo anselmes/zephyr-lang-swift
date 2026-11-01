@@ -67,7 +67,7 @@ func entrypoint() {
 Expected output:
 
 ```text
-*** Booting Zephyr OS build v4.2.0-38463-g3c1d637c5ded ***
+*** Booting Zephyr OS build <version> ***
 Hello from Swift!!!
 ```
 
