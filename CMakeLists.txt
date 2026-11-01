@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-# Swift make support
+# CMake support for building Embedded Swift with Zephyr. Swift is compiled with
+# plain swiftc calls (not SwiftPM). The entry points are:
+#   zephyr_swift_application()  Swift sources in src/ become part of `app`.
+#   zephyr_swift_library()      A Swift module that applications can import.
+# The zephyr-sys (ZephyrSystem) and zephyr (Zephyr) subdirectories at the end of
+# this file build the runtime support and the high-level library.
 
 set(SWIFT_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "")
 
@@ -72,9 +77,13 @@ function(_swift_map_target)
 endfunction()
 
 # Find the Swift libraries registered in ZEPHYR_SWIFT_LIBRARY_INFO that live in
-# one of the extra modules.  Sets `SWIFT_INCLUDE_PATHS` (-I flags) and
+# one of the extra modules.  Sets `SWIFT_INCLUDE_PATHS` (swiftc flags) and
 # `SWIFT_AVAILABLE_LIBS` in the parent scope.  EXCLUDE_MODULE skips a library,
 # so that it doesn't depend on itself.
+#
+# SWIFT_INCLUDE_PATHS starts with the Zephyr module directory and the
+# ZEPHYR_SWIFT_CLIENT_FLAGS from zephyr/CMakeLists.txt (C headers, ZephyrSystem
+# module, bridging header), followed by one -I per library found.
 function(_swift_discover_libraries)
   cmake_parse_arguments(PARSE_ARGV 0 SWIFTDISCO "" "EXCLUDE_MODULE" "")
 
@@ -136,8 +145,8 @@ endfunction()
 function(zephyr_swift_library)
   _enable_swift()
 
-  # Needed so that custom driver classes using system calls are taken into
-  # account.
+  # A library with its own include/ directory exposes it to the Zephyr build,
+  # including syscall header generation.
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
     zephyr_syscall_include_directories(include)
     zephyr_include_directories(include)
@@ -166,6 +175,8 @@ function(zephyr_swift_library)
   _swift_map_target()
   message(STATUS "Building Swift llvm target ${SWIFT_TARGET}")
 
+  # Kconfig symbols that Swift code tests with `#if`.  Swift cannot see CONFIG_*
+  # macros, so each one needs its own -D here (and in the other swiftc calls).
   set(SWIFT_DEFINES "")
   if(CONFIG_SWIFT_DEBUG_INFO)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
@@ -188,6 +199,8 @@ function(zephyr_swift_library)
 
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
 
+  # The flag set is shared with the zephyr-sys, zephyr and application swiftc
+  # calls; keep them in step.
   add_custom_command(
     OUTPUT ${MODULE_OBJ_FILE} ${MODULE_SWIFT_MODULE_FILE}
     COMMAND
@@ -243,6 +256,8 @@ function(zephyr_swift_application)
   _swift_map_target()
   message(STATUS "Building Swift llvm target ${SWIFT_TARGET}")
 
+  # Kconfig symbols that Swift code tests with `#if`.  Swift cannot see CONFIG_*
+  # macros, so each one needs its own -D here (and in the other swiftc calls).
   set(SWIFT_DEFINES "")
   if(CONFIG_SWIFT_DEBUG_INFO)
     list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
@@ -264,6 +279,8 @@ function(zephyr_swift_application)
 
   find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
 
+  # The flag set is shared with the zephyr-sys, zephyr and library swiftc
+  # calls; keep them in step.
   add_custom_command(
     OUTPUT ${APP_SWIFT_OBJ_FILE} ${APP_SWIFT_MODULE_FILE}
     COMMAND
@@ -313,7 +330,7 @@ function(zephyr_swift_application)
 endfunction()
 
 if(CONFIG_SWIFT)
-  # C runtime support (zephyr-sys), then the Swift library built on top of it.
+  # Runtime support (zephyr-sys), then the Swift library built on top of it.
   add_subdirectory(zephyr-sys)
   add_subdirectory(zephyr)
 endif()

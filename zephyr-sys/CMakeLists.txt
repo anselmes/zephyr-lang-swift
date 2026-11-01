@@ -1,67 +1,26 @@
-#[=======================================================================[.rst:
-ZephyrSystem - Swift Runtime Support Library (Swift 6.4 Implementation)
-=====================================================================
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-This CMake file builds the ZephyrSystem library using Swift 6.4's embedded mode
-and enhanced C interoperability features. The library provides essential
-runtime support for Swift code running on Zephyr RTOS.
+# ZephyrSystem: the Swift runtime support for Zephyr.
+#
+# Compiles src/*.swift with swiftc (not SwiftPM) into ZephyrSystem.o and
+# ZephyrSystem.swiftmodule, and packages the object in a static library:
+#   - the C functions the Embedded Swift runtime needs (posix_memalign), which
+#     implement the declarations in include/BridgingHeader.h with
+#     `@c @implementation`
+#   - Kernel and the k_timeout_t helpers, thin wrappers over the Zephyr C API
+#
+# Requires a Swift 6.4+ toolchain with Embedded Swift support (swift.org, not
+# Xcode's; select it with TOOLCHAINS=swift), the Zephyr SDK and the generated
+# Zephyr headers.
 
-## Swift 6.4 Features
-
-This build configuration leverages Swift 6.4's improvements:
-
-**@c and @implementation Attributes**
-  Swift functions can implement C interfaces using @c @implementation,
-  providing type-safe implementations that maintain C ABI compatibility.
-
-**Embedded Swift Mode**
-  Optimized Swift subset for resource-constrained embedded systems:
-  - Reduced memory footprint
-  - Minimal runtime requirements
-  - Size-optimized compilation
-  - Function sections for better linking
-
-**Enhanced C Interoperability**
-  Improved tolerance of C signature mismatches and better bridging
-  header processing for seamless Swift-C integration.
-
-## Build Process
-
-1. **Swift Source Discovery**: Locate all .swift files in src/ and lib/
-2. **Target Configuration**: Map Zephyr's target architecture to Swift
-3. **Cross-Compilation**: Compile Swift to object files for embedded target
-4. **Library Creation**: Package Swift objects into static library
-5. **Integration**: Link with Zephyr kernel and provide public headers
-
-## Output Components
-
-**ZephyrSystem.o**
-  Compiled Swift object code containing C-compatible function implementations
-
-**ZephyrSystem.swiftmodule**
-  Swift module interface for importing by other Swift code
-
-**Static Library**
-  Linkable library providing Swift runtime support for Zephyr applications
-
-## Dependencies
-
-- Swift 6.4+ compiler with embedded features
-- Zephyr RTOS build environment
-- Cross-compilation toolchain (SYSROOT_DIR, CROSS_COMPILE)
-- Generated Zephyr headers and syscall interfaces
-
-#]=======================================================================]
-
-# Discover all Swift source files in the zephyr-sys directory structure
-# src/: Core Swift implementations of C runtime functions using @c @implementation
-# lib/: Additional Swift libraries and utilities for enhanced functionality
+# Discover the Swift sources: src/ holds the implementations. lib/ is globbed
+# too, but this module has no lib/ directory today.
 file(GLOB_RECURSE SWIFT_SOURCES CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift"
      "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.swift")
 
-# Ensure Swift sources are available - this is a Swift-only implementation
-# The ZephyrSystem library requires Swift 6.4+ for @c @implementation support
+# This module is Swift-only, so an empty glob is a configuration error.
 if(NOT SWIFT_SOURCES)
   message(FATAL_ERROR "No Swift sources found in ZephyrSystem. Swift implementation is required.")
 endif()
@@ -70,23 +29,22 @@ list(LENGTH SWIFT_SOURCES SWIFT_SOURCES_COUNT)
 message(STATUS "ZephyrSystem: Found ${SWIFT_SOURCES_COUNT} Swift source files")
 message(STATUS "ZephyrSystem: Swift sources: ${SWIFT_SOURCES}")
 
-# Define output file paths for the compiled Swift components
-# These files are generated during the Swift compilation process
-set(SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/ZephyrSystem.o")        # Compiled object code
-set(SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/ZephyrSystem.swiftmodule")  # Swift module interface
+# Output files of the swiftc invocation below
+set(SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/ZephyrSystem.o")
+set(SWIFT_MODULE_FILE "${CMAKE_CURRENT_BINARY_DIR}/ZephyrSystem.swiftmodule")
 
-# Determine the Swift target triple based on Zephyr's CPU configuration
-# This function maps Zephyr's CONFIG_ARCH and CONFIG_SOC to appropriate
-# Swift target triples (e.g., thumbv7em-none-eabi for ARM Cortex-M)
+# Map the CPU Zephyr is configured for (CONFIG_CPU_CORTEX_*, CONFIG_ARM64,
+# CONFIG_RISCV) to a Swift target triple, such as thumbv7em-none-eabi or
+# riscv32-none-none-eabi. Sets SWIFT_TARGET; unsupported CPUs are an error.
 _swift_map_target()
 
 message(STATUS "ZephyrSystem: Swift target triple: ${SWIFT_TARGET}")
 
-# Configure Swift compilation defines based on Zephyr configuration
-# These defines control conditional compilation in Swift source code
+# Kconfig symbols that Swift code tests with `#if`. Swift cannot see CONFIG_*
+# macros, so each one needs its own -D here (and in the other swiftc calls).
 set(SWIFT_DEFINES "")
 if(CONFIG_SWIFT_DEBUG_INFO)
-  list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")   # Enable Swift debug information when configured in Zephyr
+  list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
   message(STATUS "ZephyrSystem: Debug information enabled")
 endif()
 if(CONFIG_TIMEOUT_64BIT)
@@ -94,18 +52,10 @@ if(CONFIG_TIMEOUT_64BIT)
   list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
 endif()
 
-# Additional Swift defines can be added here based on Zephyr configuration:
-# if(CONFIG_SWIFT_FEATURE_X)
-#   list(APPEND SWIFT_DEFINES "-DSWIFT_FEATURE_X")
-# endif()
-
 # Locate the Swift compiler executable.
 # swiftly's PATH shim respects the TOOLCHAINS env var on all platforms —
 # set TOOLCHAINS="swift" to select the swift.org toolchain.
 find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
-if(NOT SWIFTC_EXECUTABLE)
-  message(FATAL_ERROR "Swift compiler not found. Please install Swift 6.4+ with embedded support.")
-endif()
 
 message(STATUS "ZephyrSystem: Using Swift compiler: ${SWIFTC_EXECUTABLE}")
 
@@ -148,15 +98,16 @@ else()
   message(WARNING "ZephyrSystem: No sysroot or SDK headers found — standard C headers may be missing")
 endif()
 
-# Create custom command to compile Swift sources with C header implementations
-# This command uses Swift 6.4's embedded mode and @c @implementation features
+# Compile the Swift sources to ZephyrSystem.o and ZephyrSystem.swiftmodule. The
+# flag set is shared with the zephyr and root CMakeLists.txt swiftc calls; keep
+# the three in step.
 add_custom_command(
   OUTPUT ${SWIFT_OBJ_FILE} ${SWIFT_MODULE_FILE}
   COMMAND
     ${SWIFTC_EXECUTABLE}
 
     # === Target Configuration ===
-    -target ${SWIFT_TARGET}                               # Cross-compilation target (e.g., thumbv7em-none-eabi)
+    -target ${SWIFT_TARGET}                                 # Cross-compilation target (see _swift_map_target)
 
     # === Swift Language Features ===
     -Osize                                                  # Optimize for code size (critical for embedded systems)
@@ -164,12 +115,12 @@ add_custom_command(
     -parse-as-library                                       # Compile as library (not executable)
     -strict-memory-safety                                   # Enforce strict memory safety checks
     -whole-module-optimization                              # Whole-module optimization for better embedded performance
-    -enable-experimental-feature CImplementation            # Enable C interop features
-    -enable-experimental-feature Embedded                   # Enable Embedded Swift features (reduced runtime)
-    -enable-experimental-feature Extern                     # Enable extern Swift features
-    -enable-upcoming-feature ExistentialAny
-    -enable-upcoming-feature InternalImportsByDefault
-    -enable-upcoming-feature MemberImportVisibility
+    -enable-experimental-feature CImplementation            # Allow @c @implementation (implement C declarations in Swift)
+    -enable-experimental-feature Embedded                   # Embedded Swift: no runtime metadata or reflection
+    -enable-experimental-feature Extern                     # Enable the @extern attribute
+    -enable-upcoming-feature ExistentialAny                 # Require `any` on existential types
+    -enable-upcoming-feature InternalImportsByDefault       # `import` is internal; use `public import` to re-export
+    -enable-upcoming-feature MemberImportVisibility         # Members need their module imported in the file
 
     # === Code Generation ===
     -Xfrontend -function-sections                           # Separate functions into sections for linker optimization
@@ -177,7 +128,7 @@ add_custom_command(
     # === Output Generation ===
     -emit-object -o ${SWIFT_OBJ_FILE}                       # Generate object file for linking
     -emit-module -emit-module-path ${SWIFT_MODULE_FILE}     # Generate Swift module interface
-    -module-name ZephyrSystem                                  # Set the Swift module name to "ZephyrSystem"
+    -module-name ZephyrSystem                               # Swift module name
 
     # === Compilation Defines ===
     ${SWIFT_DEFINES}                                        # Add any Swift compilation defines from Zephyr config
@@ -192,7 +143,7 @@ add_custom_command(
 
     # === Cross-Compilation Configuration ===
     ${SWIFT_SYSROOT_FLAGS}                                  # Sysroot for C headers (cross-compile only)
-    -Xcc -DZEPHYR_BUILD_ENV                                 # Define that we're in a Zephyr build environment
+    -Xcc -DZEPHYR_BUILD_ENV                                 # Passed to the C importer while reading the headers
 
     # === C Interoperability ===
     -import-bridging-header ${CMAKE_CURRENT_SOURCE_DIR}/include/BridgingHeader.h  # Import C APIs to Swift
@@ -203,14 +154,13 @@ add_custom_command(
   DEPENDS ${SWIFT_SOURCES}
   COMMENT "Compiling Swift sources for ZephyrSystem with @c @implementation support")
 
-# Create the ZephyrSystem static library target containing Swift implementations
+# Static library that carries the Swift object file
 add_library(ZephyrSystem STATIC)
 
-# Set the linker language to C to ensure proper linking with Zephyr This is
-# necessary because CMake needs to know how to link the final binary
+# The library has no C sources, so tell CMake to link it with the C toolchain.
 set_target_properties(ZephyrSystem PROPERTIES LINKER_LANGUAGE C)
 
-# Create a compilation target to track when Swift compilation is complete
+# Target that other targets depend on to wait for the Swift compilation
 add_custom_target(ZephyrSystem_swift_compile DEPENDS ${SWIFT_OBJ_FILE}
                                                   ${SWIFT_MODULE_FILE})
 
@@ -223,9 +173,8 @@ target_sources(ZephyrSystem PRIVATE ${SWIFT_OBJ_FILE})
 # Make the ZephyrSystem library target depend on successful Swift compilation
 add_dependencies(ZephyrSystem ZephyrSystem_swift_compile)
 
-# Make the include directory publicly available This contains bridging headers
-# and module maps that Swift imports PUBLIC visibility means other targets
-# linking to ZephyrSystem get these includes
+# Publish include/ (BridgingHeader.h, module.modulemap) to targets that link
+# ZephyrSystem.
 target_include_directories(ZephyrSystem PUBLIC include)
 
 # Directory holding ZephyrSystem.swiftmodule, so dependent Swift builds (the
@@ -233,7 +182,5 @@ target_include_directories(ZephyrSystem PUBLIC include)
 set_target_properties(ZephyrSystem PROPERTIES
   SWIFT_MODULE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
-# Link with the core Zephyr kernel and libraries PUBLIC linking means that
-# targets depending on ZephyrSystem also get Zephyr This ensures Swift code has
-# access to all Zephyr RTOS functionality
+# Link the Zephyr kernel; PUBLIC so that dependents get it too.
 target_link_libraries(ZephyrSystem PUBLIC zephyr)
