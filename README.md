@@ -92,7 +92,10 @@ west update zephyr-lang-swift
 
    ```cmake
    cmake_minimum_required(VERSION 3.29)
-   set(BOARD $ENV{ZEPHYR_BOARD})
+   # `west build -b <board>` wins; otherwise use ZEPHYR_BOARD.
+   if(NOT DEFINED BOARD AND DEFINED ENV{ZEPHYR_BOARD})
+     set(BOARD $ENV{ZEPHYR_BOARD})
+   endif()
    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
    project(my_swift_app)
 
