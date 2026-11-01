@@ -10,7 +10,7 @@ __name__/
 ├── app/                     # from add-app
 │   ├── CMakeLists.txt
 │   ├── prj.conf
-│   ├── sample.yml
+│   ├── sample.yaml
 │   ├── .env.example
 │   └── src/Entrypoint.swift
 ├── lib/                     # from add-library (empty until the first library)

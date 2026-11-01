@@ -9,7 +9,7 @@ and the `anselmes/repository` template fetched from GitHub with this kit's tooli
 | Skill         | Scaffolds                                                                                                 |
 | ------------- | --------------------------------------------------------------------------------------------------------- |
 | `new-project` | A standalone Swift application repository: `west.yml`, `app/`, `AGENTS.md`, CI that builds with `west`    |
-| `add-app`     | An application in an existing project: `CMakeLists.txt`, `prj.conf`, `sample.yml`, `.env.example`, `src/` |
+| `add-app`     | An application in an existing project: `CMakeLists.txt`, `prj.conf`, `sample.yaml`, `.env.example`, `src/` |
 | `add-library` | A library module: its `Kconfig` symbol, `CMakeLists.txt`, `zephyr/module.yml` entry and Swift sources     |
 
 Each skill infers what it can from the project it runs in (`west.yml`, the Git remote, `hack/copyright.txt`) and asks once for the rest.

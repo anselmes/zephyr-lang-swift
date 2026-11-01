@@ -12,9 +12,17 @@
 | `templates/Kconfig`                      | `Kconfig`                         | When missing; if one exists, add `rsource "lib/Kconfig"` once and keep its options |
 | `templates/zephyr/module.yml`            | `zephyr/module.yml`               | Only when missing                                                               |
 
-An existing module may already build from other entry points. Keep its `zephyr/module.yml` `build.cmake` and `build.kconfig` paths, and extend the
-files they name: add `add_subdirectory_ifdef(CONFIG___MODULE__ lib/__module__)` (or `add_subdirectory(lib)` with the `lib/CMakeLists.txt` template) to
-the CMake entry point, and `rsource "lib/Kconfig"` to the Kconfig entry point, so the new library tree is part of the build.
+An existing module may already build from other entry points. Keep its `zephyr/module.yml` `build.cmake` and `build.kconfig` paths and its other
+`build.depends` entries, and extend the files they name:
+
+- Add `lang-swift` to `build.depends` (create the list if missing). Without it Zephyr may load the module before `lang-swift`, and
+  `zephyr_swift_library()` is an unknown command.
+- Resolve each entry point relative to the module root: `build.cmake: zephyr` means `zephyr/CMakeLists.txt`, `build.kconfig: zephyr/Kconfig` means
+  `zephyr/Kconfig`. Write paths relative to that file, not to the repository root, so with `build.cmake: zephyr` the line is
+  `add_subdirectory_ifdef(CONFIG___MODULE__ ../lib/__module__)`.
+- If the entry point already pulls in a `lib` tree (an existing `add_subdirectory(lib)` or `rsource "lib/Kconfig"`), extend that tree's
+  `lib/CMakeLists.txt` and `lib/Kconfig` and add nothing to the entry point. Otherwise add the `add_subdirectory_ifdef` and `rsource` lines to the entry
+  points themselves, and do not create a `lib/CMakeLists.txt` that nothing includes.
 
 The project root is the Zephyr module: `zephyr/module.yml` points `build.cmake` at `lib` and `build.kconfig` at the root `Kconfig`.
 
