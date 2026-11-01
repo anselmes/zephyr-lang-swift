@@ -2,13 +2,13 @@
 // Copyright (c) __year__ __author__
 
 import Zephyr
+__library-imports__
 
-__library - imports__
 /// The application entry point, called by `main()` in the Zephyr module's `Application.swift`.
 @c(entrypoint)
 func entrypoint() {
-    print("Hello from __Title__!")
-    while true {
-        sleep(Duration.milliseconds(1000))
-    }
+  print("Hello from __Title__!")
+  while true {
+    sleep(Duration.milliseconds(1000))
+  }
 }
