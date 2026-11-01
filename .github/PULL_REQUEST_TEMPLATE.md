@@ -38,6 +38,7 @@
 
 ## Checklist
 
+- [ ] Every commit is signed (`-S`) and signed off for the DCO (`-s`)
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have updated the documentation accordingly

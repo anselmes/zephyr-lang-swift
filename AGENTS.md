@@ -73,8 +73,13 @@ Every Swift target is compiled with this flag set:
 
   Code derived from Linaro's Zephyr Swift work keeps its Apache-2.0 header.
 
+- **DCO**: every commit must carry a `Signed-off-by: Name <email>` trailer certifying the [Developer Certificate of Origin](https://developercertificate.org/).
+  Add it with `git commit -s` (together with `-S`, which signs cryptographically; the two are independent and both are required). Use the author's real
+  name and the email of the git identity, never one invented for an agent. Keep the trailer when you amend, rebase or squash: `git rebase --signoff`
+  adds a missing one. Check with `git log --format='%h %(trailers:key=Signed-off-by,valueonly)'`; no commit may be blank. A PR with a commit that lacks
+  it must not be merged.
 - **Commits**: conventional commits using the types in `.commitlintrc` (`feature`, not `feat`; also `build`, `fix`, `refactor`, `docs`, `test`, `ci`, `chore`, …),
-  sentence-case subject, `!` for breaking changes. Every commit is GPG-signed (`git commit -S`); never bypass signing. Commits Claude wrote carry
+  sentence-case subject, `!` for breaking changes. Every commit is GPG-signed (`git commit -S`) and signed off (`git commit -s`, see DCO above); never bypass either. Commits Claude wrote carry
   `Co-authored-by: Claude <81847+claude@users.noreply.github.com>`. Check with `git log --format='%h %G? %s'`; every line must show `G`.
 - **Swift**: 6.4+. Formatting follows `.swift-format` (2-space indent, 180 columns, trailing commas); run `trunk check` and `trunk fmt`.
 - **Files**: one type per file, named after the type; no `+` in file names.
