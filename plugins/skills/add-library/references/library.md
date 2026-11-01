@@ -12,6 +12,10 @@
 | `templates/Kconfig`                      | `Kconfig`                         | When missing; if one exists, add `rsource "lib/Kconfig"` once and keep its options |
 | `templates/zephyr/module.yml`            | `zephyr/module.yml`               | Only when missing                                                               |
 
+An existing module may already build from other entry points. Keep its `zephyr/module.yml` `build.cmake` and `build.kconfig` paths, and extend the
+files they name: add `add_subdirectory_ifdef(CONFIG___MODULE__ lib/__module__)` (or `add_subdirectory(lib)` with the `lib/CMakeLists.txt` template) to
+the CMake entry point, and `rsource "lib/Kconfig"` to the Kconfig entry point, so the new library tree is part of the build.
+
 The project root is the Zephyr module: `zephyr/module.yml` points `build.cmake` at `lib` and `build.kconfig` at the root `Kconfig`.
 
 ## Rules

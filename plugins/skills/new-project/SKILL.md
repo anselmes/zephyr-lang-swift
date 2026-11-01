@@ -69,7 +69,7 @@ replacing any the template ships), and copy the `.trunk` settings from zephyr-la
 
 - `LICENSE`: keep the template's for `GPL-3.0`; for another license, stop and ask for the text.
 - `.github/workflows/west.yml`: after filling tokens, run `gh actions-lock` to update `.github/workflows/actions.lock`; never edit the lock by hand.
-- Run the `add-app` steps for the first application (`app/`), then write `AGENTS.md` from `templates/AGENTS.md` with `CLAUDE.md` as a symlink to it:
+- Run steps 1 to 3 of `add-app` for the first application (`app/`), skipping its verification step: the workspace does not exist until step 5 below, which verifies the app. Then write `AGENTS.md` from `templates/AGENTS.md` with `CLAUDE.md` as a symlink to it:
   `ln -s AGENTS.md CLAUDE.md`.
 
 ## 5. Verify
