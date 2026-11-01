@@ -10,16 +10,29 @@ extension Duration: TimeoutConvertible {}
 // MARK: - Public
 
 public extension Duration {
+  /// Whole kernel ticks, rounded to the nearest tick (integer math).
+  ///
+  /// The sign is kept, so a negative duration gives negative ticks; this is
+  /// not the timeout encoding, which maps negative durations to `K_NO_WAIT` and
+  /// rounds up. Rounding to nearest keeps instant arithmetic exact: durations
+  /// built from ticks convert back to the same tick count.
   var ticks: Tick {
-    let totalNanoSeconds = self.components.seconds * 1_000_000_000 + Int64(self.components.attoseconds / 1_000_000_000)
-    let ticksPerNanoSecond = Double(SYS_FREQUENCY) / 1_000_000_000.0
-    return Tick(Double(totalNanoSeconds) * ticksPerNanoSecond)
+    Tick(clamping: nearestKernelTicks)
   }
 
   init(ticks: Tick) {
-    let seconds = Double(ticks) / Double(SYS_FREQUENCY)
-    self = .seconds(seconds)
+    let perSecond = Int64(SYS_FREQUENCY)
+    let (seconds, remainder) = Int64(ticks).quotientAndRemainder(dividingBy: perSecond)
+    // `remainder.magnitude < perSecond`, so the 128-bit product divided by
+    // `perSecond` fits in 64 bits and keeps the sub-nanosecond part.
+    let (high, low) = remainder.magnitude.multipliedFullWidth(by: 1_000_000_000_000_000_000)
+    // Truncate toward zero: the error is under one attosecond, and both the
+    // round-up (timeout) and nearest (instant) conversions recover `ticks`.
+    let attoseconds = Int64(UInt64(perSecond).dividingFullWidth((high, low)).quotient)
+    self.init(
+      secondsComponent: seconds,
+      attosecondsComponent: remainder < 0 ? -attoseconds : attoseconds)
   }
 
-  func toTimeout() -> Timeout { Timeout(from: self) }
+  func toTimeout() -> Timeout { .init(from: self) }
 }

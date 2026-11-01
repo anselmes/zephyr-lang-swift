@@ -12,48 +12,18 @@ import ZephyrSystem
 // swift-format-ignore: AlwaysUseLowerCamelCase
 public var SYS_FREQUENCY: Int32 { return CONFIG_SYS_CLOCK_TICKS_PER_SEC }
 
-public struct Forever {
-  public func toTimeout() -> Timeout { Timeout(from: self) }
-}
-
-public struct NoWait {
-  public func toTimeout() -> Timeout { Timeout(from: self) }
-}
-
-// MARK: - Extension
-
-extension Forever:
-  Sendable,
-  TimeoutConvertible
-{}
-
-extension NoWait:
-  Sendable,
-  TimeoutConvertible
-{}
-
 // MARK: - Public
 
+/// Sleeps the calling thread (`k_sleep`).
+///
+/// - Returns: The time left when another thread woke this one early.
 @discardableResult
 public func sleep<T: TimeoutConvertible>(_ timeout: T) -> Duration {
-  let timeout = timeout.toTimeout()
-  let rest = k_sleep(timeout.value)
-  return .milliseconds(Int(rest))
+  Kernel.sleep(timeout: timeout.toTimeout().value)
 }
 
 #if CONFIG_TIMEOUT_64BIT
   public func now() -> Instant {
-    return Instant(ticks: Tick(k_uptime_ticks()))
+    return .init(ticks: Tick(Kernel.uptimeTicks))
   }
 #endif
-
-// MARK: - Internal
-
-func checkedCast<T: BinaryInteger, U: BinaryInteger>(_ value: T) -> U {
-  #if DEBUG
-    guard let result = U(exactly: value) else { fatalError("Overflow in time conversion") }
-    return result
-  #else
-    return U(clamping: value)
-  #endif
-}

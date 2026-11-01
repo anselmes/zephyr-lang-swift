@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
+public import ZephyrSystem
 
 public protocol TimeoutConvertible {
   func toTimeout() -> Timeout
@@ -21,31 +21,27 @@ extension Timeout:
 // MARK: - Public
 
 public extension Timeout {
-  static let forever = k_timeout_t(ticks: -1)
-  static let nowait = k_timeout_t(ticks: 0)
+  /// `K_FOREVER`; kept for source compatibility.
+  static var forever: k_timeout_t { .forever }
+  /// `K_NO_WAIT`; kept for source compatibility.
+  static var nowait: k_timeout_t { .noWait }
 
   init(_ value: k_timeout_t) { self.value = value }
 
-  init(from _: Forever) { self.value = Timeout.forever }
-  init(from _: NoWait) { self.value = Timeout.nowait }
+  init(from _: Forever) { self.value = .forever }
+  init(from _: NoWait) { self.value = .noWait }
 
-  init(from duration: Duration) {
-    let ticks = checkedCast(duration.ticks) as k_ticks_t
-    assert(ticks != Timeout.forever.ticks)
-    assert(ticks != Timeout.nowait.ticks)
-    self.value = k_timeout_t(ticks: ticks)
-  }
+  /// Rounds up to whole ticks; a zero duration is `K_NO_WAIT`.
+  init(from duration: Duration) { self.value = k_timeout_t(duration) }
 
   static func == (lhs: Timeout, rhs: Timeout) -> Bool {
     return lhs.value.ticks == rhs.value.ticks
   }
 
   #if CONFIG_TIMEOUT_64BIT
+    /// An instant at or before boot has already passed, so it is `K_NO_WAIT`.
     init(from instant: Instant) {
-      let ticks = checkedCast(instant.ticks) as k_ticks_t
-      assert(ticks != Timeout.forever.ticks)
-      assert(ticks != Timeout.nowait.ticks)
-      self.value = k_timeout_t(ticks: -1 - ticks)
+      self.value = instant.ticks > 0 ? .absolute(ticks: instant.ticks) : .noWait
     }
   #endif
 }
