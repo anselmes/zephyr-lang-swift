@@ -42,7 +42,7 @@ west build -p -b __board__ app
 west twister -T tests
 ```
 
-Both builds must succeed without new warnings before a PR merges.
+The build must succeed, and the tests pass, without new warnings before a PR merges.
 
 ## Pull requests
 

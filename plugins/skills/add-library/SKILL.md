@@ -13,7 +13,7 @@ metadata:
 
 # Add a library
 
-Adds one library under `lib/<module>/` to an existing Zephyr Swift project. It mirrors `samples/lib` and `samples/app+lib`
+Adds one library under `lib/<module>/` to an existing Zephyr Swift project. It mirrors `samples/lib` and `samples/app+lib/lib`
 in zephyr-lang-swift.
 
 ## 1. Read the references

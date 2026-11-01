@@ -13,7 +13,7 @@ metadata:
 
 # Add an application
 
-Adds one application directory (default `app/`) to an existing Zephyr Swift project. It mirrors `samples/app` and `samples/app+lib`
+Adds one application directory (default `app/`) to an existing Zephyr Swift project. It mirrors `samples/app` and `samples/app+lib/app`
 in zephyr-lang-swift.
 
 ## 1. Read the references
