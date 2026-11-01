@@ -85,7 +85,7 @@ Every Swift target is compiled with this flag set:
 - `ZephyrError` is an enum (`Error`, `Sendable`, `Equatable`; no `Codable` in Embedded). Wrap Zephyr calls that return `-errno` with `try check(_:)`,
   which throws `ZephyrError`. New fallible wrappers use `throws(ZephyrError)`. Consume with a single `do` and one `catch` per case.
 - Time: build on `k_timeout_t` (`.noWait`, `.forever`, `.init(_: Duration)`, `.absolute(ticks:)`) and `Kernel` from `ZephyrSystem` instead of re-implementing them.
-  Tick conversion uses integer math with ceiling rounding; no `Double`. A non-zero duration must never become `K_NO_WAIT`.
+  Tick conversion uses integer math with ceiling rounding; no `Double`. A positive duration must never become `K_NO_WAIT`; zero and negative durations do.
 
 ## Testing and verification
 
