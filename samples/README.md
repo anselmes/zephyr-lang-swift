@@ -38,6 +38,14 @@ cp .env.example .env
 source .env
 ```
 
+The combined sample keeps its `.env.example` one level above the application, so copy it from there:
+
+```bash
+cd samples/app+lib/app
+cp ../.env.example .env
+source .env
+```
+
 `.env` is git-ignored. The variables it sets are `ZEPHYR_WORKSPACE`, `TOOLCHAINS`, `ZEPHYR_TOOLCHAIN_VARIANT` (`zephyr/llvm`) and `ZEPHYR_BOARD`.
 
 ## Build and run
@@ -132,7 +140,7 @@ To start an application, copy `app` and edit `src/Entrypoint.swift`, `prj.conf` 
 cp -r samples/app my_app
 ```
 
-To start a library, copy `lib/hello` and rename the module, its Kconfig option and its `zephyr/module.yml` entry, then add the module to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
+To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib/Kconfig` and `app+lib/lib/`, not just `lib/hello`), rename the library, its Kconfig option and its `zephyr/module.yml` entry, then add the copied module root to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt` so Zephyr discovers the library and its Kconfig option. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
 
 ## Troubleshooting
 
