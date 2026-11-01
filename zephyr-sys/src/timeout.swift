@@ -77,11 +77,14 @@ extension Duration {
   /// The magnitude is rounded up to whole ticks straight from the seconds and
   /// attoseconds, so sub-nanosecond precision is kept and a tick-exact duration
   /// is not rounded up twice. The sign is kept, which makes this suitable for
-  /// instant arithmetic. Magnitudes beyond `Int64.max - 1` ticks saturate.
+  /// instant arithmetic. Results saturate at `Int64.min` and `Int64.max`; the
+  /// timeout conversions apply their own, tighter limits.
   public var kernelTicks: Int64 {
     let (seconds, attoseconds) = components
     let perSecond = UInt64(CONFIG_SYS_CLOCK_TICKS_PER_SEC)
-    let longest = UInt64(Int64.max - 1)
+    let negative = self < .zero
+    // The signed range is asymmetric: -2^63 is representable, 2^63 is not.
+    let limit = UInt64(Int64.max) + (negative ? 1 : 0)
 
     var fraction: UInt64 = 0
     let atto = attoseconds.magnitude
@@ -99,7 +102,10 @@ extension Duration {
     }
 
     let (whole, overflow) = seconds.magnitude.multipliedReportingOverflow(by: perSecond)
-    let magnitude = overflow || whole > longest || fraction > longest - whole ? longest : whole + fraction
-    return self < .zero ? -Int64(magnitude) : Int64(magnitude)
+    let magnitude = overflow || whole > limit || fraction > limit - whole ? limit : whole + fraction
+    if negative {
+      return magnitude > UInt64(Int64.max) ? .min : -Int64(magnitude)
+    }
+    return Int64(magnitude)
   }
 }
