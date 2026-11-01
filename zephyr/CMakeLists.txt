@@ -53,11 +53,6 @@ This library integrates with:
 
 #]=======================================================================]
 
-# Include Swift toolchain configuration functions
-# This provides _swift_map_target() and _enable_swift() functions for
-# configuring cross-compilation and Swift-specific build settings
-include(${CMAKE_CURRENT_SOURCE_DIR}/../toolchain.cmake)
-
 # Discover all Swift source files in the lib/ directory
 # lib/: Core Zephyr Swift library implementation providing high-level APIs
 # These files contain Swift wrappers and enhancements for Zephyr C APIs

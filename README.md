@@ -99,16 +99,12 @@ public func myFunction() -> String {
 swift/
 ├── CMakeLists.txt          # Main build configuration
 ├── Kconfig                 # Configuration options
-├── toolchain.cmake         # Swift toolchain integration
 ├── zephyr-sys/             # C runtime support library
 │   ├── src/                # C stub implementations
 │   └── include/            # Bridging headers and module maps
 ├── zephyr/                 # Core Swift library
 │   ├── lib/                # Swift Zephyr bindings
 │   └── src/                # Application bootstrap
-├── cmake/                  # CMake helper functions
-│   ├── Application.cmake   # zephyr_swift_application() function
-│   └── Library.cmake       # zephyr_swift_library() function
 └── samples/                # Example applications and libraries
 ```
 
@@ -160,7 +156,7 @@ Check the `tests/` directory for comprehensive integration examples.
 
 To add support for a new architecture:
 
-1. Update `_swift_map_target()` in `toolchain.cmake`
+1. Update `_swift_map_target()` in `CMakeLists.txt`
 2. Add appropriate Swift target triple mapping
 3. Test cross-compilation for the new target
 
