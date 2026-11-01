@@ -7,8 +7,9 @@
 /// Swift cannot import.
 ///
 /// `k_ticks_t` is `int64_t` with `CONFIG_TIMEOUT_64BIT=y` (Zephyr's default) and
-/// `int32_t` otherwise; every conversion here clamps to the width in use.
-/// `K_TICKS_FOREVER` is `-1` in both.
+/// `uint32_t` otherwise. `K_TICKS_FOREVER` is `(k_ticks_t)-1`, so it is `-1` in
+/// the first case and `UInt32.max` in the second; finite conversions here clamp
+/// below it. Absolute deadlines exist only in 64-bit builds.
 ///
 /// ```swift
 /// _ = k_thread_join(tid, .milliseconds(500))
@@ -18,7 +19,16 @@ extension k_timeout_t {
   public static var noWait: k_timeout_t { k_timeout_t(ticks: 0) }
 
   /// `K_FOREVER`.
-  public static var forever: k_timeout_t { k_timeout_t(ticks: -1) }
+  public static var forever: k_timeout_t { k_timeout_t(ticks: k_ticks_t(truncatingIfNeeded: -1)) }
+
+  /// The longest finite tick count: `k_ticks_t.max`, less one when the type is
+  /// unsigned because `UInt32.max` is `K_TICKS_FOREVER`.
+  private static var longestFinite: k_ticks_t { k_ticks_t.isSigned ? .max : .max - 1 }
+
+  /// Clamps a tick count to the finite range of `k_ticks_t`.
+  private init(clamping ticks: Int64) {
+    self.init(ticks: k_ticks_t(clamping: min(ticks, Int64(Self.longestFinite))))
+  }
 
   /// `K_MSEC(ms)`: rounds up to whole ticks, like `k_ms_to_ticks_ceil64`.
   /// Zero and negative values become `K_NO_WAIT`.
@@ -26,7 +36,7 @@ extension k_timeout_t {
     guard milliseconds > 0 else { return .noWait }
     let ticksPerSecond = Int64(CONFIG_SYS_CLOCK_TICKS_PER_SEC)
     let ticks = (Int64(milliseconds) * ticksPerSecond + 999) / 1_000
-    return k_timeout_t(ticks: k_ticks_t(clamping: ticks))
+    return k_timeout_t(clamping: ticks)
   }
 
   /// `K_TICKS(ticks)`.
@@ -34,13 +44,18 @@ extension k_timeout_t {
     .init(ticks: ticks)
   }
 
-  /// `K_TIMEOUT_ABS_TICKS(ticks)`: an absolute deadline in kernel ticks since
-  /// boot. Zephyr reserves `-1` for `K_FOREVER` and encodes the absolute tick
-  /// `t` as `-2 - t`. Negative values clamp to boot time, and values too large
-  /// to encode clamp to the latest deadline.
-  public static func absolute(ticks: k_ticks_t) -> k_timeout_t {
-    .init(ticks: -2 - min(max(ticks, 0), k_ticks_t.max - 1))
-  }
+  #if CONFIG_TIMEOUT_64BIT
+    /// `K_TIMEOUT_ABS_TICKS(ticks)`: an absolute deadline in kernel ticks since
+    /// boot. Zephyr reserves `-1` for `K_FOREVER` and encodes the absolute tick
+    /// `t` as `-2 - t`. Negative values clamp to boot time, and values too large
+    /// to encode clamp to the latest deadline.
+    ///
+    /// Available when the build passes `-DCONFIG_TIMEOUT_64BIT`; without it
+    /// `k_ticks_t` is unsigned and Zephyr has no absolute encoding.
+    public static func absolute(ticks: k_ticks_t) -> k_timeout_t {
+      .init(ticks: -2 - min(max(ticks, 0), k_ticks_t.max - 1))
+    }
+  #endif
 
   /// Converts a `Duration` using integer math only (no floating point).
   /// Rounds up to whole ticks, so a positive duration never becomes
@@ -52,7 +67,7 @@ extension k_timeout_t {
       self = .noWait
       return
     }
-    self = k_timeout_t(ticks: k_ticks_t(clamping: ticks))
+    self = k_timeout_t(clamping: ticks)
   }
 }
 
