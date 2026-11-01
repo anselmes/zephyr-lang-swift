@@ -1,297 +1,145 @@
-# Sample Applications and Libraries
+# Swift Samples
 
-This directory contains comprehensive examples demonstrating how to use Swift with Zephyr RTOS. The samples showcase different aspects of Swift development for embedded systems, from basic applications to reusable library modules.
+Three samples show how to build Swift applications and libraries for Zephyr with this module. Each one is built and run with `west`, and each has been built for `qemu_riscv32/qemu_virt_riscv32/smp` with Zephyr SDK 1.0.1 and its LLVM toolchain. Other boards are not covered by these samples.
 
-## Overview
+## Table of Contents
 
-The samples are organized to demonstrate progressive complexity and different use cases:
+- [Samples](#samples)
+- [Prerequisites](#prerequisites)
+- [Build and run](#build-and-run)
+- [Application: app](#application-app)
+- [Application with a library: app+lib](#application-with-a-library-applib)
+- [Library: lib](#library-lib)
+- [Configuration](#configuration)
+- [Create your own](#create-your-own)
+- [Troubleshooting](#troubleshooting)
 
+## Samples
 
-## Sample Structure
+| Directory | What it is                                                              | Build it with `west` |
+| --------- | ----------------------------------------------------------------------- | -------------------- |
+| `app`     | A Swift application that prints a greeting and sleeps in a loop         | yes                  |
+| `app+lib` | A Zephyr module with the Hello library, plus an application using it    | in `app+lib/app`     |
+| `lib`     | The Hello library as a standalone Zephyr module, without an application | no                   |
 
-### Application Samples (`app/`)
+`lib` and `app+lib/lib` contain the same Hello library. `app+lib` is the self-contained combined sample; `lib` is the standalone module for readers who want only the library. A module is not an application, so running `west build` in `lib` fails with `Unknown CMake command "add_subdirectory_ifdef"`.
 
-Complete Swift applications that can be built and run on Zephyr boards.
+## Prerequisites
 
-**Key Features Demonstrated:**
+1. A Swift 6.4 or later toolchain from swift.org with Embedded Swift support. Xcode's Swift lacks the RISC-V and Arm embedded backends. Select the swift.org toolchain with `TOOLCHAINS=swift`.
+2. A Zephyr workspace with the Zephyr SDK (1.0.1 was used) and its LLVM toolchain.
+3. A board, physical or emulated. The samples use QEMU.
 
-
-**Files in Application Samples:**
-
-
-### Library Module Samples (`modules/`)
-
-Reusable Swift libraries that demonstrate how to create modular Swift code for Zephyr.
-
-**Key Features Demonstrated:**
-
-
-**Example: Hello Module (`modules/hello/`)**
-
-
-## Getting Started
-
-### Prerequisites
-
-1. **Swift Toolchain**: Ensure you have Swift with Embedded Swift support installed
-2. **Zephyr SDK**: Have Zephyr RTOS SDK properly configured
-3. **Target Board**: A supported Zephyr board (physical or emulated)
-
-### Building and Running Samples
-
-#### Basic Application Sample
-
-1. **Navigate to the application directory:**
-
-    ```bash
-    cd samples/app/
-    ```
-
-2. **Build for your target board:**
-
-    ```bash
-    west build -b <your_board>
-    ```
-
-3. **Flash and run:**
-
-    ```bash
-    west flash
-    west attach
-    ```
-
-#### Library Module Sample
-
-1. **Navigate to a project that uses the library:**
-
-    ```bash
-    cd samples/app/  # This app can import the hello module
-    ```
-
-2. **Ensure the library module is in the build path:**
-
-    ```bash
-    # The build system automatically discovers modules in samples/modules/
-    ```
-
-3. **Build with library support:**
-
-    ```bash
-    west build -b <your_board>
-    ```
-
-### Sample Applications
-
-#### Hello World Application (`app/`)
-
-**Purpose**: Demonstrates basic Swift application structure for Zephyr.
-
-**Features:**
-
-
-**Code Highlights:**
-
-```swift
-func entrypoint() {
-  print("Hello from Swift!!!")
-
-  while true {
-    print("still running...")
-    // Use Zephyr's sleep function
-    k_sleep(K_MSEC(2000))
-  }
-}
-```
-
-#### Hello Library Module (`modules/hello/`)
-
-**Purpose**: Demonstrates creating reusable Swift libraries for Zephyr.
-
-**Features:**
-
-
-**Code Highlights:**
-
-```swift
-public func greet(_ name: String) -> String {
-  return "Hello, \(name) from Swift library!"
-}
-
-public struct HelloConfig {
-  public static let version = "1.0.0"
-}
-```
-
-## Development Patterns
-
-### Application Development
-
-**Entry Point Pattern:**
-
-```swift
-func entrypoint() {
-  // Your application logic here
-}
-```
-
-**Zephyr Integration:**
-
-```swift
-import Zephyr
-
-func useZephyrAPIs() {
-  // Access Zephyr kernel functions
-  k_sleep(K_MSEC(1000))
-
-  // Use Zephyr device APIs
-  // let gpio = device_get_binding("GPIO_0")
-}
-```
-
-### Library Development
-
-**Public API Design:**
-
-```swift
-// Make functions and types public for other modules
-public func libraryFunction() -> String {
-  return "Library response"
-}
-
-public struct LibraryType {
-  public let value: Int
-  public init(value: Int) {
-    self.value = value
-  }
-}
-```
-
-**Module Configuration:**
-
-
-## Configuration Examples
-
-### Basic Swift Application (`prj.conf`)
-
-```kconfig
-# Enable Swift language support
-CONFIG_SWIFT=y
-
-# Enable debug information during development
-CONFIG_SWIFT_DEBUG_INFO=y
-
-# Standard Zephyr options
-CONFIG_PRINTK=y
-CONFIG_CONSOLE=y
-CONFIG_UART_CONSOLE=y
-```
-
-### Application with Library Modules
-
-```kconfig
-# Enable Swift and specific modules
-CONFIG_SWIFT=y
-CONFIG_HELLO=y  # Enable the Hello library module
-
-# Debug configuration
-CONFIG_SWIFT_DEBUG_INFO=y
-CONFIG_DEBUG=y
-```
-
-## Testing Samples
-
-### Automated Testing
-
-The samples include automated test configurations:
+The samples read the board and toolchain from environment variables. Copy `.env.example` to `.env` in the application directory, adjust `ZEPHYR_WORKSPACE`, and source it:
 
 ```bash
-# Run sample tests using Zephyr's testing framework
-west twister -T samples/ --platform qemu_riscv32
+cd samples/app
+cp .env.example .env
+source .env
 ```
 
-### Manual Testing
+`.env` is git-ignored. The variables it sets are `ZEPHYR_WORKSPACE`, `TOOLCHAINS`, `ZEPHYR_TOOLCHAIN_VARIANT` (`zephyr/llvm`) and `ZEPHYR_BOARD`.
 
-1. **Build for QEMU:**
+## Build and run
 
-    ```bash
-    west build -b qemu_riscv32
-    ```
+From an application directory, with the environment sourced:
 
-2. **Run in emulation:**
+```bash
+west build -p -t run
+```
 
-    ```bash
-    west build -t run
-    ```
+`-p` starts from a clean build directory and `-t run` boots the image in QEMU. Leave QEMU with `Ctrl+a`, then `x`. For another board, pass it with `-b <board>` and use `west flash` and `west attach` instead of `-t run`.
 
-3. **Verify output:**
-  Look for Swift print statements in the console output.
+## Application: app
 
-## Customizing Samples
+`app/src/Entrypoint.swift` defines the entry point, which the C `main` in `zephyr/src/Application.swift` calls:
 
-### Creating New Applications
+```swift
+@c(entrypoint)
+func entrypoint() {
+  print("Hello from Swift!!!")
+  while true {
+    sleep(Duration.milliseconds(1000))
+  }
+}
+```
 
-1. **Copy the basic app structure:**
+Expected output:
 
-    ```bash
-    cp -r samples/app/ my_new_app/
-    ```
+```text
+*** Booting Zephyr OS build v4.2.0-38463-g3c1d637c5ded ***
+Hello from Swift!!!
+```
 
-2. **Modify the Swift code:**
-  Edit `src/Entrypoint.swift` with your application logic.
+## Application with a library: app+lib
 
-3. **Update configuration:**
-  Modify `prj.conf` and `CMakeLists.txt` as needed.
+The application is in `app+lib/app`. Its `CMakeLists.txt` sets `ZEPHYR_EXTRA_MODULES` to the parent directory, which is a Zephyr module (`zephyr/module.yml`) containing the Hello library in `lib/`. The application's `prj.conf` enables the library with `CONFIG_HELLO=y`, and its source imports it:
 
-### Creating New Libraries
+```swift
+import Hello
 
-1. **Copy the hello module structure:**
+@c(entrypoint)
+func entrypoint() {
+  print("Hello from Swift app+lib!!!")
+  hello()
+  while true {
+    sleep(Duration.milliseconds(2000))
+  }
+}
+```
 
-    ```bash
-    cp -r samples/modules/hello/ samples/modules/my_library/
-    ```
+`hello()` never returns, so the `while true` loop after it is never reached. Expected output:
 
-2. **Update the module definition:**
-    - Change the module name in `zephyr/module.yml`
-    - Update Kconfig options and help text
-    - Modify the CMakeLists.txt module name
+```text
+Hello from Swift app+lib!!!
+Hello from Swift!!!
+still running...
+still running...
+```
 
-3. **Implement your library:**
-  Replace the Swift code in `lib/` with your implementation.
+The source files are in `app+lib/src`, and `app+lib/app/src` is a symlink to them.
 
-## Best Practices
+## Library: lib
 
-### Performance Considerations
+The Hello library (`lib/hello`) exports two entry points, both of which print a greeting and then `still running...` every `timeout` milliseconds, and never return:
 
+```swift
+public func hello(timeout: Int = 1000)
 
-### Memory Management
+public struct Hello {
+  public static func run(timeout: Int = 1000)
+}
+```
 
+`lib/hello/Kconfig` defines `CONFIG_HELLO`, and `lib/CMakeLists.txt` adds the library to the build only when it is set. `lib/hello/CMakeLists.txt` compiles the sources with `zephyr_swift_library(MODULE_NAME Hello)`.
 
-### Debugging
+## Configuration
 
-  ```swift
-  #if SWIFT_DEBUG_INFO
-      print("Debug: operation completed")
-  #endif
-  ```
+Both applications set these options in `prj.conf`:
 
-### Integration
+| Option                    | Purpose                                                             |
+| ------------------------- | ------------------------------------------------------------------- |
+| `CONFIG_SWIFT`            | Enables Swift support                                               |
+| `CONFIG_MINIMAL_LIBC`     | A libc with a heap, which the Embedded Swift runtime allocates from |
+| `CONFIG_SWIFT_DEBUG_INFO` | Optional. Defines `SWIFT_DEBUG_INFO` for `#if` blocks; adds no `-g` |
+| `CONFIG_HELLO`            | `app+lib` only. Builds the Hello library                            |
 
+## Create your own
+
+To start an application, copy `app` and edit `src/Entrypoint.swift`, `prj.conf` and `CMakeLists.txt`:
+
+```bash
+cp -r samples/app my_app
+```
+
+To start a library, copy `lib/hello` and rename the module, its Kconfig option and its `zephyr/module.yml` entry, then add the module to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Build Failures:**
-    - Verify Swift toolchain installation
-    - Check that CONFIG_SWIFT=y in prj.conf
-    - Ensure target architecture is supported
-
-2. **Runtime Issues:**
-    - Check stack size configuration
-    - Verify memory constraints are met
-    - Enable debug information for better error messages
-
-3. **Module Import Issues:**
-    - Ensure module is properly configured in Kconfig
-    - Check that module build dependencies are correct
-    - Verify module.yml configuration
+| Symptom                                         | Likely cause and fix                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org. |
+| `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Source `.env` (it sets `zephyr/llvm`).                     |
+| `BOARD is not being defined`                    | `ZEPHYR_BOARD` is not set. Source `.env`, or pass `-b <board>`.                                   |
+| `no such module 'Hello'`                        | `CONFIG_HELLO=y` is missing from `prj.conf`, or the module is not in `ZEPHYR_EXTRA_MODULES`.      |
+| `west twister -T samples/` finds nothing        | The `sample.yml` files have no `tests:` section yet, so twister has no test cases to run.         |

@@ -1,8 +1,7 @@
-# ==== Conditional Module Compilation ====
-# Only build this Swift module when it's explicitly enabled through Kconfig This
-# demonstrates resource-efficient building where unused modules are skipped
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-# Check if the Hello module is enabled in the project configuration CONFIG_HELLO
-# is defined in this module's Kconfig file and can be enabled in the
-# application's prj.conf with: CONFIG_HELLO=y
+# Add the Hello library only when CONFIG_HELLO is enabled, for example with
+# CONFIG_HELLO=y in the application's prj.conf. CONFIG_HELLO is defined in
+# hello/Kconfig.
 add_subdirectory_ifdef(CONFIG_HELLO hello)
