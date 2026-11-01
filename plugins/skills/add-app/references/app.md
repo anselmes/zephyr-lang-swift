@@ -24,6 +24,6 @@
 - `entrypoint()` is `@c(entrypoint)` and never returns; the `main()` that calls it is in the Zephyr module's `Application.swift`.
   Do not define another `main`.
 - Sleep with `sleep(Duration.milliseconds(...))` from `Zephyr`; never busy-wait.
-- Apps may define a `Kconfig` only to add application options; keep `CONFIG_SWIFT=y` and `CONFIG_MINIMAL_LIBC=y` in `prj.conf`.
+- Apps may define a `Kconfig` only to add application options; keep `CONFIG_SWIFT=y`, `CONFIG_MINIMAL_LIBC=y` and the nonzero malloc arena in `prj.conf`.
 - Boards, toolchain and paths come from the environment (`ZEPHYR_BOARD`, `ZEPHYR_TOOLCHAIN_VARIANT`, `CROSS_COMPILE`, `SYSROOT_DIR`);
   never hard-code them in `CMakeLists.txt`.

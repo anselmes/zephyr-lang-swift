@@ -88,7 +88,7 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 - A library is a Zephyr module: a `zephyr/module.yml` naming it and pointing `build.cmake` and `build.kconfig` at it, a `Kconfig` symbol that gates it,
   and a `CMakeLists.txt` calling `zephyr_swift_library(MODULE_NAME __Module__)` under `add_subdirectory_ifdef`. Apps enable it with `CONFIG___MODULE__=y`
   in `prj.conf` and see it through `ZEPHYR_EXTRA_MODULES`.
-- `prj.conf` always has `CONFIG_SWIFT=y` and `CONFIG_MINIMAL_LIBC=y`.
+- `prj.conf` always has `CONFIG_SWIFT=y`, `CONFIG_MINIMAL_LIBC=y` and a nonzero `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE`.
 - Board, toolchain and paths come from environment variables in `.env` (copied from `.env.example`, git-ignored); never hard-code them.
 - `.env`, keys and certificates are never committed.
 

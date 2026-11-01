@@ -19,7 +19,8 @@ An existing module may already build from other entry points. Keep its `zephyr/m
   `zephyr_swift_library()` is an unknown command.
 - Resolve each entry point relative to the module root: `build.cmake: zephyr` means `zephyr/CMakeLists.txt`, `build.kconfig: zephyr/Kconfig` means
   `zephyr/Kconfig`. Write paths relative to that file, not to the repository root, so with `build.cmake: zephyr` the line is
-  `add_subdirectory_ifdef(CONFIG___MODULE__ ../lib/__module__)`.
+  `add_subdirectory_ifdef(CONFIG___MODULE__ ../lib/__module__ ${CMAKE_CURRENT_BINARY_DIR}/lib/__module__)`. A source directory outside the
+  current one needs an explicit binary directory, or CMake fails at configuration.
 - If the entry point already pulls in a `lib` tree (an existing `add_subdirectory(lib)` or `rsource "lib/Kconfig"`), extend that tree's
   `lib/CMakeLists.txt` and `lib/Kconfig` and add nothing to the entry point. Otherwise add the `add_subdirectory_ifdef` and `rsource` lines to the entry
   points themselves, and do not create a `lib/CMakeLists.txt` that nothing includes.

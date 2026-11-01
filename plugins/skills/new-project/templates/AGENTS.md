@@ -5,7 +5,7 @@ one copy. Change the rules here. Anything not stated here follows the owner's gl
 
 ## What this repository is
 
-**description** It is an Embedded Swift application on Zephyr RTOS, built on the `zephyr-lang-swift` module.
+__description__ It is an Embedded Swift application on Zephyr RTOS, built on the `zephyr-lang-swift` module.
 
 ## Layout
 
