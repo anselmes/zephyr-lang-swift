@@ -30,13 +30,13 @@ extension k_timeout_t {
 
   /// `K_TICKS(ticks)`.
   public static func ticks(_ ticks: k_ticks_t) -> k_timeout_t {
-    k_timeout_t(ticks: ticks)
+    .init(ticks: ticks)
   }
 
   /// `K_TIMEOUT_ABS_TICKS(ticks)`: an absolute deadline in kernel ticks since
   /// boot. Negative values clamp to boot time.
   public static func absolute(ticks: k_ticks_t) -> k_timeout_t {
-    k_timeout_t(ticks: -1 - max(ticks, 0))
+    .init(ticks: -1 - max(ticks, 0))
   }
 
   /// Converts a `Duration` using integer math only (no floating point).
