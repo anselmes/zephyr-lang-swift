@@ -45,13 +45,16 @@ extension k_timeout_t {
   }
 
   /// `K_TICKS(ticks)`: a timeout from a raw tick count, which is relative for
-  /// non-negative values.
+  /// finite non-negative values.
   ///
   /// The value is copied unchanged, so negative counts are not relative
   /// timeouts. In a 64-bit build `-1` is `K_FOREVER` and anything below `-1`
   /// is an absolute deadline in the encoding of `absolute(ticks:)`, so `-3` is
-  /// tick 1. Do not pass a computed or untrusted count that may be negative;
-  /// use `milliseconds(_:)`, `init(_:)` or `absolute(ticks:)` instead.
+  /// tick 1. Without `CONFIG_TIMEOUT_64BIT`, `k_ticks_t` is unsigned and
+  /// `UInt32.max` is `K_TICKS_FOREVER`, so that one non-negative count also
+  /// waits indefinitely. Do not pass a computed or untrusted count that may be
+  /// negative or reach that limit; use `milliseconds(_:)`, `init(_:)` or
+  /// `absolute(ticks:)` instead.
   ///
   /// - Parameter ticks: The timeout in kernel ticks, taken as is.
   public static func ticks(_ ticks: k_ticks_t) -> k_timeout_t {
