@@ -10,15 +10,16 @@ extension Duration: TimeoutConvertible {}
 // MARK: - Public
 
 public extension Duration {
+  /// Whole kernel ticks, rounded up (integer math).
   var ticks: Tick {
-    let totalNanoSeconds = self.components.seconds * 1_000_000_000 + Int64(self.components.attoseconds / 1_000_000_000)
-    let ticksPerNanoSecond = Double(SYS_FREQUENCY) / 1_000_000_000.0
-    return Tick(Double(totalNanoSeconds) * ticksPerNanoSecond)
+    Tick(clamping: k_timeout_t(self).ticks)
   }
 
   init(ticks: Tick) {
-    let seconds = Double(ticks) / Double(SYS_FREQUENCY)
-    self = .seconds(seconds)
+    let perSecond = Int64(SYS_FREQUENCY)
+    let (seconds, remainder) = Int64(ticks).quotientAndRemainder(dividingBy: perSecond)
+    // `remainder < perSecond`, so the product stays far below Int64.max.
+    self = .seconds(seconds) + .nanoseconds(remainder * 1_000_000_000 / perSecond)
   }
 
   func toTimeout() -> Timeout { Timeout(from: self) }
