@@ -55,7 +55,10 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 | `__zephyr-owner__` | GitHub owner of the Zephyr source (default `anselmes`)     | `anselmes`                              |
 | `__zephyr-repo__` | Repository name of the Zephyr source (default `zephyr`)     | `zephyr`                                |
 | `__swift-rev__`   | `zephyr-lang-swift` revision, looked up                     | a tag or commit SHA                     |
-| `__Title__`       | Human-readable application name                             | `Blinky`                                |
+| `__Title__`       | Human-readable application name, as typed                   | `Blinky: ESP32`                         |
+| `__Title-yaml__`  | `__Title__` for a YAML double-quoted scalar (`\` and `"` escaped) | `Blinky: ESP32`                   |
+| `__Title-swift__` | `__Title__` for a Swift string literal (`\` and `"` escaped)  | `Blinky: ESP32`                         |
+| `__swift-version__` | Swift toolchain version for CI, looked up (6.4 or later)  | `6.4.2`                                 |
 | `__description__` | One-sentence description of the project or library          | `Blinks an LED.`                        |
 | `__hal-module__`  | A HAL module the board needs; one allowlist line per module | `hal_espressif`                         |
 

@@ -1,5 +1,5 @@
 sample:
-  name: __Title__
+  name: "__Title-yaml__"
 tests:
   app.build:
     build_only: true

@@ -3,6 +3,7 @@
 
 config __MODULE__
   bool "Enable the __Module__ Swift library"
+  depends on SWIFT
   help
     __description__
 

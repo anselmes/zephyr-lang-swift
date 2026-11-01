@@ -21,6 +21,16 @@ jobs:
           west init -l __name__
           west update
           west packages pip --install
+      - name: Install Swift
+        env:
+          SWIFT_VERSION: __swift-version__
+        run: |
+          curl -fsSL "https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz" | tar -xz
+          ./swiftly init --assume-yes --skip-install --quiet-shell-followup
+          . "${SWIFTLY_HOME_DIR:-${HOME}/.local/share/swiftly}/env.sh"
+          swiftly install --assume-yes --use "${SWIFT_VERSION}"
+          swiftc --version
+          echo "${SWIFTLY_BIN_DIR:-${HOME}/.local/share/swiftly/bin}" >> "${GITHUB_PATH}"
       - name: Install the SDK
         run: west sdk install --no-gnu-toolchains --llvm
       - name: Build
