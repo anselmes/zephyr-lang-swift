@@ -29,14 +29,16 @@ If any is missing or unreadable, stop and name the missing file.
 
 Infer what you can, then ask the user one combined question listing every missing input (see conventions):
 
-- **Name** (`__name__`) and **directory** (default `./__name__` beside the current directory). Stop if it exists and is not empty.
+- **Name** (`__name__`) and **directory** (`__dir__`; default `./__name__` beside the current directory). An existing empty directory is fine; stop if it is not empty.
 - **Owner** (`__owner__`; default `anselmes`) and whether to create the GitHub repository (confirm first: it creates a remote).
 - **Board** (`__board__`) and the **HAL modules** it needs in the manifest's allowlist (for example `hal_espressif` for ESP32).
 - **Title** of the first app; **license** (`GPL-3.0` default), **author**, **year**, one-line **description**.
 - **Zephyr source**: the project that provides Zephyr and its `revision` source (default: `anselmes/zephyr`).
   Its owner and repository name are `__zephyr-owner__` and `__zephyr-repo__`, independent of `__owner__`.
   Look up the latest release tag, and the latest `zephyr-lang-swift` tag or commit, with `gh` (`__zephyr-rev__`, `__swift-rev__`), and the latest stable Swift toolchain (6.4 or later) for CI (`__swift-version__`).
-  If a lookup fails, stop and report it; never guess a revision.
+  The tag must be new enough for the CI workflow's `west sdk install --no-gnu-toolchains --llvm`: check that the revision's
+  `scripts/west_commands/sdk.py` defines both options (the default source's newest stable tag, v4.2.0, does not). If the newest
+  tag lacks them, resolve a commit SHA that has them, or stop and ask. If a lookup fails, stop and report it; never guess a revision.
 
 ## 3. Start from the repository template
 
@@ -46,14 +48,14 @@ Infer what you can, then ask the user one combined question listing every missin
   gh repo create __owner__/__name__ --template anselmes/repository --private --clone
   ```
 
-  Honor the chosen directory: move the clone there or clone straight into it.
+  Honor the chosen directory: clone straight into `__dir__` (`gh repo create ... --clone` clones into `./__name__`, so move it when they differ).
 
 - Locally otherwise, the template's files without its history:
 
   ```bash
-  mkdir __name__
-  gh api repos/anselmes/repository/tarball | tar -xz -C __name__ --strip-components=1
-  git -C __name__ init -b main
+  mkdir -p __dir__
+  gh api repos/anselmes/repository/tarball | tar -xz -C __dir__ --strip-components=1
+  git -C __dir__ init -b main
   ```
 
 If a fetch fails, stop and report it; never substitute guessed or placeholder values.

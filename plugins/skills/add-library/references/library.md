@@ -9,7 +9,7 @@
 | `templates/module/Module.swift.template` | `lib/__module__/__Module__.swift` | Public API of the module                                                        |
 | `templates/lib-CMakeLists.txt`           | `lib/CMakeLists.txt`              | Only when missing; otherwise append the `add_subdirectory_ifdef` line           |
 | `templates/lib-Kconfig`                  | `lib/Kconfig`                     | Only when missing; otherwise add `rsource "__module__/Kconfig"` inside the menu |
-| `templates/Kconfig`                      | `Kconfig`                         | Only when missing                                                               |
+| `templates/Kconfig`                      | `Kconfig`                         | When missing; if one exists, add `rsource "lib/Kconfig"` once and keep its options |
 | `templates/zephyr/module.yml`            | `zephyr/module.yml`               | Only when missing                                                               |
 
 The project root is the Zephyr module: `zephyr/module.yml` points `build.cmake` at `lib` and `build.kconfig` at the root `Kconfig`.

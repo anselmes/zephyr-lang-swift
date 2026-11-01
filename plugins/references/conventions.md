@@ -36,11 +36,12 @@ remembered or placeholder value.
 
 ## Tokens
 
-Templates use `__token__` placeholders. Replace every one; none may remain in the output (`grep -rn '__[a-zA-Z-]*__' . | grep -v '"__copyright__"'` must find nothing; the `.swift-format` key `__copyright__` is a real key, not a token).
+Templates use `__token__` placeholders. Replace every one; none may remain in the output (`grep -rnE '__[a-zA-Z0-9_-]+__' . | grep -v '"__copyright__"'` must find nothing; the `.swift-format` key `__copyright__` is a real key, not a token).
 
 | Token             | Meaning                                                     | Example                                 |
 | ----------------- | ----------------------------------------------------------- | --------------------------------------- |
 | `__name__`        | Repository name                                             | `blinky`                                |
+| `__dir__`         | Directory the repository is created in                      | `./firmware`                            |
 | `__owner__`       | GitHub owner                                                | `anselmes`                              |
 | `__app__`         | Application directory, relative to the project root         | `app`, `apps/blinky`                    |
 | `__project__`     | CMake project name: `__app__`'s basename, `[A-Za-z0-9_]`    | `app`, `blinky`                         |
