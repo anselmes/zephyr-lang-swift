@@ -1,209 +1,232 @@
-# Swift Language Support
+# Swift Language Support for Zephyr
 
-A comprehensive module that enables Swift programming language support in Zephyr RTOS projects, bringing modern language features and memory safety to embedded systems development.
+A Zephyr module that lets you write applications and libraries in Embedded Swift. It provides the CMake functions that compile Swift for a Zephyr target, the runtime support that Embedded Swift needs, and a small Swift library over the Zephyr kernel.
 
-## Overview
+## Table of Contents
 
-This module integrates Swift's powerful programming language capabilities with Zephyr RTOS, enabling developers to write embedded applications using Swift's modern syntax, type safety, and performance characteristics. The module provides complete toolchain integration, runtime support, and seamless C-Swift interoperability.
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Architecture](#architecture)
+- [Supported architectures](#supported-architectures)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
 ## Features
 
-### Core Capabilities
+- **CMake functions**: `zephyr_swift_application()` builds the Swift sources in `src/` into a Zephyr application, and `zephyr_swift_library()` builds a Swift module that applications can import.
+- **Kconfig options**: `CONFIG_SWIFT` turns Swift support on, and `CONFIG_SWIFT_DEBUG_INFO` defines `SWIFT_DEBUG_INFO` for `#if` blocks in Swift code.
+- **Runtime support** (`ZephyrSystem`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
+- **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)`, and `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw.
+- **C interoperability**: a bridging header exposes the Zephyr C APIs to Swift, and C functions can be implemented in Swift with `@c @implementation`.
+- **Claude Code plugin** (`plugins/`): scaffolds a project, an application or a library.
 
-- **Cross-compilation Support**: Compile Swift code for ARM Cortex-M, RISC-V, and AArch64 targets
-- **Embedded Swift Integration**: Full support for Embedded Swift experimental features
-- **Memory Safety**: Leverage Swift's memory management and safety features in embedded contexts
-- **Performance Optimization**: Whole-module optimization and size-optimized builds for embedded systems
+## Prerequisites
 
-### Build System Integration
-
-- **CMake Integration**: Native CMake functions for Swift applications and libraries
-- **Kconfig Support**: Configuration options integrated with Zephyr's configuration system
-- **Dependency Management**: Automatic dependency resolution between Swift modules
-- **Module System**: Support for reusable Swift libraries and modules
-
-### Runtime Support
-
-- **C Runtime Stubs**: Implementation of required C library functions for Swift runtime
-- **Memory Allocation**: Custom aligned memory allocation for Swift's requirements
-- **POSIX Compatibility**: Essential POSIX function stubs for Swift runtime operation
-- **Bridging Headers**: Seamless integration between Swift and Zephyr C APIs
-
-## Quick Start
-
-### Prerequisites
-
-1. **Swift Toolchain**: Install Swift with Embedded Swift support
+1. A Swift 6.4 or later toolchain from swift.org with Embedded Swift support. Xcode's Swift lacks the RISC-V and Arm embedded backends, so select the swift.org toolchain with `TOOLCHAINS=swift`. With swiftly:
 
    ```bash
-   # Download and install Swift toolchain with embedded support
-   # Follow Swift.org installation instructions for your platform
+   swiftly install 6.4.0
+   export TOOLCHAINS=swift
    ```
 
-2. **Zephyr SDK**: Ensure you have Zephyr SDK installed and configured
+2. A Zephyr workspace with the Zephyr SDK and its LLVM toolchain (`ZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm`). The module was built and run with Zephyr SDK 1.0.1.
+3. CMake 3.29 or later, `west`, and Git.
 
-### Enabling Swift Support
+## Installation
 
-1. **Configure your project** (`prj.conf`):
+Clone the module into your Zephyr workspace:
+
+```bash
+git clone https://github.com/anselmes/zephyr-lang-swift modules/lang/swift
+```
+
+Then make Zephyr find it, in one of two ways.
+
+**From your application.** Set `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`, before `find_package(Zephyr)`:
+
+```cmake
+set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/modules/lang/swift)
+```
+
+**From the west manifest.** Add the project to `$ZEPHYR_BASE/submanifests/optional.yaml`, which needs no change to `CMakeLists.txt`:
+
+```yaml
+manifest:
+  remotes:
+    - name: anselmes
+      url-base: https://github.com/anselmes
+  projects:
+    - name: zephyr-lang-swift
+      revision: main
+      path: modules/lang/swift
+      remotes: anselmes
+      groups:
+        - optional
+```
+
+The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork also carries the module.
+
+## Usage
+
+### An application
+
+1. Enable Swift in `prj.conf`. The Embedded Swift runtime allocates from the libc heap, so a libc is required:
 
    ```kconfig
    CONFIG_SWIFT=y
-   CONFIG_SWIFT_DEBUG_INFO=y  # Optional, for debug builds
+   CONFIG_MINIMAL_LIBC=y
    ```
 
-2. **Create a Swift application** (`CMakeLists.txt`):
+2. Build the Swift sources in `src/` from `CMakeLists.txt`:
 
    ```cmake
+   cmake_minimum_required(VERSION 3.29)
    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
    project(my_swift_app)
 
    zephyr_swift_application()
    ```
 
-3. **Write Swift code** (`src/main.swift`):
+3. Define the entry point in `src/Entrypoint.swift`. The C `main` provided by this module calls it:
 
    ```swift
    import Zephyr
 
+   @c(entrypoint)
    func entrypoint() {
-    print("Hello from Swift on Zephyr!")
-
-    while true {
-      // Your embedded Swift application logic
-      k_sleep(K_MSEC(1000))
-    }
+     print("Hello from Swift on Zephyr!")
+     while true {
+       sleep(Duration.milliseconds(1000))
+     }
    }
    ```
 
-### Building Swift Libraries
+4. Build and run it in QEMU, with the board and toolchain from your environment:
 
-Create reusable Swift libraries for your projects:
+   ```bash
+   west build -p -t run
+   ```
+
+`samples/` has working versions of all of this, including the `.env.example` that sets the board and toolchain. See [samples/README.md](samples/README.md).
+
+### A library
+
+Put the library in its own directory with a `CMakeLists.txt` that names the module, and expose it as a Zephyr module with `zephyr/module.yml`:
 
 ```cmake
-# In your library's CMakeLists.txt
 zephyr_swift_library(MODULE_NAME MyLibrary)
 ```
 
 ```swift
-// In lib/MyLibrary.swift
+// MyLibrary.swift
 public func myFunction() -> String {
-  return "Hello from MyLibrary!"
+  "Hello from MyLibrary!"
 }
 ```
 
-## Architecture
+An application imports it with `import MyLibrary` once the module is in its `ZEPHYR_EXTRA_MODULES`. `samples/app+lib` shows the full setup, including the Kconfig option that gates the library.
 
-### Module Structure
+### The Zephyr library
 
-```empty
-swift/
-├── CMakeLists.txt          # Main build configuration
-├── Kconfig                 # Configuration options
-├── zephyr-sys/             # C runtime support library
-│   ├── src/                # C stub implementations
-│   └── include/            # Bridging headers and module maps
-├── zephyr/                 # Core Swift library
-│   ├── lib/                # Swift Zephyr bindings
-│   └── src/                # Application bootstrap
-└── samples/                # Example applications and libraries
+```swift
+import Zephyr
+
+sleep(Duration.milliseconds(250))     // relative timeout, rounded up to whole ticks
+sleep(Forever())                      // K_FOREVER
+
+let start = now()                     // kernel ticks since boot
+let elapsed = now().duration(since: start)
+
+do {
+  try check(code)                     // code < 0 is -errno
+} catch ZephyrError.timedOut {
+  retry()
+}
 ```
 
-### Compilation Flow
+`Instant` and `now()` are available when the build defines `CONFIG_TIMEOUT_64BIT`, which Zephyr's default configuration does.
 
-1. **Configuration**: Kconfig options enable Swift support
-2. **Toolchain Setup**: Swift compiler configured for target architecture
-3. **Runtime Building**: zephyr-sys C library provides Swift runtime support
-4. **Core Library**: Zephyr Swift library compiled with Zephyr bindings
-5. **Application/Library**: User Swift code compiled and linked
-6. **Integration**: All components linked into final Zephyr binary
+## Configuration
 
-## Supported Architectures
+| Option                    | Description                                                     | Default        |
+| ------------------------- | --------------------------------------------------------------- | -------------- |
+| `CONFIG_SWIFT`            | Enable Swift language support                                   | `n`            |
+| `CONFIG_SWIFT_DEBUG_INFO` | Define `SWIFT_DEBUG_INFO` for Swift code; adds no debug symbols | `y` if `DEBUG` |
 
-| Architecture                | Status | Target Triple                 |
-| --------------------------- | ------ | ----------------------------- |
-| ARM Cortex-M0/M0+/M1        | ✅     | `thumbv6m-none-eabi`          |
-| ARM Cortex-M3               | ✅     | `thumbv7m-none-eabi`          |
-| ARM Cortex-M4/M7            | ✅     | `thumbv7em-none-eabi[hf]`     |
-| ARM Cortex-M23/M33/M35P/M55 | ✅     | `thumbv8m.main-none-eabi[hf]` |
-| ARM 64-bit (AArch64)        | ✅     | `aarch64-none-elf`            |
-| RISC-V 32-bit               | ✅     | `riscv32-none-none-eabi`      |
-| RISC-V 64-bit               | ✅     | `riscv64-none-none-eabi`      |
+Swift code cannot see `CONFIG_*` macros, so a Kconfig symbol used in an `#if` needs a matching `-D` in the module's `swiftc` calls. `CONFIG_TIMEOUT_64BIT` already has one.
 
-## Examples
+## Architecture
 
-### Basic Application
+```text
+swift/
+├── CMakeLists.txt     # zephyr_swift_application(), zephyr_swift_library()
+├── Kconfig            # CONFIG_SWIFT, CONFIG_SWIFT_DEBUG_INFO
+├── zephyr-sys/        # ZephyrSystem: runtime support in Swift
+│   ├── src/           # init, kernel, malloc and timeout sources
+│   └── include/       # BridgingHeader.h and module.modulemap
+├── zephyr/            # Zephyr: the high-level Swift library
+│   ├── lib/           # Duration, Timeout, Instant, sleep, ZephyrError, check
+│   └── src/           # Application.swift: the C main that calls entrypoint()
+├── samples/           # app, lib and app+lib
+├── plugins/           # Claude Code plugin
+├── doc/               # Installation guide
+└── tests/             # Reserved for Ztest/Twister cases (empty)
+```
 
-See `samples/app/` for a complete Swift application example.
+Swift is compiled with plain `swiftc` calls, not SwiftPM. The build order is:
 
-### Swift Library Module
+1. Kconfig turns Swift support on.
+2. `ZephyrSystem` is compiled from `zephyr-sys/src`, with `BridgingHeader.h` as the bridging header.
+3. `Zephyr` is compiled from `zephyr/lib` and imports `ZephyrSystem`.
+4. The application, and any libraries it uses, are compiled against both modules.
+5. Everything is linked into the Zephyr image.
 
-See `samples/modules/hello/` for a reusable Swift library example.
+## Supported architectures
 
-### Advanced Integration
+The build system maps these CPUs to a Swift target triple. Only the RISC-V 32-bit target has been built and run, in QEMU (`qemu_riscv32/qemu_virt_riscv32/smp`) with Zephyr SDK 1.0.1.
 
-Check the `tests/` directory for comprehensive integration examples.
-
-## Configuration Options
-
-| Option                    | Description                   | Default        |
-| ------------------------- | ----------------------------- | -------------- |
-| `CONFIG_SWIFT`            | Enable Swift language support | `n`            |
-| `CONFIG_SWIFT_DEBUG_INFO` | Include debug information     | `y` if `DEBUG` |
+| Architecture                | Target triple                 | Status                |
+| --------------------------- | ----------------------------- | --------------------- |
+| Arm Cortex-M0/M0+/M1        | `thumbv6m-none-eabi`          | mapped, not tested    |
+| Arm Cortex-M3               | `thumbv7m-none-eabi`          | mapped, not tested    |
+| Arm Cortex-M4/M7            | `thumbv7em-none-eabi[hf]`     | mapped, not tested    |
+| Arm Cortex-M23/M33/M35P/M55 | `thumbv8m.main-none-eabi[hf]` | mapped, not tested    |
+| Arm 64-bit (AArch64)        | `aarch64-none-elf`            | mapped, not tested    |
+| RISC-V 32-bit               | `riscv32-none-none-eabi`      | built and run in QEMU |
+| RISC-V 64-bit               | `riscv64-none-none-eabi`      | mapped, not tested    |
 
 ## Development
 
-### Adding New Architectures
+Rules for contributors and agents (code style, Embedded Swift constraints, commits, pull requests) are in [AGENTS.md](AGENTS.md).
 
-To add support for a new architecture:
+To add an architecture, map it to a Swift target triple in `_swift_map_target()` in `CMakeLists.txt` and build a sample for it.
 
-1. Update `_swift_map_target()` in `CMakeLists.txt`
-2. Add appropriate Swift target triple mapping
-3. Test cross-compilation for the new target
+To add runtime support that Swift needs from C:
 
-### Extending Runtime Support
+1. Declare the C function in `zephyr-sys/include/BridgingHeader.h`.
+2. Implement it in `zephyr-sys/src` with `@c @implementation`, so the compiler checks the signature against the declaration.
+3. Document it, and keep the `swiftc` flag lists in `zephyr-sys`, `zephyr` and the root `CMakeLists.txt` in step.
 
-To add new C runtime functions:
+Check a change by building both buildable samples:
 
-1. Add stub implementations to `zephyr-sys/src/`
-2. Update `BridgingHeader.h` to expose new functions
-3. Document the additions in relevant files
+```bash
+cd samples/app && west build -p -t run
+cd samples/app+lib/app && west build -p -t run
+```
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Swift Toolchain Not Found**
-   - Ensure Swift is installed and in your PATH
-   - Verify Embedded Swift support is available
-
-2. **Compilation Errors**
-   - Check target architecture support
-   - Verify Kconfig options are correct
-   - Ensure all dependencies are built
-
-3. **Linking Issues**
-   - Verify proper build order with dependencies
-   - Check that all required libraries are linked
-
-### Debug Information
-
-Enable debug builds for better error messages:
-
-```kconfig
-CONFIG_SWIFT_DEBUG_INFO=y
-CONFIG_DEBUG=y
-```
-
-## Contributing
-
-Contributions are welcome! Please ensure:
-
-- All new features include comprehensive documentation
-- Code follows the existing style and patterns
-- Changes are tested across supported architectures
-- Commit messages are clear and descriptive
-
----
+| Symptom                                         | Likely cause and fix                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org. |
+| `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                         |
+| `error: unknown argument: '...'` from swiftc    | A flag that swiftc does not accept is in one of the module's `swiftc` calls (see Development).    |
+| `undefined reference to 'entrypoint'`           | The application has no `@c(entrypoint) func entrypoint()`.                                        |
+| `no such module` for a library                  | The library is missing from `ZEPHYR_EXTRA_MODULES`, or its Kconfig option is off.                 |
 
 ## License
 

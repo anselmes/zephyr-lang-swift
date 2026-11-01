@@ -1,42 +1,31 @@
-
 # Zephyr Swift Integration
 
-Enable Swift language support in Zephyr RTOS projects with this module.
-
----
-
-## Overview
-
-This repository provides seamless integration of Swift into Zephyr-based applications. It allows you to write Zephyr modules and applications in Swift, leveraging Zephyr's build system and configuration.
-
----
+Install the Swift module for Zephyr and make an application find it. For what the module provides and how to use it, see the [README](../README.md).
 
 ## Prerequisites
 
-- Zephyr RTOS (recommended: latest main branch)
-- Swift toolchain (recommended: Swift 5.8+)
-- CMake
+- Zephyr RTOS and the Zephyr SDK with its LLVM toolchain (1.0.1 was used)
+- A Swift 6.4 or later toolchain from swift.org with Embedded Swift support, selected with `TOOLCHAINS=swift`. Xcode's Swift cannot target RISC-V or Arm embedded
+- CMake 3.29 or later
 - Git
 
----
+## Installation
 
-## Installation & Setup
-
-### 1. Clone as a Zephyr Module
+### Clone as a Zephyr module
 
 Clone the `zephyr-lang-swift` repository into your Zephyr modules directory:
 
-```sh
+```bash
 git clone https://github.com/anselmes/zephyr-lang-swift modules/lang/swift
 ```
 
-In your project's `CMakeLists.txt`, uncomment or add:
+Then add this line to the application's `CMakeLists.txt`, before `find_package(Zephyr)`:
 
 ```cmake
 set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/modules/lang/swift)
 ```
 
-### 2. Add via West Manifest
+### Add through the west manifest
 
 Add the following to `$ZEPHYR_BASE/submanifests/optional.yaml`:
 
@@ -54,35 +43,25 @@ manifest:
         - optional
 ```
 
-No need to modify `CMakeLists.txt` for this method.
+This method needs no change to `CMakeLists.txt`.
 
-### 3. Use the Zephyr Mirror
+### Use the Zephyr fork
 
-Alternatively, use the Zephyr mirror with Swift support:
+The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork carries the module.
 
-- [anselmes/zephyr (GitHub)](https://github.com/anselmes/zephyr)
+## Example
 
----
+After installing, add Swift sources to a Zephyr application or library. `samples/app` is a minimal application and `samples/app+lib/lib/hello/Hello.swift` is a small library. [samples/README.md](../samples/README.md) explains how to build and run them.
 
-## Example Usage
+## Troubleshooting
 
-After setup, you can add Swift source files to your Zephyr app or library. See `samples/` and `lib/hello/Hello.swift` for examples.
-
----
-
-## Troubleshooting & FAQ
-
-- **Build errors?** Ensure your Swift toolchain is installed and available in your PATH.
-- **Zephyr not finding Swift module?** Double-check the module path in `CMakeLists.txt` or manifest.
-- **Unsupported Zephyr version?** Use the latest main branch for best compatibility.
-
----
+- **Build errors?** Check that the swift.org toolchain is the one `swiftc` resolves to: set `TOOLCHAINS=swift` and run `swiftc --version`.
+- **Zephyr cannot find the module?** Check the module path in `CMakeLists.txt` or the manifest.
+- **`BOARD is not being defined`?** The samples read `ZEPHYR_BOARD` and `ZEPHYR_TOOLCHAIN_VARIANT` from the environment; source the `.env` created from `.env.example`.
 
 ## Contributing
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines. Issues and PRs are welcome!
-
----
+The rules for code, commits and pull requests are in [AGENTS.md](../AGENTS.md). Issues and pull requests are welcome.
 
 ## Resources
 

@@ -18,7 +18,7 @@ and samples. It has no application or domain logic.
 | `zephyr/src`                  | `Zephyr`         | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
 | `CMakeLists.txt`, `Kconfig`   | —                | Target mapping, `swiftc` invocations, `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`                                                |
 | `zephyr/module.yml`           | —                | Zephyr module definition                                                                                                          |
-| `samples/{app,lib,app+lib}`   | —                | Sample application, library and combined application with a library                                                               |
+| `samples/{app,lib,app+lib}`   | —                | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib/app`)        |
 | `tests/`                      | —                | Reserved for Ztest/Twister cases (empty today)                                                                                    |
 | `doc/`                        | —                | Documentation                                                                                                                     |
 | `plugins/`, `.claude-plugin/` | `zephyr-swift`   | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
@@ -32,9 +32,13 @@ Swift-native abstractions over it belong in `Zephyr`.
   must live in one of those directories.
 - `Zephyr` finds `ZephyrSystem.swiftmodule` through the `SWIFT_MODULE_DIR` property of the `ZephyrSystem` target and depends on `ZephyrSystem_swift_compile`.
   Keep that wiring when touching either `CMakeLists.txt`.
-- The two `swiftc` flag lists (`zephyr-sys/CMakeLists.txt` and `zephyr/CMakeLists.txt`) must stay in step with each other.
-- A `#if CONFIG_FOO` in Swift only works if CMake passes `-DCONFIG_FOO`. Today only `SWIFT_DEBUG_INFO` is passed, so `#if CONFIG_TIMEOUT_64BIT` code
-  does not compile in until the define is added. Check before relying on a Kconfig symbol in an `#if`.
+- The four `swiftc` flag lists (`zephyr-sys/CMakeLists.txt`, `zephyr/CMakeLists.txt`, and `zephyr_swift_library()` and `zephyr_swift_application()` in the root
+  `CMakeLists.txt`) must stay in step with each other. A flag that `swiftc` rejects, such as `-strict-concurrency`, breaks the build.
+- `zephyr/CMakeLists.txt` publishes the `ZEPHYR_SWIFT_CLIENT_FLAGS` global property (include paths, sysroot headers, the `ZephyrSystem` module directory and the
+  bridging header). `_swift_discover_libraries` adds it to `SWIFT_INCLUDE_PATHS`, so applications and libraries can load `Zephyr.swiftmodule`. Without it, an
+  application that calls the generic `sleep(_:)` crashes the compiler.
+- A `#if CONFIG_FOO` in Swift only works if CMake passes `-DCONFIG_FOO`. Today `SWIFT_DEBUG_INFO` and `CONFIG_TIMEOUT_64BIT` are passed (the latter makes `Tick`
+  `Int64` and compiles `Instant` and `now()`). Check before relying on any other Kconfig symbol in an `#if`.
 - Kconfig symbols are `CONFIG_SWIFT` (master switch) and `CONFIG_SWIFT_DEBUG_INFO`. Document new options in `Kconfig` and in `README.md`.
 
 ## Embedded Swift rules
@@ -97,7 +101,7 @@ Today the check is a clean build of the samples; CI does not build or test yet (
 
 ```bash
 west build -p -b <board> samples/app
-west build -p -b <board> samples/app+lib
+west build -p -b <board> samples/app+lib/app
 ```
 
 Both must compile without new warnings. New logic should come with Ztest/Twister cases under `tests/`, including negative and edge cases
