@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSys
+import ZephyrSystem
 
 #if CONFIG_TIMEOUT_64BIT
-public typealias Tick = Int64
+  public typealias Tick = Int64
 #else
-public typealias Tick = Int32
+  public typealias Tick = Int32
 #endif
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 public var SYS_FREQUENCY: Int32 { return CONFIG_SYS_CLOCK_TICKS_PER_SEC }
 
 public struct Forever {
@@ -24,12 +25,12 @@ public struct NoWait {
 extension Forever:
   Sendable,
   TimeoutConvertible
-  {}
+{}
 
 extension NoWait:
   Sendable,
   TimeoutConvertible
- {}
+{}
 
 // MARK: - Public
 
@@ -41,18 +42,18 @@ public func sleep<T: TimeoutConvertible>(_ timeout: T) -> Duration {
 }
 
 #if CONFIG_TIMEOUT_64BIT
-public func now() -> Instant {
-  return Instant(ticks: Tick(k_uptime_ticks()))
-}
+  public func now() -> Instant {
+    return Instant(ticks: Tick(k_uptime_ticks()))
+  }
 #endif
 
 // MARK: - Internal
 
 func checkedCast<T: BinaryInteger, U: BinaryInteger>(_ value: T) -> U {
   #if DEBUG
-  guard let result = U(exactly: value) else { fatalError("Overflow in time conversion") }
-  return result
+    guard let result = U(exactly: value) else { fatalError("Overflow in time conversion") }
+    return result
   #else
-  return U(clamping: value)
+    return U(clamping: value)
   #endif
 }

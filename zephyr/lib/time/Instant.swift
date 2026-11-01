@@ -1,43 +1,43 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSys
+import ZephyrSystem
 
 #if CONFIG_TIMEOUT_64BIT
-public struct Instant {
-  public let ticks: Tick
-}
+  public struct Instant {
+    public let ticks: Tick
+  }
 
-// MARK: - Extension
+  // MARK: - Extension
 
-extension Instant:
-  Comparable,
-  Equatable ,
-  Sendable,
-  TimeoutConvertible
+  extension Instant:
+    Comparable,
+    Equatable,
+    Sendable,
+    TimeoutConvertible
   {}
 
-// MARK: - Public
+  // MARK: - Public
 
-public extension Instant {
-  init(ticks: Tick) { self.ticks = ticks }
+  public extension Instant {
+    init(ticks: Tick) { self.ticks = ticks }
 
-  static func < (lhs: Instant, rhs: Instant) -> Bool {
-    return lhs.ticks < rhs.ticks
+    static func < (lhs: Instant, rhs: Instant) -> Bool {
+      return lhs.ticks < rhs.ticks
+    }
+
+    static func > (lhs: Instant, rhs: Instant) -> Bool {
+      return lhs.ticks > rhs.ticks
+    }
+
+    func toTimeout() -> Timeout { Timeout(from: self) }
+
+    func duration(since earlier: Instant) -> Duration {
+      return Duration(ticks: self.ticks - earlier.ticks)
+    }
+
+    func advance(by duration: Duration) -> Instant {
+      return Instant(ticks: self.ticks + duration.ticks)
+    }
   }
-
-  static func > (lhs: Instant, rhs: Instant) -> Bool {
-    return lhs.ticks > rhs.ticks
-  }
-
-  func toTimeout() -> Timeout { Timeout(from: self) }
-
-  func duration(since earlier: Instant) -> Duration {
-    return Duration(ticks: self.ticks - earlier.ticks)
-  }
-
-  func advance(by duration: Duration) -> Instant {
-    return Instant(ticks: self.ticks + duration.ticks)
-  }
-}
 #endif

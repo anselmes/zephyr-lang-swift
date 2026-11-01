@@ -1,21 +1,26 @@
 {
+  "__copyright__": [
+    "SPDX-License-Identifier: GPL-3.0",
+    "Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>"
+  ],
   "version": 1,
-  "lineLength": 100,
+  "lineLength": 180,
   "indentation": {
     "spaces": 2
   },
-  "tabWidth": 2,
   "maximumBlankLines": 1,
-  "respectsExistingLineBreaks": false,
-  "lineBreakBeforeControlFlowKeywords": false,
-  "lineBreakBeforeEachArgument": false,
-  "lineBreakBeforeEachGenericRequirement": false,
-  "prioritizeKeepingFunctionOutputTogether": false,
-  "indentConditionalCompilationBlocks": true,
-  "lineBreakAroundMultilineExpressionChainComponents": false,
-  "indentSwitchCaseLabels": false,
+  "multiElementCollectionTrailingCommas": true,
+  "multilineTrailingCommaBehavior": "alwaysUsed",
   "fileScopedDeclarationPrivacy": {
     "accessLevel": "private"
   },
-  "spacesAroundRangeFormationOperators": false
+  "orderedImports": {
+    "includeConditionalImports": false,
+    "shouldGroupImports": true
+  },
+  "rules": {
+    "AlwaysUseLowerCamelCase": true,
+    "NoEmptyLinesOpeningClosingBraces": true,
+    "TypeNamesShouldBeCapitalized": true
+  }
 }

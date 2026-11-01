@@ -3,16 +3,16 @@
 
 /**
  @file main.swift
- @brief ZephyrSys Main Module - Swift Runtime Support for Zephyr RTOS
+ @brief ZephyrSystem Main Module - Swift Runtime Support for Zephyr RTOS
 
- This file serves as the main module for the ZephyrSys library, which provides
+ This file serves as the main module for the ZephyrSystem library, which provides
  essential Swift runtime support for Swift code running on Zephyr RTOS. The
- ZephyrSys library bridges the gap between Swift's runtime expectations and
+ ZephyrSystem library bridges the gap between Swift's runtime expectations and
  Zephyr's minimal embedded C environment.
 
- ## Swift 6.3 Features Used
+ ## Swift 6.4 Features Used
 
- This implementation leverages Swift 6.3's embedded mode improvements:
+ This implementation leverages Swift 6.4's embedded mode improvements:
  - `@c @implementation` attribute for implementing pre-existing C headers
  - Embedded Swift subset for minimal memory footprint
  - Strict concurrency for safe embedded programming
@@ -39,14 +39,14 @@
  */
 
 /**
- @brief Initialize ZephyrSys runtime support
+ @brief Initialize ZephyrSystem runtime support
 
- This function provides C-compatible initialization for the ZephyrSys runtime
+ This function provides C-compatible initialization for the ZephyrSystem runtime
  support library. Using the `@c @implementation` attribute, this Swift function
  implements the C interface defined in the header, allowing C code to call
  this initialization function while the implementation is written in Swift.
 
- The function performs any initialization required by the ZephyrSys runtime
+ The function performs any initialization required by the ZephyrSystem runtime
  support library. Currently, no initialization is needed as the runtime stubs
  are stateless, but this provides a hook for future expansion using Swift's
  modern language features.
@@ -68,13 +68,14 @@
  - Setting up Swift-based logging infrastructure
  - Implementing hardware-specific initialization routines
 
- @note This function serves as a demonstration of Swift 6.3's C interoperability
+ @note This function serves as a demonstration of Swift 6.4's C interoperability
        improvements and may be extended in the future to initialize runtime
        state using Swift's memory safety and concurrency features.
  */
+// swift-format-ignore: AlwaysUseLowerCamelCase
 @c @implementation
 public func zephyr_sys_init() {
-  // Currently no initialization is required for ZephyrSys.
+  // Currently no initialization is required for ZephyrSystem.
   // Runtime stubs are stateless and ready to use immediately.
   // This function serves as a placeholder for future expansion.
   //
