@@ -143,6 +143,21 @@ if(SWIFT_SOURCES)
     message(WARNING "Zephyr Swift Library: No sysroot or SDK headers found — standard C headers may be missing")
   endif()
 
+  # Flags that every Swift client of Zephyr (applications and libraries) needs
+  # to load Zephyr.swiftmodule: it refers to C types such as k_timeout_t through
+  # the bridging header, and to the Kernel helpers through ZephyrSystem.
+  set_property(GLOBAL PROPERTY ZEPHYR_SWIFT_CLIENT_FLAGS
+    -I ${CMAKE_BINARY_DIR}/zephyr/include/generated
+    -I ${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr
+    -I ${CMAKE_BINARY_DIR}/zephyr/include
+    -I ${ZEPHYR_BASE}/include
+    -I ${ZEPHYR_SYS_MODULE}/include
+    -I ${ZEPHYR_SYS_SWIFT_MODULE_DIR}
+    ${SWIFT_SYSROOT_INCLUDE_FLAGS}
+    ${SWIFT_SYSROOT_FLAGS}
+    -import-bridging-header ${ZEPHYR_SYS_MODULE}/include/BridgingHeader.h
+  )
+
   # Create custom command to compile the core Zephyr Swift library
   # This builds high-level Swift APIs that depend on ZephyrSystem for runtime support
   add_custom_command(

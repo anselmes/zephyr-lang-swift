@@ -80,6 +80,10 @@ function(_swift_discover_libraries)
 
   set(include_paths "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
 
+  # C headers, ZephyrSystem module and bridging header (see zephyr/CMakeLists.txt).
+  get_property(client_flags GLOBAL PROPERTY ZEPHYR_SWIFT_CLIENT_FLAGS)
+  list(APPEND include_paths ${client_flags})
+
   # Normalize the extra module roots so that they can be compared by prefix.
   set(extra_module_dirs "")
   foreach(root ${ZEPHYR_EXTRA_MODULES} ${EXTRA_ZEPHYR_MODULES})
