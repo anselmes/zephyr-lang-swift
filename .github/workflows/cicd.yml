@@ -1,3 +1,5 @@
+# This workflow is managed by gh actions-lock.
+
 name: Continuos Integration
 
 on:
@@ -11,24 +13,85 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
+    permissions:
+      checks: write
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            api0.prismacloud.io:443
+            codeload.github.com:443
+            ghcr.io:443
+            github.com:443
+            objects.githubusercontent.com:443
+            pipelines.actions.githubusercontent.com:443
+            pypi.org:443
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Lint Code Base
+        uses: super-linter/super-linter@2da136927bd4a73596db63044b504547c62cb854 # v9.0.0
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ github.token }}
+          # A push that brings no new commits (a restack, a branch created at an existing
+          # commit) leaves commitlint an empty range, which it rejects. Only ever set this to
+          # false or leave it empty: super-linter refuses a mix of VALIDATE_*=true and =false.
+          VALIDATE_GIT_COMMITLINT: ${{ github.event_name == 'push' && github.event.commits[0] == null && 'false' || '' }}
+          # VALIDATE_EDITORCONFIG: false
+          # VALIDATE_SPELL_CODESPELL: false
+
+  # dependabot auto-approve/merge and tag-triggered draft-release creation are
+  # provided by anselmes/cicd's bot.yml. releaser publishes as a draft — a
+  # published release becomes immutable immediately — and release.yml flips it
+  # to published. This package attaches no assets, so it does so as soon as
+  # the draft exists.
   bot:
-    uses: anselmes/cicd/.github/workflows/bot.yml@96ca47c59a516ea9022fbe449889c64e7d4ea3fe # v0.2.3
+    uses: anselmes/cicd/.github/workflows/bot.yml@d543980b235b5c5e40d5b13aaa64b532f4208446 # v0.3.8
     permissions:
       contents: write
       issues: write
       pull-requests: write
       repository-projects: write
 
+  # trivy.yml's SARIF-to-code-scanning upload only ever runs on
+  # `main`+push, and fails there: GitHub Advanced Security (required for
+  # code scanning on private repos) isn't purchasable for a user-owned
+  # account -- confirmed via the REST API (security_and_analysis: null).
+  # The scan itself still runs and succeeds everywhere else, so only skip
+  # the one combination that's guaranteed to fail.
   trivy:
     uses: anselmes/cicd/.github/workflows/trivy.yml@d543980b235b5c5e40d5b13aaa64b532f4208446 # v0.3.8
+    if: >-
+      !(github.ref == 'refs/heads/main' && github.event_name == 'push' &&
+        github.event.repository.private && github.event.repository.owner.type == 'User')
     permissions:
+      actions: read
       contents: write
       id-token: write
       security-events: write
 
+  # scorecard.yml's analysis job only ever runs on `main`, and fails there:
+  # several Scorecard checks need GraphQL access the default GITHUB_TOKEN
+  # can't provide on any non-public repo, user- or org-owned, private or
+  # internal ("ListCommits: ... Resource not accessible by integration").
+  # Since it can never succeed as configured, only run it on public repos
+  # rather than leave a permanently-red required check.
   scorecard:
-    uses: anselmes/cicd/.github/workflows/scorecard.yml@96ca47c59a516ea9022fbe449889c64e7d4ea3fe # v0.2.3
+    uses: anselmes/cicd/.github/workflows/scorecard.yml@d543980b235b5c5e40d5b13aaa64b532f4208446 # v0.3.8
+    if: ${{ !github.event.repository.private }}
     permissions:
       contents: read
       id-token: write
       security-events: write
+    with:
+      publish-results: false

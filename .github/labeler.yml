@@ -3,15 +3,25 @@ repo:
   - changed-files:
       - any-glob-to-any-file: "*"
 
-# Add 'github-actions' label to any changes in the '.github' directory
-github-actions:
+# Add 'ci' label to any changes in the '.github' directory
+ci:
   - changed-files:
       - any-glob-to-any-file:
-          - .github/actions/*
-          - .github/actions/*/**
-          - .github/auto_assign.yml
-          - .github/auto_assign.yml/**
-          - .github/dependabot.yml
-          - .github/dependabot.yml/**
-          - .github/workflows/*
-          - .github/workflows/*/**
+          - .github/**
+          - .trunk/*
+          - .trunk/*/**
+
+# Add 'swift' label to any changes in Swift files
+swift:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*/*.swift"
+          - "*/**/*.swift"
+
+# Add 'docs' label to any changes in the 'docs' directory
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/*
+          - docs/*/**
+          - README.md
