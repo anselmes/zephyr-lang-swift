@@ -53,11 +53,6 @@ This build configuration leverages Swift 6.3's improvements:
 
 #]=======================================================================]
 
-# Include Swift toolchain configuration functions
-# This provides _swift_map_target() and _enable_swift() functions for
-# configuring cross-compilation targets and Swift-specific build settings
-include(${CMAKE_CURRENT_SOURCE_DIR}/../toolchain.cmake)
-
 # Discover all Swift source files in the zephyr-sys directory structure
 # src/: Core Swift implementations of C runtime functions using @c @implementation
 # lib/: Additional Swift libraries and utilities for enhanced functionality
