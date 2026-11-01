@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: __license__
+# Copyright (c) __year__ __author__
+
+config __MODULE__
+  bool "Enable the __Module__ Swift library"
+  help
+    __description__
+
+    Use it from Swift with `import __Module__`.

@@ -1,0 +1,13 @@
+{
+  "name": "zephyr-swift",
+  "version": "0.1.0",
+  "description": "Scaffold Embedded Swift on Zephyr RTOS: a new application repository, and in an existing project an application or a library module, built on the zephyr-lang-swift module.",
+  "author": {
+    "name": "Schubert Anselme",
+    "email": "schubert@anselm.es"
+  },
+  "homepage": "https://github.com/anselmes/zephyr-lang-swift",
+  "repository": "https://github.com/anselmes/zephyr-lang-swift",
+  "license": "GPL-3.0",
+  "keywords": ["swift", "zephyr", "embedded", "west", "scaffold"]
+}

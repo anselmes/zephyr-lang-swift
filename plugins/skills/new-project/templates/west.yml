@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: __license__
+# Copyright (c) __year__ __author__
+
+manifest:
+  version: "1.2"
+
+  self:
+    path: __name__
+
+  remotes:
+    - name: __owner__
+      url-base: https://github.com/__owner__
+
+  projects:
+    - name: zephyr
+      remote: __owner__
+      revision: __zephyr-rev__
+      import:
+        name-allowlist:
+          - __hal-module__ # repeat this line for each HAL module the board needs
+          - picolibc # Built as a module so headers are visible to Swift
+          - zephyr-lang-swift # Swift language support

@@ -1,0 +1,5 @@
+name: __name__
+
+build:
+  cmake: lib
+  kconfig: Kconfig

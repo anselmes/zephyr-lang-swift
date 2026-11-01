@@ -1,0 +1,28 @@
+# Application
+
+## Files
+
+| Template                                  | Written to                     | Notes                                                      |
+| ----------------------------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `templates/CMakeLists.txt`                | `__app__/CMakeLists.txt`       | Fill `__extra-modules__` (below)                           |
+| `templates/prj.conf`                      | `__app__/prj.conf`             | Fill `__library-configs__`                                 |
+| `templates/sample.yml`                    | `__app__/sample.yml`           | Twister metadata; `build_only` until Ztest cases exist     |
+| `templates/env.example`                   | `__app__/.env.example`         | Copy as `.env.example`; skip if a project-level one exists |
+| `templates/src/Entrypoint.swift.template` | `__app__/src/Entrypoint.swift` | Fill `__library-imports__`                                 |
+
+## Tokens specific to this skill
+
+- `__extra-modules__`: when the project root is itself a Zephyr module (it has `zephyr/module.yml`, as created by `new-project`),
+  the line `set(ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_LIST_DIR}/..)` so the app sees the project's libraries. Otherwise remove the token's line.
+- `__library-configs__`: one `CONFIG___MODULE__=y` line per library the app enables; remove the token's line when there are none.
+- `__library-imports__`: one `import __Module__` line per enabled library, placed after `import Zephyr`; remove the token's line when none.
+
+## Rules
+
+- `zephyr_swift_application()` globs `src/*.swift` of the app directory; every Swift file belongs there, not beside `CMakeLists.txt`.
+- `entrypoint()` is `@c(entrypoint)` and never returns; the `main()` that calls it is in the Zephyr module's `Application.swift`.
+  Do not define another `main`.
+- Sleep with `sleep(Duration.milliseconds(...))` from `Zephyr`; never busy-wait.
+- Apps may define a `Kconfig` only to add application options; keep `CONFIG_SWIFT=y` and `CONFIG_MINIMAL_LIBC=y` in `prj.conf`.
+- Boards, toolchain and paths come from the environment (`ZEPHYR_BOARD`, `ZEPHYR_TOOLCHAIN_VARIANT`, `CROSS_COMPILE`, `SYSROOT_DIR`);
+  never hard-code them in `CMakeLists.txt`.

@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: __license__
+# Copyright (c) __year__ __author__
+
+rsource "lib/Kconfig"
