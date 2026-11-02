@@ -225,7 +225,7 @@ do {
 | `CONFIG_SWIFT`            | Enable Swift language support                                   | `n`            |
 | `CONFIG_SWIFT_DEBUG_INFO` | Define `SWIFT_DEBUG_INFO` for Swift code; adds no debug symbols | `y` if `DEBUG` |
 
-With `CONFIG_SWIFT=y`, the module also makes `CONFIG_LOG_MODE_IMMEDIATE` the default log mode, so `Log` output and `print()` output appear in order. Set `CONFIG_LOG_MODE_DEFERRED=y` in `prj.conf` to use deferred logging instead.
+With `CONFIG_SWIFT=y`, the module also makes `CONFIG_LOG_MODE_IMMEDIATE` the default log mode, so `Log` output and `print()` output appear in order. Set `CONFIG_LOG_MODE_DEFERRED=y` in `prj.conf` to use deferred logging instead. `Log` logs nothing with `CONFIG_LOG_MODE_MINIMAL=y`, which builds no logging core to log into.
 
 Swift code cannot see `CONFIG_*` macros, so a Kconfig symbol used in an `#if` needs a matching `-D` in `_swift_defines()` in `CMakeLists.txt`, which writes it to the build's SwiftPM toolset. `CONFIG_TIMEOUT_64BIT`, `CONFIG_LOG` and `CONFIG_LOG_MODE_DEFERRED` already have one.
 
