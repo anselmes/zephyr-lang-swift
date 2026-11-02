@@ -75,6 +75,12 @@ static inline bool zephyr_swift_log_enabled(uint32_t level) {
     return false;
   }
 #if defined(CONFIG_LOG_RUNTIME_FILTERING)
+  // The filters live in kernel memory, which a user thread cannot read: it
+  // would fault. As the LOG_* macros do, leave the filtering to the logging
+  // core for those callers.
+  if (IS_ENABLED(CONFIG_USERSPACE) && k_is_user_context()) {
+    return true;
+  }
   // The logger writes the filters when it starts and whenever they change,
   // which the compiler cannot see from this module. It would take the zero in
   // the initializer above for a constant, fold this check to false and drop
