@@ -13,14 +13,14 @@ import Zephyr
 public struct Hello {
   /// Runs the Hello demonstration; see `hello(timeout:)`. Never returns.
   ///
-  /// With `CONFIG_SWIFT_DEBUG_INFO=y`, it first logs a debug line, which shows
-  /// only with `CONFIG_LOG=y` and `CONFIG_LOG_DEFAULT_LEVEL=4`.
+  /// With `CONFIG_SWIFT_DEBUG_INFO=y`, it first logs an info line, which shows
+  /// with `CONFIG_LOG=y`.
   ///
   /// - Parameter timeout: Milliseconds between `still running...` messages.
   public static func run(timeout: Int = 1000) {
     // Logged only when CONFIG_SWIFT_DEBUG_INFO is enabled.
     #if SWIFT_DEBUG_INFO
-      Log.debug("Module Hello compiled with debug info")
+      Log.info("Module Hello compiled with debug info")
     #endif
 
     hello(timeout: timeout)
