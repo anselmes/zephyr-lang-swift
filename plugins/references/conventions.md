@@ -127,7 +127,7 @@ Templates in this plugin already conform; when filling tokens, do not change the
 When `west` and the Zephyr SDK are present, build with the board from `.env` (or the one the user gave):
 
 ```bash
-west build -p -b __board__ __app__
+west build -p -d .build -b __board__ __app__
 ```
 
 Fix failures your change caused and rebuild. If a failure persists after two attempts or comes from the environment, stop and report the exact command

@@ -42,4 +42,4 @@ jobs:
         env:
           ZEPHYR_TOOLCHAIN_VARIANT: zephyr/llvm
         # Package.resolved pins any package used by URL; never resolve in CI.
-        run: west build -p -b __board__ __name__/app -- -DZEPHYR_SWIFT_OFFLINE=ON
+        run: west build -p -d .build -b __board__ __name__/app -- -DZEPHYR_SWIFT_OFFLINE=ON

@@ -41,5 +41,5 @@ or `zephyr/module.yml`, add to them.
 
 ## 4. Verify
 
-Build an app that enables the library (`west build -p -b <board> <app>`), as the conventions describe, and run
+Build an app that enables the library (`west build -p -d .build -b <board> <app>`), as the conventions describe, and run
 `swift format format --in-place` on `Package.swift`, `swift format lint --strict` on the new sources and `Package.swift`, and `swift package describe` at the project root. Do not commit; tell the user what was created and how to enable it.

@@ -303,9 +303,9 @@ west build -d .build -t swift_build                                       # gene
 west build -d .build -t run                                               # build and run the image
 ```
 
-`swift-build.sh` needs the headers that the `swift_build` target generates, and says so if they are missing. Configuring with plain CMake works the same way: `cmake -G Ninja -B build -DBOARD=qemu_riscv32/qemu_virt_riscv32/smp`, then `ninja -C build swift_build`.
+`swift-build.sh` needs the headers that the `swift_build` target generates, and says so if they are missing. Configuring with plain CMake works the same way: `cmake -G Ninja -B .build -DBOARD=qemu_riscv32/qemu_virt_riscv32/smp`, then `ninja -C .build swift_build`.
 
-To use another SwiftPM package, add it to the application's `Package.swift` and rebuild. SwiftPM resolves it on the next build and caches it under `.build/swift/cache`. Commit the `Package.resolved` it writes, so every build uses the same versions, and configure CI with `-DZEPHYR_SWIFT_OFFLINE=ON`. The package must build with Embedded Swift for a bare-metal target: no Foundation, and no unsafe flags when it is pinned to a version range.
+To use another SwiftPM package, add it to the application's `Package.swift` and rebuild. SwiftPM resolves it on the next build and caches it under `.build/swift/cache`. Commit the `Package.resolved` it writes, so every build uses the same versions, and configure CI with `-DZEPHYR_SWIFT_OFFLINE=ON`, which never resolves dependencies and fails when `Package.resolved` is missing or stale. Offline mode fetches nothing, and `Package.resolved` pins revisions but carries no sources, so a disconnected build also needs the sources already in the cache, or path dependencies. The package must build with Embedded Swift for a bare-metal target: no Foundation, and no unsafe flags when it is pinned to a version range.
 
 Check a change by building both buildable samples:
 

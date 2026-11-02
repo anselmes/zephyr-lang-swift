@@ -43,7 +43,7 @@ __description__ It is an Embedded Swift application on Zephyr RTOS, built on the
 ```bash
 west init -l .
 west update
-west build -p -b __board__ app
+west build -p -d .build -b __board__ app
 west twister -T tests
 ```
 
