@@ -266,6 +266,13 @@ function(_swift_write_toolset path)
       "-I${CMAKE_BINARY_DIR}/zephyr/include"
       "-Xcc"
       "-I${ZEPHYR_BASE}/include"
+      # Load the kernel configuration as macros in Swift's Clang importer too,
+      # as Zephyr does for C, so a dependency's header that tests CONFIG_*
+      # imports the same declarations its C implementation is compiled with.
+      "-Xcc"
+      "-imacros"
+      "-Xcc"
+      "${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr/autoconf.h"
       ${SWIFT_SYSROOT_FLAGS})
 
   # SwiftPM does not hand the Swift compiler's -Xcc options on to the C and C++
