@@ -14,12 +14,12 @@ import PackageDescription
 // be empty when `package` reads it.
 let settings: [SwiftSetting] = [
   .strictMemorySafety(),
-  .enableExperimentalFeature("CImplementation"),
-  .enableExperimentalFeature("Embedded"),
-  .enableExperimentalFeature("Extern"),
   .enableUpcomingFeature("ExistentialAny"),
   .enableUpcomingFeature("InternalImportsByDefault"),
   .enableUpcomingFeature("MemberImportVisibility"),
+  .enableExperimentalFeature("CImplementation"),
+  .enableExperimentalFeature("Embedded"),
+  .enableExperimentalFeature("Extern"),
 ]
 
 let package = Package(

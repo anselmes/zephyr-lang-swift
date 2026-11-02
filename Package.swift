@@ -19,20 +19,20 @@ import PackageDescription
 // be empty when `package` reads it.
 let settings: [SwiftSetting] = [
   .strictMemorySafety(),
-  .enableExperimentalFeature("CImplementation"),
-  .enableExperimentalFeature("Embedded"),
-  .enableExperimentalFeature("Extern"),
   .enableUpcomingFeature("ExistentialAny"),
   .enableUpcomingFeature("InternalImportsByDefault"),
   .enableUpcomingFeature("MemberImportVisibility"),
+  .enableExperimentalFeature("CImplementation"),
+  .enableExperimentalFeature("Embedded"),
+  .enableExperimentalFeature("Extern"),
 ]
 
 let package = Package(
   name: "zephyr-lang-swift",
   products: [
-    .library(name: "ZephyrCore", targets: ["ZephyrCore"]),
     .library(name: "Zephyr", targets: ["Zephyr"]),
     .library(name: "ZephyrApplication", targets: ["ZephyrApplication"]),
+    .library(name: "ZephyrCore", targets: ["ZephyrCore"]),
     .library(name: "ZephyrSystem", targets: ["ZephyrSystem"]),
   ],
   targets: [
@@ -48,7 +48,8 @@ let package = Package(
     .target(
       name: "ZephyrApplication",
       dependencies: [
-        .target(name: "Zephyr")
+        .target(name: "Zephyr"),
+        .target(name: "ZephyrCore"),
       ],
       path: "zephyr/src",
       swiftSettings: settings,
