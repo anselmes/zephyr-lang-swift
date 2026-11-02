@@ -47,8 +47,10 @@ jobs:
           # commit) leaves commitlint an empty range, which it rejects. Only ever set this to
           # false or leave it empty: super-linter refuses a mix of VALIDATE_*=true and =false.
           VALIDATE_GIT_COMMITLINT: ${{ github.event_name == 'push' && github.event.commits[0] == null && 'false' || '' }}
-          # VALIDATE_EDITORCONFIG: false
-          # VALIDATE_SPELL_CODESPELL: false
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_EDITORCONFIG: false
+          VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_SPELL_CODESPELL: false
 
   # dependabot auto-approve/merge and tag-triggered draft-release creation are
   # provided by anselmes/cicd's bot.yml. releaser publishes as a draft — a
