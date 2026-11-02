@@ -5,7 +5,8 @@
 //
 // It exposes the Zephyr C APIs to Swift, and declares the C functions that
 // ZephyrCore implements in Swift with `@c @implementation`
-// (see zephyr-sys/src). Swift compiles it with `-import-bridging-header`.
+// (see zephyr-sys/src). It is the umbrella header of the ZephyrCore Clang
+// module (module.modulemap), which Swift code imports with `import ZephyrCore`.
 
 #pragma once
 

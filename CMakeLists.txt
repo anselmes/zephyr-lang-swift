@@ -1,45 +1,47 @@
-# SPDX-License-Identifier: GPL-3.0 Copyright (c) 2026 Schubert Anselme
-# <schubert@anselm.es>
+# cmake-format: off
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-# CMake support for building Embedded Swift with Zephyr. Swift is compiled with
-# plain swiftc calls (not SwiftPM). The entry points are:
-# zephyr_swift_application()  Swift sources in src/ become part of `app`.
-# zephyr_swift_library()      A Swift module that applications can import. The
-# zephyr-sys (ZephyrSystem) and zephyr (Zephyr) subdirectories at the end of
-# this file build the runtime support and the high-level library.
+# CMake support for building Embedded Swift with Zephyr through SwiftPM.
+#
+# Swift code is described by Package.swift manifests: this module's root
+# package (ZephyrCore, ZephyrSystem, Zephyr, ZephyrApplication) and one package
+# per application. Swift needs the headers that a Zephyr build generates
+# (autoconf.h, syscalls) and flags that depend on Kconfig, so `swift build`
+# cannot run on its own. Instead, for every Zephyr build this file:
+#
+# 1. writes a SwiftPM toolset (build/swift/toolset.json) with the target
+#    options: -Osize, the Zephyr include paths, the C library headers and the
+#    Kconfig defines Swift code tests with `#if`;
+# 2. runs `swift build --product App` for the application's package, after
+#    Zephyr has generated its headers;
+# 3. links the static library it produces into the `app` target.
+#
+# The entry points are:
+#   zephyr_swift_application()  Build the application package and link it.
+#   zephyr_swift_library()      Register a Swift library module with Kconfig.
+#
+# Cache options:
+#   ZEPHYR_SWIFT_OFFLINE       ON: never resolve package dependencies; fail if
+#                              Package.resolved is missing or stale. For CI.
+#   ZEPHYR_SWIFT_LSP_CONFIG    ON (default): write .sourcekit-lsp/config.json
+#                              into the application package for the editor.
+#   ZEPHYR_SWIFT_BUILD_SYSTEM  SwiftPM build system, `native` by default.
+# cmake-format: on
 
 set(SWIFT_MODULE_DIR
     "${CMAKE_CURRENT_LIST_DIR}"
     CACHE INTERNAL "")
 
-# Enable Swift as a language with settings suited to cross-compiling Embedded
-# Swift.  Called by the other functions in this file.
-function(_enable_swift)
-  # Use the Zephyr SDK's llvm-objcopy.  CMAKE_OBJCOPY must be set before
-  # enable_language(Swift).
-  if(ZEPHYR_SDK_INSTALL_DIR)
-    set(CMAKE_OBJCOPY
-        "${ZEPHYR_SDK_INSTALL_DIR}/llvm/bin/llvm-objcopy"
-        CACHE FILEPATH "Object copy tool" FORCE)
-  endif()
-
-  # Skip the compiler sanity check: it builds a host-native executable, which
-  # fails for cross-compilation toolchains.
-  set(CMAKE_Swift_COMPILER_WORKS
-      TRUE
-      CACHE BOOL "Swift compiler works" FORCE)
-
-  # On macOS, CMake finds swiftc through xcrun, which honors TOOLCHAINS.  Set
-  # TOOLCHAINS="swift" to select the swift.org toolchain, since Xcode's Swift
-  # lacks the LLVM backends for RISC-V and ARM embedded targets.  On Linux,
-  # CMake searches PATH (swiftly's shim also honors TOOLCHAINS).
-  enable_language(Swift)
-
-  set(CMAKE_Swift_COMPILER_TARGET ${BUILD_TARGET})
-
-  # Embedded Swift requires whole-module optimization.
-  set(CMAKE_Swift_COMPILATION_MODE wholemodule)
-endfunction()
+option(ZEPHYR_SWIFT_OFFLINE
+       "Build Swift packages without resolving dependencies" OFF)
+option(ZEPHYR_SWIFT_LSP_CONFIG
+       "Write .sourcekit-lsp/config.json into the application package" ON)
+# The default build system (swiftbuild) archives with the host's libtool, which
+# cannot create ELF archives, so the native build system is used.
+set(ZEPHYR_SWIFT_BUILD_SYSTEM
+    "native"
+    CACHE STRING "SwiftPM build system for Swift packages")
 
 # Zephyr targets are defined through Kconfig.  We need to map these to an
 # appropriate llvm target triple.  This sets `SWIFT_TARGET` in the parent scope,
@@ -105,282 +107,408 @@ function(_swift_map_target)
   endif()
 endfunction()
 
-# Find the Swift libraries registered in ZEPHYR_SWIFT_LIBRARY_INFO that live in
-# one of the extra modules.  Sets `SWIFT_INCLUDE_PATHS` (swiftc flags) and
-# `SWIFT_AVAILABLE_LIBS` in the parent scope.  EXCLUDE_MODULE skips a library,
-# so that it doesn't depend on itself.
-#
-# SWIFT_INCLUDE_PATHS starts with the Zephyr module directory and the
-# ZEPHYR_SWIFT_CLIENT_FLAGS from zephyr/CMakeLists.txt (C headers, ZephyrSystem
-# module, bridging header), followed by one -I per library found.
-function(_swift_discover_libraries)
-  cmake_parse_arguments(PARSE_ARGV 0 SWIFTDISCO "" "EXCLUDE_MODULE" "")
-
-  set(include_paths "-I" "${CMAKE_BINARY_DIR}/modules/lang-swift/zephyr")
-
-  # C headers, ZephyrSystem module and bridging header (see
-  # zephyr/CMakeLists.txt).
-  get_property(client_flags GLOBAL PROPERTY ZEPHYR_SWIFT_CLIENT_FLAGS)
-  list(APPEND include_paths ${client_flags})
-
-  # Normalize the extra module roots so that they can be compared by prefix.
-  set(extra_module_dirs "")
-  foreach(root ${ZEPHYR_EXTRA_MODULES} ${EXTRA_ZEPHYR_MODULES})
-    if(NOT root)
-      continue()
-    endif()
-    get_filename_component(root "${root}" ABSOLUTE BASE_DIR
-                           "${CMAKE_CURRENT_SOURCE_DIR}")
-    get_filename_component(root "${root}" REALPATH)
-    if(IS_DIRECTORY "${root}")
-      list(APPEND extra_module_dirs "${root}")
-    endif()
-  endforeach()
-  list(REMOVE_DUPLICATES extra_module_dirs)
-
-  # Registry entries have the form "module_name|source_dir".
-  set(available_libs "")
-  get_property(registry GLOBAL PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO)
-  foreach(entry ${registry})
-    string(FIND "${entry}" "|" separator)
-    if(separator LESS 0)
-      continue()
-    endif()
-    string(SUBSTRING "${entry}" 0 ${separator} name)
-    math(EXPR start "${separator} + 1")
-    string(SUBSTRING "${entry}" ${start} -1 source_dir)
-
-    if(name STREQUAL SWIFTDISCO_EXCLUDE_MODULE OR NOT TARGET ${name}_compile)
-      continue()
-    endif()
-
-    foreach(dir ${extra_module_dirs})
-      string(FIND "${source_dir}/" "${dir}/" pos)
-      if(pos EQUAL 0)
-        list(APPEND available_libs "${name}")
-        list(APPEND include_paths "-I" "${CMAKE_BINARY_DIR}/modules/${name}")
+# Find the C library headers (errno.h, stdlib.h) for SWIFT_TARGET and set
+# SWIFT_SYSROOT_FLAGS in the parent scope to the -Xcc options that add them.
+# Priority: 1) SYSROOT_DIR (a custom cross toolchain), 2) the Zephyr SDK's
+# clang-runtimes headers (zephyr/llvm, which also provide picolibc.h), 3) none.
+function(_swift_sysroot_flags)
+  set(flags "")
+  if(SYSROOT_DIR)
+    list(APPEND flags "-Xcc" "-I${SYSROOT_DIR}/include" "-Xcc"
+         "--sysroot=${SYSROOT_DIR}")
+  elseif(ZEPHYR_SDK_INSTALL_DIR)
+    # The SDK uses LLVM/clang triple naming (riscv32-none-elf) while Swift
+    # embedded modules use ABI triple naming (riscv32-none-none-eabi).
+    string(REGEX REPLACE "^(riscv[0-9]+)-none-none-eabi$" "\\1-none-elf" arch
+                         "${SWIFT_TARGET}")
+    # The first multilib include directory without exceptions that has the C
+    # library headers.
+    file(GLOB includes
+         "${ZEPHYR_SDK_INSTALL_DIR}/llvm/lib/clang-runtimes/${arch}/*/include")
+    foreach(dir IN LISTS includes)
+      if(NOT dir MATCHES "exn_rtti" AND EXISTS "${dir}/errno.h")
+        list(APPEND flags "-Xcc" "-I${dir}")
+        message(STATUS "Swift: C library headers: ${dir}")
         break()
       endif()
     endforeach()
-  endforeach()
-  list(REMOVE_DUPLICATES available_libs)
-
-  set(SWIFT_INCLUDE_PATHS
-      "${include_paths}"
-      PARENT_SCOPE)
-  set(SWIFT_AVAILABLE_LIBS
-      "${available_libs}"
+  endif()
+  if(NOT flags)
+    message(
+      WARNING
+        "Swift: no C library headers found for ${SWIFT_TARGET}; set SYSROOT_DIR"
+    )
+  endif()
+  set(SWIFT_SYSROOT_FLAGS
+      "${flags}"
       PARENT_SCOPE)
 endfunction()
 
-# Build a Swift static library and register it so that applications can find it.
-# Without SOURCES, every .swift file below the current directory is used.
-#
-# zephyr_swift_library([MODULE_NAME <name>] [SOURCES <file>...])
-function(zephyr_swift_library)
-  _enable_swift()
+# Set SWIFT_DEFINES in the parent scope to the swiftc options derived from
+# Kconfig. Swift cannot see CONFIG_* macros, so each symbol that Swift code
+# tests with `#if` needs its own -D here.
+function(_swift_defines)
+  set(defines "")
+  if(CONFIG_SWIFT_DEBUG_INFO)
+    list(APPEND defines "-DSWIFT_DEBUG_INFO")
+  endif()
+  if(CONFIG_TIMEOUT_64BIT)
+    # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
+    list(APPEND defines "-DCONFIG_TIMEOUT_64BIT")
+  endif()
+  if(CONFIG_LOG)
+    # zephyr_log (zephyr-sys/src/log.swift) logs; without it, it does nothing.
+    list(APPEND defines "-DCONFIG_LOG")
+  endif()
+  if(CONFIG_LOG_MODE_DEFERRED)
+    # zephyr_log hands messages to the logger's buffer instead of building them
+    # on the stack.
+    list(APPEND defines "-DCONFIG_LOG_MODE_DEFERRED")
+  endif()
+  if(NOT CONFIG_STACK_CANARIES)
+    # swiftc adds stack protectors to functions that take the address of a
+    # local, but Zephyr only provides __stack_chk_guard with
+    # CONFIG_STACK_CANARIES.
+    list(APPEND defines "-Xfrontend" "-disable-stack-protector")
+  endif()
 
-  # A library with its own include/ directory exposes it to the Zephyr build,
-  # including syscall header generation.
+  # A library registered with zephyr_swift_library() gets a define for its
+  # Kconfig symbol when it is enabled, so code can test `#if CONFIG_HELLO`.
+  get_property(libraries GLOBAL PROPERTY ZEPHYR_SWIFT_LIBRARIES)
+  foreach(library IN LISTS libraries)
+    string(TOUPPER "${library}" symbol)
+    if(CONFIG_${symbol})
+      list(APPEND defines "-DCONFIG_${symbol}")
+    endif()
+  endforeach()
+
+  set(SWIFT_DEFINES
+      "${defines}"
+      PARENT_SCOPE)
+endfunction()
+
+# Quote `value` for JSON and store it in `out`.
+function(_swift_json_string out value)
+  string(REPLACE "\\" "\\\\" value "${value}")
+  string(REPLACE "\"" "\\\"" value "${value}")
+  set(${out}
+      "\"${value}\""
+      PARENT_SCOPE)
+endfunction()
+
+# Quote `value` for a POSIX shell and store it in `out`.
+function(_swift_shell_string out value)
+  string(REPLACE "'" "'\\''" value "${value}")
+  set(${out}
+      "'${value}'"
+      PARENT_SCOPE)
+endfunction()
+
+# Write `content` to `path` only when it differs from the file there, so that
+# reconfiguring does not touch the file and rebuild Swift needlessly.
+function(_swift_write_if_changed path content)
+  file(WRITE "${path}.tmp" "${content}")
+  file(COPY_FILE "${path}.tmp" "${path}" ONLY_IF_DIFFERENT)
+  file(REMOVE "${path}.tmp")
+endfunction()
+
+# Write the SwiftPM toolset for this build to `path`: the target options every
+# Swift module is compiled with, and the Zephyr SDK's llvm-ar for archives. All
+# modules get the same Clang options, so they share one build of the ZephyrCore
+# Clang module.
+function(_swift_write_toolset path)
+  _swift_sysroot_flags()
+  _swift_defines()
+
+  set(options
+      # Optimize for size; comes after the -O that SwiftPM passes for release.
+      "-Osize"
+      # One section per function, so the linker's --gc-sections can drop unused
+      # code.
+      "-Xfrontend"
+      "-function-sections"
+      ${SWIFT_DEFINES}
+      # Generated headers first (autoconf.h, syscalls), then Zephyr's own.
+      "-Xcc"
+      "-I${CMAKE_BINARY_DIR}/zephyr/include/generated"
+      "-Xcc"
+      "-I${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr"
+      "-Xcc"
+      "-I${CMAKE_BINARY_DIR}/zephyr/include"
+      "-Xcc"
+      "-I${ZEPHYR_BASE}/include"
+      ${SWIFT_SYSROOT_FLAGS})
+
+  set(items "")
+  foreach(option IN LISTS options)
+    _swift_json_string(item "${option}")
+    list(APPEND items "${item}")
+  endforeach()
+  list(JOIN items ",\n      " items)
+
+  set(librarian "")
+  if(ZEPHYR_SDK_INSTALL_DIR AND EXISTS
+                                "${ZEPHYR_SDK_INSTALL_DIR}/llvm/bin/llvm-ar")
+    _swift_json_string(ar "${ZEPHYR_SDK_INSTALL_DIR}/llvm/bin/llvm-ar")
+    set(librarian ",\n  \"librarian\": { \"path\": ${ar} }")
+  endif()
+
+  _swift_write_if_changed(
+    "${path}"
+    "{
+  \"schemaVersion\": \"1.0\",
+  \"swiftCompiler\": {
+    \"extraCLIOptions\": [
+      ${items}
+    ]
+  }${librarian}
+}
+")
+endfunction()
+
+# Set `out` to the directory of the nearest Package.swift at or above `dir`.
+function(_swift_find_package out dir)
+  set(current "${dir}")
+  while(NOT EXISTS "${current}/Package.swift")
+    get_filename_component(parent "${current}" DIRECTORY)
+    if(parent STREQUAL current)
+      message(
+        FATAL_ERROR
+          "Swift: no Package.swift in ${dir} or a parent directory. "
+          "zephyr_swift_application() builds the application's Swift package.")
+    endif()
+    set(current "${parent}")
+  endwhile()
+  set(${out}
+      "${current}"
+      PARENT_SCOPE)
+endfunction()
+
+# Register a Swift library module: a directory of a Zephyr module that holds a
+# target of a Swift package, usually enabled by a Kconfig symbol of the same
+# name (CONFIG_HELLO for MODULE_NAME Hello).
+#
+# ~~~
+#   zephyr_swift_library([MODULE_NAME <name>])
+# ~~~
+#
+# SwiftPM compiles the library as part of every application package that depends
+# on it, so this function does not compile anything. It exposes the library's
+# include/ directory, if any, to the Zephyr build (including syscall
+# generation), and defines CONFIG_<NAME> for Swift code when the symbol is on.
+function(zephyr_swift_library)
+  cmake_parse_arguments(PARSE_ARGV 0 SWIFTLIB "" "MODULE_NAME" "SOURCES")
+  if(NOT SWIFTLIB_MODULE_NAME)
+    set(SWIFTLIB_MODULE_NAME ${PROJECT_NAME})
+  endif()
+  if(SWIFTLIB_SOURCES)
+    message(WARNING "zephyr_swift_library(${SWIFTLIB_MODULE_NAME}): SOURCES "
+                    "is ignored; the target's sources come from Package.swift")
+  endif()
+
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
     zephyr_syscall_include_directories(include)
     zephyr_include_directories(include)
   endif()
 
-  cmake_parse_arguments(PARSE_ARGV 0 SWIFTLIB "" "MODULE_NAME" "SOURCES")
-
-  if(NOT SWIFTLIB_MODULE_NAME)
-    set(SWIFTLIB_MODULE_NAME ${PROJECT_NAME})
-  endif()
-
-  if(NOT SWIFTLIB_SOURCES)
-    file(GLOB_RECURSE SWIFTLIB_SOURCES CONFIGURE_DEPENDS
-         "${CMAKE_CURRENT_SOURCE_DIR}/*.swift")
-  endif()
-
-  if(NOT SWIFTLIB_SOURCES)
-    message(
-      WARNING "No Swift sources found for library ${SWIFTLIB_MODULE_NAME}")
-    return()
-  endif()
-
-  set(MODULE_DIR ${CMAKE_BINARY_DIR}/modules/${SWIFTLIB_MODULE_NAME})
-  set(MODULE_OBJ_FILE ${MODULE_DIR}/${SWIFTLIB_MODULE_NAME}.o)
-  set(MODULE_SWIFT_MODULE_FILE
-      ${MODULE_DIR}/${SWIFTLIB_MODULE_NAME}.swiftmodule)
-  file(MAKE_DIRECTORY ${MODULE_DIR})
-
-  _swift_map_target()
-  message(STATUS "Building Swift llvm target ${SWIFT_TARGET}")
-
-  # Kconfig symbols that Swift code tests with `#if`.  Swift cannot see CONFIG_*
-  # macros, so each one needs its own -D here (and in the other swiftc calls).
-  set(SWIFT_DEFINES "")
-  if(CONFIG_SWIFT_DEBUG_INFO)
-    list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
-  endif()
-  if(CONFIG_TIMEOUT_64BIT)
-    # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
-    list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
-  endif()
-  if(CONFIG_LOG)
-    # zephyr_log (zephyr-sys/src/log.swift) logs; without it, it does nothing.
-    list(APPEND SWIFT_DEFINES "-DCONFIG_LOG")
-  endif()
-  if(CONFIG_LOG_MODE_DEFERRED)
-    # zephyr_log hands messages to the logger's buffer instead of building them
-    # on the stack.
-    list(APPEND SWIFT_DEFINES "-DCONFIG_LOG_MODE_DEFERRED")
-  endif()
-  if(NOT CONFIG_STACK_CANARIES)
-    # swiftc adds stack protectors to functions that take the address of a
-    # local, but Zephyr only provides __stack_chk_guard with
-    # CONFIG_STACK_CANARIES.
-    list(APPEND SWIFT_DEFINES "-Xfrontend" "-disable-stack-protector")
-  endif()
-
-  _swift_discover_libraries(EXCLUDE_MODULE "${SWIFTLIB_MODULE_NAME}")
-
-  # Build after the sources, the Zephyr module, and the libraries found above.
-  set(COMPILE_DEPS ${SWIFTLIB_SOURCES})
-  if(TARGET Zephyr_compile)
-    list(APPEND COMPILE_DEPS Zephyr_compile)
-  endif()
-  foreach(lib ${SWIFT_AVAILABLE_LIBS})
-    list(APPEND COMPILE_DEPS ${lib}_compile)
-  endforeach()
-
-  find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
-
-  # The flag set is shared with the zephyr-sys, zephyr and application swiftc
-  # calls; keep them in step.
-  add_custom_command(
-    OUTPUT ${MODULE_OBJ_FILE} ${MODULE_SWIFT_MODULE_FILE}
-    COMMAND
-      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} -Osize -swift-version 6
-      -parse-as-library -strict-memory-safety -whole-module-optimization
-      -enable-experimental-feature CImplementation -enable-experimental-feature
-      Embedded -enable-experimental-feature Extern -enable-upcoming-feature
-      ExistentialAny -enable-upcoming-feature InternalImportsByDefault
-      -enable-upcoming-feature MemberImportVisibility -Xfrontend
-      -function-sections -emit-object -o ${MODULE_OBJ_FILE} -emit-module
-      -emit-module-path ${MODULE_SWIFT_MODULE_FILE} -module-name
-      ${SWIFTLIB_MODULE_NAME} ${SWIFT_DEFINES} ${SWIFT_INCLUDE_PATHS}
-      ${SWIFTLIB_SOURCES}
-    DEPENDS ${COMPILE_DEPS}
-    COMMENT "Compiling Swift library ${SWIFTLIB_MODULE_NAME}")
-
-  add_library(${SWIFTLIB_MODULE_NAME} STATIC ${MODULE_OBJ_FILE})
-  set_target_properties(${SWIFTLIB_MODULE_NAME} PROPERTIES LINKER_LANGUAGE C)
-
-  add_custom_target(${SWIFTLIB_MODULE_NAME}_compile
-                    DEPENDS ${MODULE_OBJ_FILE} ${MODULE_SWIFT_MODULE_FILE})
-  add_dependencies(${SWIFTLIB_MODULE_NAME} ${SWIFTLIB_MODULE_NAME}_compile)
-
-  get_filename_component(source_dir "${CMAKE_CURRENT_SOURCE_DIR}" REALPATH)
-  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_LIBRARY_INFO
-                                      "${SWIFTLIB_MODULE_NAME}|${source_dir}")
+  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_LIBRARIES
+                                      "${SWIFTLIB_MODULE_NAME}")
+  message(STATUS "Swift: library ${SWIFTLIB_MODULE_NAME} "
+                 "(built by the application's Package.swift)")
 endfunction()
 
-# Build the Swift sources in `src/` into the Zephyr `app` target, together with
-# the application bootstrap and every Swift library found in the extra modules.
+# Build the application's Swift package and link it into the Zephyr `app`
+# target.
+#
+# ~~~
+#   zephyr_swift_application([PACKAGE_DIR <dir>] [PRODUCT <name>])
+# ~~~
+#
+# PACKAGE_DIR defaults to the nearest directory at or above the application that
+# holds a Package.swift. PRODUCT is the package's static library product, `App`
+# by default; it holds the application, every Swift module it depends on and
+# ZephyrApplication's C `main`.
+#
+# ~~~
+# Besides the build itself, configuring writes, under build/swift/:
+#   toolset.json    the target options for `swift build`
+#   swift-build.sh  the exact `swift build` command, for compiling Swift alone
+# and, with ZEPHYR_SWIFT_LSP_CONFIG, <package>/.sourcekit-lsp/config.json.
+# The `swift_build` target compiles the Swift package without linking.
+# ~~~
 function(zephyr_swift_application)
-  _enable_swift()
-
-  file(GLOB_RECURSE SWIFT_SOURCES CONFIGURE_DEPENDS
-       "${CMAKE_CURRENT_SOURCE_DIR}/src/*.swift")
-
-  # Provides main(), which calls the application's entrypoint().
-  set(SWIFT_APPLICATION "${SWIFT_MODULE_DIR}/zephyr/src/Application.swift")
-
-  set(APP_SWIFT_OBJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.o")
-  set(APP_SWIFT_MODULE_FILE
-      "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.swiftmodule")
+  cmake_parse_arguments(PARSE_ARGV 0 SWIFTAPP "" "PACKAGE_DIR;PRODUCT" "")
+  if(NOT SWIFTAPP_PACKAGE_DIR)
+    _swift_find_package(SWIFTAPP_PACKAGE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+  get_filename_component(package_dir "${SWIFTAPP_PACKAGE_DIR}" ABSOLUTE)
+  if(NOT SWIFTAPP_PRODUCT)
+    set(SWIFTAPP_PRODUCT "App")
+  endif()
 
   _swift_map_target()
-  message(STATUS "Building Swift llvm target ${SWIFT_TARGET}")
+  message(STATUS "Swift: package ${package_dir}, product ${SWIFTAPP_PRODUCT}, "
+                 "target ${SWIFT_TARGET}")
 
-  # Kconfig symbols that Swift code tests with `#if`.  Swift cannot see CONFIG_*
-  # macros, so each one needs its own -D here (and in the other swiftc calls).
-  set(SWIFT_DEFINES "")
-  if(CONFIG_SWIFT_DEBUG_INFO)
-    list(APPEND SWIFT_DEFINES "-DSWIFT_DEBUG_INFO")
-  endif()
-  if(CONFIG_TIMEOUT_64BIT)
-    # Tick is Int64 and Instant, now() and absolute timeouts are compiled in.
-    list(APPEND SWIFT_DEFINES "-DCONFIG_TIMEOUT_64BIT")
-  endif()
-  if(CONFIG_LOG)
-    # zephyr_log (zephyr-sys/src/log.swift) logs; without it, it does nothing.
-    list(APPEND SWIFT_DEFINES "-DCONFIG_LOG")
-  endif()
-  if(CONFIG_LOG_MODE_DEFERRED)
-    # zephyr_log hands messages to the logger's buffer instead of building them
-    # on the stack.
-    list(APPEND SWIFT_DEFINES "-DCONFIG_LOG_MODE_DEFERRED")
-  endif()
-  if(NOT CONFIG_STACK_CANARIES)
-    # swiftc adds stack protectors to functions that take the address of a
-    # local, but Zephyr only provides __stack_chk_guard with
-    # CONFIG_STACK_CANARIES.
-    list(APPEND SWIFT_DEFINES "-Xfrontend" "-disable-stack-protector")
+  # `swift` from the same toolchain as `swiftc`. On macOS, set TOOLCHAINS=swift
+  # to select the swift.org toolchain: Xcode's Swift lacks the Embedded Swift
+  # standard library for these targets.
+  find_program(SWIFT_EXECUTABLE swift REQUIRED)
+
+  set(swift_dir "${CMAKE_BINARY_DIR}/swift")
+  set(toolset "${swift_dir}/toolset.json")
+  set(archive "${swift_dir}/${SWIFT_TARGET}/release/lib${SWIFTAPP_PRODUCT}.a")
+  file(MAKE_DIRECTORY "${swift_dir}")
+  _swift_write_toolset("${toolset}")
+
+  set(build_args
+      build
+      --build-system
+      ${ZEPHYR_SWIFT_BUILD_SYSTEM}
+      --package-path
+      ${package_dir}
+      --scratch-path
+      ${swift_dir}
+      --cache-path
+      ${swift_dir}/cache
+      --configuration
+      release
+      --triple
+      ${SWIFT_TARGET}
+      --toolset
+      ${toolset}
+      --product
+      ${SWIFTAPP_PRODUCT})
+  if(ZEPHYR_SWIFT_OFFLINE)
+    list(APPEND build_args --disable-automatic-resolution)
   endif()
 
-  _swift_discover_libraries()
-
-  set(COMPILE_DEPS ${SWIFT_SOURCES})
-  if(TARGET Zephyr_compile)
-    list(APPEND COMPILE_DEPS Zephyr_compile)
+  # Environment for `swift build`: the toolchain selection, and where this
+  # module lives, for manifests that resolve zephyr-lang-swift by path.
+  set(build_env "ZEPHYR_LANG_SWIFT_PATH=${SWIFT_MODULE_DIR}")
+  if(DEFINED ENV{TOOLCHAINS})
+    list(APPEND build_env "TOOLCHAINS=$ENV{TOOLCHAINS}")
   endif()
-  foreach(lib ${SWIFT_AVAILABLE_LIBS})
-    list(APPEND COMPILE_DEPS ${lib}_compile)
-  endforeach()
 
-  find_program(SWIFTC_EXECUTABLE swiftc REQUIRED)
+  # Rebuild when a Swift source, manifest, lock file or ZephyrCore header of the
+  # application package or of this module changes. SwiftPM itself decides what
+  # to recompile. Build directories are skipped.
+  file(
+    GLOB_RECURSE
+    inputs
+    CONFIGURE_DEPENDS
+    "${package_dir}/*.swift"
+    "${package_dir}/Package.resolved"
+    "${SWIFT_MODULE_DIR}/Package.swift"
+    "${SWIFT_MODULE_DIR}/zephyr/*.swift"
+    "${SWIFT_MODULE_DIR}/zephyr-sys/*.swift"
+    "${SWIFT_MODULE_DIR}/zephyr-sys/include/*")
+  list(FILTER inputs EXCLUDE REGEX "/(\\.build|build|\\.swiftpm)/")
+  list(REMOVE_DUPLICATES inputs)
 
-  # The flag set is shared with the zephyr-sys, zephyr and library swiftc calls;
-  # keep them in step.
   add_custom_command(
-    OUTPUT ${APP_SWIFT_OBJ_FILE} ${APP_SWIFT_MODULE_FILE}
-    COMMAND
-      ${SWIFTC_EXECUTABLE} -target ${SWIFT_TARGET} -Osize -swift-version 6
-      -strict-memory-safety -whole-module-optimization
-      -enable-experimental-feature CImplementation -enable-experimental-feature
-      Embedded -enable-experimental-feature Extern -enable-upcoming-feature
-      ExistentialAny -enable-upcoming-feature InternalImportsByDefault
-      -enable-upcoming-feature MemberImportVisibility -Xfrontend
-      -function-sections -emit-object -o ${APP_SWIFT_OBJ_FILE} ${SWIFT_DEFINES}
-      ${SWIFT_INCLUDE_PATHS} ${SWIFT_APPLICATION} ${SWIFT_SOURCES}
-    DEPENDS ${COMPILE_DEPS}
-    COMMENT
-      "Compiling Swift application ${PROJECT_NAME} with libraries: ${SWIFT_AVAILABLE_LIBS}"
-  )
+    OUTPUT "${archive}"
+    COMMAND ${CMAKE_COMMAND} -E env ${build_env} ${SWIFT_EXECUTABLE}
+            ${build_args}
+    DEPENDS ${inputs} "${toolset}"
+    WORKING_DIRECTORY "${package_dir}"
+    COMMENT "Building Swift package ${package_dir} (${SWIFTAPP_PRODUCT})"
+    USES_TERMINAL)
+  add_custom_target(swift_build DEPENDS "${archive}")
 
-  add_custom_target(${PROJECT_NAME}_compile DEPENDS ${APP_SWIFT_OBJ_FILE}
-                                                    ${APP_SWIFT_MODULE_FILE})
+  # Swift imports Zephyr's generated headers (syscalls, offsets, version).
+  if(TARGET zephyr_generated_headers)
+    add_dependencies(swift_build zephyr_generated_headers)
+  endif()
+  if(TARGET ${SYSCALL_LIST_H_TARGET})
+    add_dependencies(swift_build ${SYSCALL_LIST_H_TARGET})
+  endif()
 
-  target_sources(app PRIVATE ${APP_SWIFT_OBJ_FILE})
-  add_dependencies(app ${PROJECT_NAME}_compile)
-
-  target_link_libraries(app PRIVATE Zephyr)
-  foreach(lib ${SWIFT_AVAILABLE_LIBS})
-    target_link_libraries(app PRIVATE ${lib})
-  endforeach()
-
+  # `app` needs a source file of its own; all of its code is in the archive.
+  target_sources(app PRIVATE ${ZEPHYR_BASE}/misc/empty_file.c)
+  # Zephyr links the kernel, which has a weak `main`, outside --whole-archive.
+  # The linker would not extract the archive member with Swift's `main` to
+  # replace it, so link the whole archive. One `-Wl,` item, so that CMake cannot
+  # reorder or deduplicate its parts; --gc-sections drops whatever the image
+  # does not use.
+  target_link_libraries(
+    app PRIVATE "-Wl,--whole-archive,${archive},--no-whole-archive")
+  # Relink the image when the archive changes.
+  set_property(
+    TARGET app
+    APPEND
+    PROPERTY INTERFACE_LINK_DEPENDS "${archive}")
+  add_dependencies(app swift_build)
   # The final link is done by the C toolchain.
   set_target_properties(app PROPERTIES LINKER_LANGUAGE C)
 
-  # .swift_modhash is only used while compiling, so drop it from the binary.
-  add_custom_command(
-    TARGET app
-    POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} --remove-section .swift_modhash $<TARGET_FILE:app>
-            $<TARGET_FILE:app>
-    COMMENT "Removing .swift_modhash section from final binary")
+  # swift-build.sh: the same `swift build`, for compiling Swift on its own after
+  # `west build -t swift_build` has generated Zephyr's headers. Extra arguments
+  # are passed on, for example -v.
+  set(command "")
+  foreach(word IN LISTS build_env)
+    _swift_shell_string(quoted "${word}")
+    string(APPEND command "${quoted} ")
+  endforeach()
+  foreach(word ${SWIFT_EXECUTABLE} ${build_args})
+    _swift_shell_string(quoted "${word}")
+    string(APPEND command "${quoted} ")
+  endforeach()
+  # syscall_list.h is generated at build time, not when configuring.
+  _swift_shell_string(
+    headers
+    "${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr/syscall_list.h")
+  _swift_write_if_changed(
+    "${swift_dir}/swift-build.sh"
+    "#!/usr/bin/env bash
+# Generated by zephyr_swift_application(); regenerated by every configure.
+# Builds the Swift package of this Zephyr build without linking the image.
+# Usage: swift-build.sh [swift build options...], for example -v.
+set -Eeuo pipefail
+if [[ ! -e ${headers} ]]; then
+  echo 'Zephyr has not generated its headers yet; run: west build -t swift_build' >&2
+  exit 1
+fi
+exec env ${command}\"$@\"
+")
+  file(
+    CHMOD
+    "${swift_dir}/swift-build.sh"
+    PERMISSIONS
+    OWNER_READ
+    OWNER_WRITE
+    OWNER_EXECUTE
+    GROUP_READ
+    GROUP_EXECUTE
+    WORLD_READ
+    WORLD_EXECUTE)
+
+  # SourceKit-LSP configuration, so the editor resolves ZephyrCore and the
+  # Zephyr headers of this build. It has its own scratch path: the editor's
+  # builds must not race the image build.
+  if(ZEPHYR_SWIFT_LSP_CONFIG)
+    _swift_json_string(triple "${SWIFT_TARGET}")
+    _swift_json_string(lsp_toolset "${toolset}")
+    _swift_json_string(lsp_scratch "${CMAKE_BINARY_DIR}/swift-lsp")
+    file(MAKE_DIRECTORY "${package_dir}/.sourcekit-lsp")
+    _swift_write_if_changed(
+      "${package_dir}/.sourcekit-lsp/config.json"
+      "{
+  \"swiftPM\": {
+    \"configuration\": \"release\",
+    \"scratchPath\": ${lsp_scratch},
+    \"triple\": ${triple},
+    \"toolsets\": [${lsp_toolset}]
+  }
+}
+")
+  endif()
 endfunction()
 
 if(CONFIG_SWIFT)
-  # Runtime support (zephyr-sys), then the Swift library built on top of it.
-  add_subdirectory(zephyr-sys)
-  add_subdirectory(zephyr)
+  # swiftc emits sections that no image needs (.swift_modhash,
+  # .swift1_autolink_entries). Discard them instead of letting ld.lld warn that
+  # they are orphans.
+  zephyr_linker_sources(SECTIONS
+                        ${CMAKE_CURRENT_LIST_DIR}/zephyr-sys/swift_orphans.ld)
 endif()
