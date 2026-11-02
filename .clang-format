@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
+
+# clang-format defaults to LLVM style, which puts one space before a trailing
+# comment. cpplint (whitespace/comments) wants two, and the two tools must agree
+# or each undoes the other. Everything else stays at the LLVM defaults.
+BasedOnStyle: LLVM
+SpacesBeforeTrailingComments: 2

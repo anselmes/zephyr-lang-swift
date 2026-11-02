@@ -7,6 +7,8 @@
 // which makes the compiler check each Swift signature against this C
 // declaration.
 
+#pragma once
+
 #ifdef __cplusplus
 extern "C" {
 #endif

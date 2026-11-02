@@ -16,6 +16,9 @@
 // own copy (and the logger would see several `swift` sources). Only the
 // zephyr_log() implementation uses them, and other modules call it through
 // the C declaration above, so ZephyrCore holds the only copy.
+
+#pragma once
+
 #if defined(CONFIG_LOG)
 static const STRUCT_SECTION_ITERABLE_ALTERNATE(log_const, log_source_const_data,
                                                log_const_swift) = {

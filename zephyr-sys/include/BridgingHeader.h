@@ -36,8 +36,8 @@
 
 // ===== Device and Hardware APIs =====
 
-#include <zephyr/device.h> // Generic device model interfaces for hardware access
-#include <zephyr/drivers/gpio.h> // GPIO interfaces for pin control and interrupts
+#include <zephyr/device.h>  // Generic device model interfaces for hardware access
+#include <zephyr/drivers/gpio.h>  // GPIO interfaces for pin control and interrupts
 
 // ===== Filesystem =====
 
@@ -54,5 +54,5 @@
 
 // ===== Zephyr Core Imports =====
 
-#include "core.h"
-#include "log.h"
+#include "core.h"  // NOLINT(build/include_subdir)
+#include "log.h"   // NOLINT(build/include_subdir)
