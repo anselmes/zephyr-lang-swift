@@ -10,9 +10,9 @@
 # (autoconf.h, syscalls) and flags that depend on Kconfig, so `swift build`
 # cannot run on its own. Instead, for every Zephyr build this file:
 #
-# 1. writes a SwiftPM toolset (build/swift/toolset.json) with the target
-#    options: -Osize, the Zephyr include paths, the C library headers and the
-#    Kconfig defines Swift code tests with `#if`;
+# 1. writes a SwiftPM toolset (swift/toolset.json in the build directory) with
+#    the target options: -Osize, the Zephyr include paths, the C library
+#    headers and the Kconfig defines Swift code tests with `#if`;
 # 2. runs `swift build --product App` for the application's package, after
 #    Zephyr has generated its headers;
 # 3. links the static library it produces into the `app` target.
@@ -330,7 +330,8 @@ endfunction()
 # ZephyrApplication's C `main`.
 #
 # ~~~
-# Besides the build itself, configuring writes, under build/swift/:
+# Besides the build itself, configuring writes, under swift/ in the build
+# directory:
 #   toolset.json    the target options for `swift build`
 #   swift-build.sh  the exact `swift build` command, for compiling Swift alone
 # and, with ZEPHYR_SWIFT_LSP_CONFIG, <package>/.sourcekit-lsp/config.json.

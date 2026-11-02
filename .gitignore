@@ -54,7 +54,6 @@ fastlane/test_output
 .env
 .idea/
 .vscode/
-build/
 
 
 # Exceptions
