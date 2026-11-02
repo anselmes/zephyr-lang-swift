@@ -29,7 +29,8 @@ void zephyr_sys_init(void);
 // Logs `msg` to the `swift` log module at `level` (`LOG_LEVEL_ERR` through
 // `LOG_LEVEL_DBG`; anything else logs at debug), like `LOG_ERR("%s", msg)` and
 // the other `LOG_*` macros. Implemented in zephyr-sys/src/log.swift. Does
-// nothing when `CONFIG_LOG` is off. C code may call it too.
+// nothing when `CONFIG_LOG` is off or `CONFIG_LOG_MODE_MINIMAL` is on. C code
+// may call it too.
 void zephyr_log(uint32_t level, const char *msg);
 
 #ifdef __cplusplus

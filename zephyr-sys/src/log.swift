@@ -13,7 +13,9 @@ import ZephyrCore
 /// in read-only memory and copies every other string, so `msg` may be a buffer
 /// on the caller's stack.
 ///
-/// Nothing is logged unless the build sets `CONFIG_LOG=y`. Messages above
+/// Nothing is logged unless the build sets `CONFIG_LOG=y`, and nothing is
+/// logged with `CONFIG_LOG_MODE_MINIMAL=y`, which builds no logging core to log
+/// into. Messages above
 /// `CONFIG_LOG_DEFAULT_LEVEL` and `CONFIG_LOG_MAX_LEVEL` are dropped, or above
 /// `CONFIG_LOG_OVERRIDE_LEVEL` when that is set, and with
 /// `CONFIG_LOG_RUNTIME_FILTERING=y` so are messages above the source's runtime

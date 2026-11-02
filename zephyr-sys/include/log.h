@@ -17,10 +17,14 @@
 // own copy (and the logger would see several `swift` sources). Only the
 // zephyr_log() implementation uses them, and other modules call it through
 // the C declaration above, so ZephyrCore holds the only copy.
+//
+// CONFIG_LOG_MODE_MINIMAL builds no logging core: there are no message records,
+// no sources and no z_log_msg_runtime_create(). There is nothing to log into,
+// so in that mode the wrappers at the end of this file do nothing.
 
 #pragma once
 
-#if defined(CONFIG_LOG)
+#if defined(CONFIG_LOG) && !defined(CONFIG_LOG_MODE_MINIMAL)
 static const STRUCT_SECTION_ITERABLE_ALTERNATE(log_const, log_source_const_data,
                                                log_const_swift) = {
     .name = "swift",
@@ -88,12 +92,29 @@ static inline bool zephyr_swift_log_enabled(uint32_t level) {
 // mode and packages the argument itself: it keeps a pointer to a string in
 // read-only memory and copies every other string, so `msg` may be a buffer on
 // the caller's stack. Callers check zephyr_swift_log_enabled() first.
+//
+// The format string and the arguments are made the way the LOG_* macros make
+// them for a runtime message, so that CONFIG_LOG_USE_TAGGED_ARGUMENTS, which
+// needs every argument preceded by its type tag, and CONFIG_LOG_FMT_SECTION,
+// which keeps the format string in a dedicated section, work too.
 static inline void zephyr_swift_log_message(uint32_t level, const char *msg) {
+  Z_LOG_MSG_STR_VAR(_fmt, "%s", msg)
   z_log_msg_runtime_create(
       Z_LOG_LOCAL_DOMAIN_ID, zephyr_swift_log_source(), (uint8_t)level, NULL, 0,
       Z_LOG_MSG_CBPRINTF_FLAGS(0) | (IS_ENABLED(CONFIG_LOG_USE_TAGGED_ARGUMENTS)
                                          ? CBPRINTF_PACKAGE_ARGS_ARE_TAGGED
                                          : 0),
-      "%s", msg);
+      Z_LOG_FMT_RUNTIME_ARGS(_fmt, "%s", msg));
+}
+#elif defined(CONFIG_LOG)
+// CONFIG_LOG_MODE_MINIMAL: nothing to log into (see the top of this file).
+static inline bool zephyr_swift_log_enabled(uint32_t level) {
+  (void)level;
+  return false;
+}
+
+static inline void zephyr_swift_log_message(uint32_t level, const char *msg) {
+  (void)level;
+  (void)msg;
 }
 #endif
