@@ -196,6 +196,20 @@ function(_swift_json_string out value)
       PARENT_SCOPE)
 endfunction()
 
+# Store the elements of an array of toolset options in `out`, as JSON strings,
+# one per line.
+function(_swift_json_items out)
+  set(items "")
+  foreach(option IN LISTS ARGN)
+    _swift_json_string(item "${option}")
+    list(APPEND items "${item}")
+  endforeach()
+  list(JOIN items ",\n      " items)
+  set(${out}
+      "${items}"
+      PARENT_SCOPE)
+endfunction()
+
 # Quote `value` for a POSIX shell and store it in `out`.
 function(_swift_shell_string out value)
   string(REPLACE "'" "'\\''" value "${value}")
@@ -239,12 +253,20 @@ function(_swift_write_toolset path)
       "-I${ZEPHYR_BASE}/include"
       ${SWIFT_SYSROOT_FLAGS})
 
-  set(items "")
-  foreach(option IN LISTS options)
-    _swift_json_string(item "${option}")
-    list(APPEND items "${item}")
-  endforeach()
-  list(JOIN items ",\n      " items)
+  # SwiftPM does not hand the Swift compiler's -Xcc options on to the C and C++
+  # targets of a package, so a C-backed dependency would not find Zephyr's or
+  # the C library's headers. Give those compilers the same include paths as
+  # plain options.
+  set(c_options
+      "-I${CMAKE_BINARY_DIR}/zephyr/include/generated"
+      "-I${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr"
+      "-I${CMAKE_BINARY_DIR}/zephyr/include"
+      "-I${ZEPHYR_BASE}/include"
+      ${SWIFT_SYSROOT_FLAGS})
+  list(FILTER c_options EXCLUDE REGEX "^-Xcc$")
+
+  _swift_json_items(items ${options})
+  _swift_json_items(c_items ${c_options})
 
   set(librarian "")
   if(ZEPHYR_SDK_INSTALL_DIR AND EXISTS
@@ -260,6 +282,16 @@ function(_swift_write_toolset path)
   \"swiftCompiler\": {
     \"extraCLIOptions\": [
       ${items}
+    ]
+  },
+  \"cCompiler\": {
+    \"extraCLIOptions\": [
+      ${c_items}
+    ]
+  },
+  \"cxxCompiler\": {
+    \"extraCLIOptions\": [
+      ${c_items}
     ]
   }${librarian}
 }
