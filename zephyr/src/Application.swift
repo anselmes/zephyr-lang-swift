@@ -34,7 +34,7 @@ public func main() {
 
 /// Raises a fatal kernel panic through Zephyr's `k_panic()`.
 // swift-format-ignore: AlwaysUseLowerCamelCase
-@c
+@c @implementation
 public func swift_panic_wrap() {
   zephyr_panic()
 }
