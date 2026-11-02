@@ -316,17 +316,18 @@ Check a change by building both buildable samples:
 
 ## Troubleshooting
 
-| Symptom                                         | Likely cause and fix                                                                                        |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org.           |
-| `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                                   |
-| `could not build C module 'ZephyrCore'`         | Zephyr has not generated its headers. Build the `swift_build` target or the image, not `swift build` alone. |
-| `no Package.swift in ... or a parent directory` | The application has no Swift package. Add a `Package.swift`, or pass `PACKAGE_DIR`.                         |
-| `undefined reference to 'entrypoint'`           | The application has no `@c(entrypoint) func entrypoint()`.                                                  |
-| `no such module` for a library                  | The application's `Package.swift` does not depend on the library's target or product.                       |
-| Package resolution fails                        | A dependency cannot be fetched. Check the network, or build offline from a committed `Package.resolved`.    |
-| Stale Swift errors after moving a build         | `build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                        |
-| `'--build-system native' has been deprecated`   | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).  |
+| Symptom                                         | Likely cause and fix                                                                                         |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org.            |
+| `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                                    |
+| `could not build C module 'ZephyrCore'`         | Zephyr has not generated its headers. Build the `swift_build` target or the image, not `swift build` alone.  |
+| `no Package.swift in ... or a parent directory` | The application has no Swift package. Add a `Package.swift`, or pass `PACKAGE_DIR`.                          |
+| `undefined reference to 'entrypoint'`           | The application has no `@c(entrypoint) func entrypoint()`.                                                   |
+| `no such module` for a library                  | The application's `Package.swift` does not depend on the library's target or product.                        |
+| Package resolution fails                        | A dependency cannot be fetched. Check the network, or build offline from a committed `Package.resolved`.     |
+| Stale Swift errors after moving a build         | `build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                         |
+| A header edit changes nothing                   | SwiftPM does not rebuild when only a `ZephyrCore` header changes. Edit a Swift file too, or `west build -p`. |
+| `'--build-system native' has been deprecated`   | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).   |
 
 ## License
 

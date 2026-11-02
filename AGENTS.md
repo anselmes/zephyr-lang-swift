@@ -40,6 +40,9 @@ belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
 - Language settings live in the `settings` array of each manifest. Declare it before `package`; a later declaration is still empty when `package` reads it.
 - The archive is linked with `--whole-archive`, as one `-Wl,` item, because the kernel's weak `main` would otherwise win over Swift's. `swift_orphans.ld`
   discards `.swift_modhash` and `.swift1_autolink_entries`.
+- `swift_build` runs on every build, because only SwiftPM's planner knows the whole package graph, including packages the application depends on by
+  path; CMake cannot list those inputs. When nothing changed it leaves the archive alone, and Ninja does not relink. SwiftPM does not notice a change to a
+  `ZephyrCore` header on its own: edit a Swift file too, or build with `-p`.
 - `--build-system native` is used because swiftbuild archives with the host's libtool, which cannot write ELF archives. The deprecation warning it prints is
   expected.
 - A `#if CONFIG_FOO` in Swift only works if `_swift_defines()` passes `-DCONFIG_FOO`. Today `SWIFT_DEBUG_INFO`, `CONFIG_TIMEOUT_64BIT` (makes `Tick` `Int64`
