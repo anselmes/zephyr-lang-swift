@@ -6,15 +6,18 @@ import ZephyrCore
 /// Logs `msg` to Zephyr's `swift` log module: `LOG_ERR("%s", msg)` and the
 /// other `LOG_*` macros, written in Swift.
 ///
-/// The macros are variadic and cannot be imported, so this does what they
-/// expand to: it filters by level, packs a `"%s"` message with one string
-/// argument and hands it to `z_log_msg_static_create`. The `swift` log source
-/// and the level limit come from BridgingHeader.h. Read-only strings are kept
-/// by pointer; the logger copies any other string before it returns.
+/// The macros are variadic and cannot be imported, so this does what they do:
+/// it drops messages that the `swift` source's filters reject, then hands a
+/// `"%s"` message with one string argument to the logger through the wrappers
+/// in log.h. The logger packages the argument: it keeps a pointer to a string
+/// in read-only memory and copies every other string, so `msg` may be a buffer
+/// on the caller's stack.
 ///
 /// Nothing is logged unless the build sets `CONFIG_LOG=y`. Messages above
 /// `CONFIG_LOG_DEFAULT_LEVEL` and `CONFIG_LOG_MAX_LEVEL` are dropped, or above
-/// `CONFIG_LOG_OVERRIDE_LEVEL` when that is set.
+/// `CONFIG_LOG_OVERRIDE_LEVEL` when that is set, and with
+/// `CONFIG_LOG_RUNTIME_FILTERING=y` so are messages above the source's runtime
+/// level, before they take any room in the log buffer.
 ///
 /// - Parameters:
 ///   - level: A Zephyr severity: `LOG_LEVEL_ERR` (1), `LOG_LEVEL_WRN` (2),
@@ -25,57 +28,21 @@ import ZephyrCore
 public func zephyr_log(_ level: UInt32, _ msg: UnsafePointer<CChar>?) {
   #if CONFIG_LOG
     let level = (UInt32(LOG_LEVEL_ERR)...UInt32(LOG_LEVEL_DBG)).contains(level) ? level : UInt32(LOG_LEVEL_DBG)
-    guard level <= UInt32(ZEPHYR_SWIFT_LOG_LEVEL), let msg = unsafe msg else { return }
+    guard let msg = unsafe msg, zephyr_swift_log_enabled(level) else { return }
 
-    // The cbprintf package for `"%s", msg`: header and format string, then the
-    // one argument, laid out like the C struct cbprintf expects.
-    let format: StaticString = "%s"
-    var header = unsafe cbprintf_package_hdr_ext()
-    // SAFETY: `utf8Start` points to the static, NUL-terminated literal, and
-    // UInt8 and CChar have the same size and alignment. The field is `char *`,
-    // but cbprintf only reads the format.
-    unsafe header.fmt = UnsafeMutableRawPointer(mutating: format.utf8Start).assumingMemoryBound(to: CChar.self)
-    var package = unsafe (header, msg)
-    let packageSize = unsafe MemoryLayout.size(ofValue: package)
-    // The package length is counted in 32-bit words.
-    unsafe package.0.hdr.desc.len = UInt8(packageSize / MemoryLayout<UInt32>.size)
-
-    var descriptor = log_msg_desc()
-    descriptor.level = level
-    descriptor.package_len = UInt32(packageSize)
-
-    #if CONFIG_LOG_MODE_DEFERRED
-      // Deferred mode: the logger allocates the message in its buffer, copies
-      // the package into it and prints it later from its thread.
-      withUnsafeMutableBytes(of: &package) { bytes in
-        // SAFETY: `bytes` covers the whole package for the duration of the
-        // call, and z_log_msg_static_create copies it before returning. The
-        // source is the `swift` log source data in BridgingHeader.h.
-        unsafe z_log_msg_static_create(zephyr_swift_log_source(), descriptor, bytes.baseAddress?.assumingMemoryBound(to: UInt8.self), nil)
-      }
-    #else
-      // Immediate mode has no message buffer, so, like the LOG_* macros, build
-      // the whole message on the stack (header, then the package in its `data`
-      // field) and let z_log_msg_finalize print it before returning. Zephyr
-      // asserts that `sizeof(struct log_msg)` is the offset of `data`, so the
-      // package that follows the header in this tuple lands exactly there.
-      var message = unsafe (log_msg(), package)
-      withUnsafeMutableBytes(of: &message) { bytes in
-        // SAFETY: `bytes` covers the header and the package, which only holds
-        // pointer-sized values, so pointer alignment is enough. The message is
-        // processed before z_log_msg_finalize returns. The source is the
-        // `swift` log source data in BridgingHeader.h.
-        unsafe z_log_msg_finalize(bytes.baseAddress?.assumingMemoryBound(to: log_msg.self), zephyr_swift_log_source(), descriptor, nil)
-      }
-    #endif
+    // SAFETY: `msg` is a non-NULL, NUL-terminated string that the caller keeps
+    // valid for this call (the documented contract). The logger only reads it
+    // while packaging the message, and copies it unless it is read-only.
+    unsafe zephyr_swift_log_message(level, msg)
   #endif
 }
 
 extension Kernel {
   /// Logs `message` to Zephyr's `swift` log module (`zephyr_log`).
   ///
-  /// The message is a `StaticString`, so it lives in read-only memory and is
-  /// passed without copying or allocation. Applications use `Log` from the
+  /// The message is a `StaticString`, so it lives in read-only memory and the
+  /// logger keeps a pointer to it instead of copying the text; the logger still
+  /// records the message in its own buffer. Applications use `Log` from the
   /// `Zephyr` library instead.
   ///
   /// - Parameters:

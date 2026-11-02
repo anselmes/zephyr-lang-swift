@@ -10,7 +10,8 @@
 // put a string pointer in a `@section` constant nor take the address of a C
 // global without copying it. So the source structs are defined here, in the
 // sections Zephyr's logger enumerates, with a one-line accessor for their
-// address.
+// address. The variadic z_log_msg_runtime_create() that the macros call cannot
+// be imported either, so a small wrapper for it is defined here too.
 //
 // These are statics, so every Swift module that referenced them would get its
 // own copy (and the logger would see several `swift` sources). Only the
@@ -33,8 +34,8 @@ static STRUCT_SECTION_ITERABLE_ALTERNATE(log_dynamic, log_source_dynamic_data,
                                          log_dynamic_swift) = {0};
 #endif
 
-// The `swift` log source that z_log_msg_static_create() expects: the dynamic
-// data with runtime filtering, otherwise the constant data.
+// The `swift` log source that the logger expects: the dynamic data with runtime
+// filtering, otherwise the constant data.
 static inline const void *zephyr_swift_log_source(void) {
   return COND_CODE_1(CONFIG_LOG_RUNTIME_FILTERING, (&log_dynamic_swift),
                      (&log_const_swift));
@@ -49,4 +50,28 @@ enum {
           ? CONFIG_LOG_OVERRIDE_LEVEL
           : MIN(CONFIG_LOG_DEFAULT_LEVEL, CONFIG_LOG_MAX_LEVEL),
 };
+
+// Whether a message at `level` passes the `swift` source's filters, the checks
+// the LOG_* macros make before they build a message: the compile-time level
+// above and, with CONFIG_LOG_RUNTIME_FILTERING, the aggregate runtime level of
+// the enabled backends. A message that fails must not be created: it would take
+// room in the log buffer that messages the backends do want could need.
+static inline bool zephyr_swift_log_enabled(uint32_t level) {
+  return level <= ZEPHYR_SWIFT_LOG_LEVEL &&
+         Z_LOG_DYNAMIC_LEVEL_CHECK(level, zephyr_swift_log_source());
+}
+
+// Logs `msg` at `level` like LOG_ERR("%s", msg) and the other LOG_* macros do,
+// through z_log_msg_runtime_create(). The logger builds the message in any log
+// mode and packages the argument itself: it keeps a pointer to a string in
+// read-only memory and copies every other string, so `msg` may be a buffer on
+// the caller's stack. Callers check zephyr_swift_log_enabled() first.
+static inline void zephyr_swift_log_message(uint32_t level, const char *msg) {
+  z_log_msg_runtime_create(
+      Z_LOG_LOCAL_DOMAIN_ID, zephyr_swift_log_source(), (uint8_t)level, NULL, 0,
+      Z_LOG_MSG_CBPRINTF_FLAGS(0) | (IS_ENABLED(CONFIG_LOG_USE_TAGGED_ARGUMENTS)
+                                         ? CBPRINTF_PACKAGE_ARGS_ARE_TAGGED
+                                         : 0),
+      "%s", msg);
+}
 #endif
