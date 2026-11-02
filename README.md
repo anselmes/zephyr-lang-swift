@@ -297,10 +297,10 @@ To add runtime support that Swift needs from C:
 
 ```bash
 cd samples/app
-west build -b qemu_riscv32/qemu_virt_riscv32/smp --cmake-only   # generate .build/ with CMake
-west build -t swift_build                                       # generate Zephyr's headers, compile Swift
-.build/swift/swift-build.sh                                      # recompile Swift only; add -v to see the flags
-west build -t run                                               # build and run the image
+west build -d .build -b qemu_riscv32/qemu_virt_riscv32/smp --cmake-only   # generate .build/ with CMake
+west build -d .build -t swift_build                                       # generate Zephyr's headers, compile Swift
+.build/swift/swift-build.sh                                               # recompile Swift only; add -v to see the flags
+west build -d .build -t run                                               # build and run the image
 ```
 
 `swift-build.sh` needs the headers that the `swift_build` target generates, and says so if they are missing. Configuring with plain CMake works the same way: `cmake -G Ninja -B build -DBOARD=qemu_riscv32/qemu_virt_riscv32/smp`, then `ninja -C build swift_build`.

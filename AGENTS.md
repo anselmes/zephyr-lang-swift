@@ -148,9 +148,9 @@ west build -p -b <board> samples/app+lib/app
 Both must compile without new warnings. To iterate on Swift alone, generate the build directory and rebuild only the package:
 
 ```bash
-west build -b <board> --cmake-only samples/app
-west build -t swift_build          # Zephyr's generated headers, then the Swift package
-.build/swift/swift-build.sh -v      # the same swift build, again, with its command lines
+west build -d .build -b <board> --cmake-only samples/app
+west build -d .build -t swift_build   # Zephyr's generated headers, then the Swift package
+.build/swift/swift-build.sh -v        # the same swift build, again, with its command lines
 ```
 
 Check every manifest with `swift package describe`; `swift build` on its own cannot work, because the Zephyr headers come from a build directory. New logic should come with Ztest/Twister cases under `tests/`, including negative and edge cases

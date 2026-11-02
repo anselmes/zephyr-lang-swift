@@ -35,7 +35,7 @@ __description__ It is an Embedded Swift application on Zephyr RTOS, built on the
 - **Configuration**: board and toolchain come from `.env` (copy `app/.env.example`); never commit `.env`, keys or certificates.
 - **Swift packages**: `west build` builds the Swift code with SwiftPM. Manifests hold only the Embedded Swift `settings`, declared before
   `package`; never add `unsafeFlags`, `platforms` or include paths, which zephyr-lang-swift's CMake writes to the build's toolset. Commit
-  `Package.resolved` when a manifest uses a package by URL. To iterate on Swift alone: `west build -t swift_build`, then
+  `Package.resolved` when a manifest uses a package by URL. To iterate on Swift alone: `west build -d .build -t swift_build`, then
   `.build/swift/swift-build.sh`.
 
 ## Build and test
