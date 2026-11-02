@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
+import ZephyrCore
+
 /// Thin, allocation-free wrappers over the Zephyr kernel calls that the
 /// `Zephyr` library builds on.
 ///
