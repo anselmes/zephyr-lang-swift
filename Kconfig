@@ -11,24 +11,25 @@
 #   CONFIG_SWIFT_DEBUG_INFO=y  # Optional
 #
 # When CONFIG_SWIFT is enabled, the module's CMakeLists.txt:
-# 1. builds the ZephyrSystem library (Swift runtime support, such as
-#    posix_memalign)
-# 2. builds the Zephyr Swift library (Duration, Timeout, sleep, ZephyrError)
-# 3. provides the zephyr_swift_application() and zephyr_swift_library()
-#    functions for applications and libraries
+# 1. provides zephyr_swift_application(), which builds the application's
+#    Swift package with SwiftPM (including this module's ZephyrCore,
+#    ZephyrSystem, Zephyr and ZephyrApplication) and links it into the image
+# 2. provides zephyr_swift_library(), which registers a Swift library module
+# 3. discards the sections swiftc emits that no image needs
 
 config SWIFT
   bool "Swift language support"
   help
     Enable support for the Swift programming language in Zephyr RTOS.
 
-    Swift sources are compiled with swiftc in Embedded Swift mode and linked
+    Swift packages are built with SwiftPM in Embedded Swift mode and linked
     into the Zephyr image. When enabled, this option provides:
-    - Swift compiler integration with Zephyr's CMake build system
+    - zephyr_swift_application(), which runs swift build for the
+      application's Package.swift with the target options of the build
     - Cross-compilation for Arm Cortex-M, AArch64 and RISC-V targets
-    - Swift runtime support through the ZephyrSystem library
-    - C-Swift interoperability through a bridging header
-    - zephyr_swift_application() and zephyr_swift_library() CMake functions
+    - Swift runtime support through the ZephyrSystem package target
+    - C-Swift interoperability through the ZephyrCore Clang module
+    - zephyr_swift_library() for library modules
 
     Requirements:
     - A Swift 6.4 or later toolchain from swift.org with Embedded Swift

@@ -1,6 +1,6 @@
 # Swift Samples
 
-Three samples show how to build Swift applications and libraries for Zephyr with this module. Each one is built and run with `west`, and each has been built for `qemu_riscv32/qemu_virt_riscv32/smp` with Zephyr SDK 1.0.1 and its LLVM toolchain. Other boards are not covered by these samples.
+Three samples show how to build Swift applications and libraries for Zephyr with this module. Each is a Swift package (`Package.swift`) that depends on this module's package by path, and the applications are built and run with `west`, and each has been built for `qemu_riscv32/qemu_virt_riscv32/smp` with Zephyr SDK 1.0.1 and its LLVM toolchain. Other boards are not covered by these samples.
 
 ## Table of Contents
 
@@ -82,7 +82,7 @@ Hello from Swift!!!
 
 ## Application with a library: app+lib
 
-The application is in `app+lib/app`. Its `CMakeLists.txt` appends the parent directory to `ZEPHYR_EXTRA_MODULES`, which is a Zephyr module (`zephyr/module.yml`) containing the Hello library in `lib/`. The application's `prj.conf` enables the library with `CONFIG_HELLO=y`, and its source imports it:
+The application is in `app+lib/app`. `app+lib/Package.swift` describes both the `Hello` library target (`lib/hello`) and the `App` target (`app/src`) that depends on it, and `zephyr_swift_application()` in `app/CMakeLists.txt` finds that manifest in the parent directory. The `CMakeLists.txt` also appends the parent directory to `ZEPHYR_EXTRA_MODULES`: it is a Zephyr module (`zephyr/module.yml`) that provides the library's Kconfig option, which the application's `prj.conf` enables with `CONFIG_HELLO=y`. The source imports the library:
 
 ```swift
 import Hello
@@ -106,7 +106,7 @@ still running...
 still running...
 ```
 
-The source files are in `app+lib/src`, and `app+lib/app/src` is a symlink to them.
+The application's source files are in `app+lib/app/src`.
 
 ## Library: lib
 
@@ -120,29 +120,29 @@ public struct Hello {
 }
 ```
 
-`lib/hello/Kconfig` defines `CONFIG_HELLO`, and `lib/CMakeLists.txt` adds the library to the build only when it is set. `lib/hello/CMakeLists.txt` compiles the sources with `zephyr_swift_library(MODULE_NAME Hello)`.
+`lib/Package.swift` makes the library a package of its own with a `Hello` product, which an application adds to its `Package.swift`; SwiftPM then compiles it as part of the application. `lib/hello/Kconfig` defines `CONFIG_HELLO`, and `lib/CMakeLists.txt` registers the library with `zephyr_swift_library(MODULE_NAME Hello)` only when it is set, which defines `CONFIG_HELLO` for Swift code.
 
 ## Configuration
 
 Both applications set these options in `prj.conf`:
 
-| Option                    | Purpose                                                             |
-| ------------------------- | ------------------------------------------------------------------- |
-| `CONFIG_SWIFT`            | Enables Swift support                                               |
-| `CONFIG_MINIMAL_LIBC`     | The libc that the Embedded Swift runtime allocates through          |
+| Option                                 | Purpose                                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `CONFIG_SWIFT`                         | Enables Swift support                                                                             |
+| `CONFIG_MINIMAL_LIBC`                  | The libc that the Embedded Swift runtime allocates through                                        |
 | `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE` | Heap size in bytes. The minimal libc defaults it to zero, so set it for the board and application |
-| `CONFIG_SWIFT_DEBUG_INFO` | Optional. Defines `SWIFT_DEBUG_INFO` for `#if` blocks; adds no `-g` |
-| `CONFIG_HELLO`            | `app+lib` only. Builds the Hello library                            |
+| `CONFIG_SWIFT_DEBUG_INFO`              | Optional. Defines `SWIFT_DEBUG_INFO` for `#if` blocks; adds no `-g`                               |
+| `CONFIG_HELLO`                         | `app+lib` only. Builds the Hello library                                                          |
 
 ## Create your own
 
-To start an application, copy `app` and edit `src/Entrypoint.swift`, `prj.conf` and `CMakeLists.txt`:
+To start an application, copy `app` and edit `src/Entrypoint.swift`, `prj.conf`, `CMakeLists.txt` and `Package.swift`. The copy depends on this module by the relative path `../..`, so change that path, or use the URL form shown in the [README](../README.md#an-application):
 
 ```bash
 cp -r samples/app my_app
 ```
 
-To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib/Kconfig` and `app+lib/lib/`, not just `lib/hello`), rename the library, its Kconfig option and its `zephyr/module.yml` entry, then add the copied module root to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt` so Zephyr discovers the library and its Kconfig option. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
+To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib/Kconfig` and `app+lib/lib/`, not just `lib/hello`), rename the library, its Kconfig option and its `zephyr/module.yml` entry, and add it as a target to a `Package.swift`. Then add the library to the application's `Package.swift`, and the copied module root to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt` so Zephyr discovers its Kconfig option. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
 
 ## Troubleshooting
 
@@ -150,6 +150,7 @@ To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org. |
 | `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Source `.env` (it sets `zephyr/llvm`).                     |
-| `BOARD is not being defined`                    | Neither `ZEPHYR_BOARD` nor `-b <board>` gave a board. Source `.env`, or pass `-b <board>`.                                   |
-| `no such module 'Hello'`                        | `CONFIG_HELLO=y` is missing from `prj.conf`, or the module is not in `ZEPHYR_EXTRA_MODULES`.      |
+| `BOARD is not being defined`                    | Neither `ZEPHYR_BOARD` nor `-b <board>` gave a board. Source `.env`, or pass `-b <board>`.        |
+| `no such module 'Hello'`                        | The application's `Package.swift` does not depend on the `Hello` target or product.               |
+| `could not build C module 'ZephyrCore'`         | Zephyr has not generated its headers yet. Build with `west build`, not `swift build` alone.       |
 | `west twister -T samples/` finds nothing        | The `sample.yml` files have no `tests:` section yet, so twister has no test cases to run.         |

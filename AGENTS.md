@@ -5,45 +5,54 @@ Change the rules here. Anything not stated here follows the owner's global guide
 
 ## What this repository is
 
-A Zephyr RTOS module that adds Embedded Swift support: C runtime stubs and thin kernel wrappers (`ZephyrSystem`), a high-level Swift library built on them (`Zephyr`),
-and samples. It has no application or domain logic.
+A Zephyr RTOS module that adds Embedded Swift support as a SwiftPM package: the Zephyr C APIs as a Clang module (`ZephyrCore`), C runtime stubs and thin
+kernel wrappers (`ZephyrSystem`), a high-level Swift library built on them (`Zephyr`), the C `main` (`ZephyrApplication`), the CMake that builds an
+application's package from `west build`, and samples. It has no application or domain logic.
 
 ## Layout
 
-| Path                          | Target / product | Purpose                                                                                                                           |
-| ----------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `zephyr-sys/src`              | `ZephyrSystem`   | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `malloc.swift`, `init.swift`                   |
-| `zephyr-sys/include`          | `ZephyrSystem`   | `BridgingHeader.h` (Zephyr C APIs and `@c @implementation` declarations) and `module.modulemap`                                   |
-| `zephyr/lib`                  | `Zephyr`         | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `ZephyrError.swift`, `Check.swift`                       |
-| `zephyr/src`                  | `Zephyr`         | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
-| `CMakeLists.txt`, `Kconfig`   | —                | Target mapping, `swiftc` invocations, `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`                                                |
-| `zephyr/module.yml`           | —                | Zephyr module definition                                                                                                          |
-| `samples/{app,lib,app+lib}`   | —                | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib/app`)        |
-| `tests/`                      | —                | Reserved for Ztest/Twister cases (empty today)                                                                                    |
-| `doc/`                        | —                | Documentation                                                                                                                     |
-| `plugins/`, `.claude-plugin/` | `zephyr-swift`   | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
+| Path                          | Target / product    | Purpose                                                                                                                           |
+| ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Package.swift`               | all four            | The root package: targets, products and the Embedded Swift `settings`; no per-build or unsafe flags                               |
+| `zephyr-sys/include`          | `ZephyrCore`        | `BridgingHeader.h` (umbrella: Zephyr C APIs, `core.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`      |
+| `zephyr-sys/src`              | `ZephyrSystem`      | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `log.swift`, `malloc.swift`, `init.swift`      |
+| `zephyr/lib`                  | `Zephyr`            | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `Log.swift`, `ZephyrError.swift`, `Check.swift`          |
+| `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
+| `CMakeLists.txt`, `Kconfig`   | —                   | Target mapping, toolset generation, the `swift build` command and linking; `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`           |
+| `zephyr/module.yml`           | —                   | Zephyr module definition                                                                                                          |
+| `samples/{app,lib,app+lib}`   | —                   | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib/app`)        |
+| `tests/`                      | —                   | Reserved for Ztest/Twister cases (empty today)                                                                                    |
+| `doc/`                        | —                   | Documentation                                                                                                                     |
+| `plugins/`, `.claude-plugin/` | `zephyr-swift`      | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
 
-`Zephyr` depends on `ZephyrSystem`, never the reverse. Code that only wraps a Zephyr C API or provides runtime support belongs in `ZephyrSystem`;
-Swift-native abstractions over it belong in `Zephyr`.
+Dependencies flow `ZephyrCore` ← `ZephyrSystem` ← `Zephyr` ← `ZephyrApplication` ← the application, never the reverse. C declarations belong in
+`ZephyrCore`'s headers. Code that only wraps a Zephyr C API or provides runtime support belongs in `ZephyrSystem`; Swift-native abstractions over it
+belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
 
 ## Build system
 
-- Both libraries are compiled with a raw `swiftc` call inside `add_custom_command`, not by SwiftPM. Sources are globbed from `src/` and `lib/`, so a new file
-  must live in one of those directories.
-- `Zephyr` finds `ZephyrSystem.swiftmodule` through the `SWIFT_MODULE_DIR` property of the `ZephyrSystem` target and depends on `ZephyrSystem_swift_compile`.
-  Keep that wiring when touching either `CMakeLists.txt`.
-- The four `swiftc` flag lists (`zephyr-sys/CMakeLists.txt`, `zephyr/CMakeLists.txt`, and `zephyr_swift_library()` and `zephyr_swift_application()` in the root
-  `CMakeLists.txt`) must stay in step with each other. A flag that `swiftc` rejects, such as `-strict-concurrency`, breaks the build.
-- `zephyr/CMakeLists.txt` publishes the `ZEPHYR_SWIFT_CLIENT_FLAGS` global property (include paths, sysroot headers, the `ZephyrSystem` module directory and the
-  bridging header). `_swift_discover_libraries` adds it to `SWIFT_INCLUDE_PATHS`, so applications and libraries can load `Zephyr.swiftmodule`. Without it, an
-  application that calls the generic `sleep(_:)` crashes the compiler.
-- A `#if CONFIG_FOO` in Swift only works if CMake passes `-DCONFIG_FOO`. Today `SWIFT_DEBUG_INFO` and `CONFIG_TIMEOUT_64BIT` are passed (the latter makes `Tick`
-  `Int64` and compiles `Instant` and `now()`). Check before relying on any other Kconfig symbol in an `#if`.
-- Kconfig symbols are `CONFIG_SWIFT` (master switch) and `CONFIG_SWIFT_DEBUG_INFO`. Document new options in `Kconfig` and in `README.md`.
+- Swift is built by SwiftPM, driven by CMake. `zephyr_swift_application()` runs one `swift build --product App` for the application's package (the nearest
+  `Package.swift` at or above the application, or `PACKAGE_DIR`) and links `build/swift/<triple>/release/libApp.a` into `app`. Every Swift module the
+  application uses, this module's included, is in that archive. There is no other Swift compile step.
+- Per-build options live in the toolset that `_swift_write_toolset()` writes to `build/swift/toolset.json`: `-Osize`, `-Xfrontend -function-sections`, the
+  Kconfig defines from `_swift_defines()`, the Zephyr include paths and the C library headers (`_swift_sysroot_flags()`). Never put them, or any
+  `unsafeFlags`, in a `Package.swift`: they differ per build, and unsafe flags stop other packages from depending on the root package by URL.
+- Language settings live in the `settings` array of each manifest. Declare it before `package`; a later declaration is still empty when `package` reads it.
+- The archive is linked with `--whole-archive`, as one `-Wl,` item, because the kernel's weak `main` would otherwise win over Swift's. `swift_orphans.ld`
+  discards `.swift_modhash` and `.swift1_autolink_entries`.
+- `--build-system native` is used because swiftbuild archives with the host's libtool, which cannot write ELF archives. The deprecation warning it prints is
+  expected.
+- A `#if CONFIG_FOO` in Swift only works if `_swift_defines()` passes `-DCONFIG_FOO`. Today `SWIFT_DEBUG_INFO`, `CONFIG_TIMEOUT_64BIT` (makes `Tick` `Int64`
+  and compiles `Instant` and `now()`), `CONFIG_LOG`, `CONFIG_LOG_MODE_DEFERRED` and `CONFIG_<NAME>` for each registered library are passed. Check before
+  relying on any other Kconfig symbol in an `#if`.
+- `zephyr_swift_library()` compiles nothing: it exposes a library's `include/` to Zephyr and registers its name for the `CONFIG_<NAME>` define. A library
+  reaches an application through the application's `Package.swift`.
+- Kconfig symbols are `CONFIG_SWIFT` (master switch) and `CONFIG_SWIFT_DEBUG_INFO`. CMake cache options are `ZEPHYR_SWIFT_OFFLINE`,
+  `ZEPHYR_SWIFT_LSP_CONFIG` and `ZEPHYR_SWIFT_BUILD_SYSTEM`. Document new options in `Kconfig` or `CMakeLists.txt`, and in `README.md`.
 
 ## Embedded Swift rules
 
-Every Swift target is compiled with this flag set:
+Every Swift target is compiled with this flag set, from the manifest's `settings` and `swiftLanguageModes: [.v6]`:
 
 ```text
 -swift-version 6 -strict-memory-safety
@@ -55,11 +64,13 @@ Every Swift target is compiled with this flag set:
 -enable-experimental-feature CImplementation
 ```
 
-- Declare C interfaces in `BridgingHeader.h` and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
+- Declare C interfaces in `core.h` (included by `BridgingHeader.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
+  A C function that one Swift module calls and another implements, such as `entrypoint`, is declared there too.
 - No `async`/`await`, `Task` or actors. No `Codable` or runtime reflection. Avoid existentials and anything that allocates (`Array` growth, `String` building)
   in ISRs and tight loops.
 - Annotate every unsafe pointer operation with a `// SAFETY:` comment stating the invariant.
-- Use access-level imports: `public import ZephyrSystem` only when a public signature mentions a type from it (for example `k_timeout_t`).
+- Use access-level imports: `public import ZephyrCore` or `public import ZephyrSystem` only when a public signature or an `@inlinable` body uses a declaration
+  from it (for example `k_timeout_t`, or the errno constants in `ZephyrError`). Imports are not re-exported, so each file imports what it uses.
 - Prefer value types. Keep the Swift layer a thin bridge over the Zephyr C API.
 
 ## Conventions
@@ -109,7 +120,15 @@ west build -p -b <board> samples/app
 west build -p -b <board> samples/app+lib/app
 ```
 
-Both must compile without new warnings. New logic should come with Ztest/Twister cases under `tests/`, including negative and edge cases
+Both must compile without new warnings. To iterate on Swift alone, generate the build directory and rebuild only the package:
+
+```bash
+west build -b <board> --cmake-only samples/app
+west build -t swift_build          # Zephyr's generated headers, then the Swift package
+build/swift/swift-build.sh -v      # the same swift build, again, with its command lines
+```
+
+Check every manifest with `swift package describe`; `swift build` on its own cannot work, because the Zephyr headers come from a build directory. New logic should come with Ztest/Twister cases under `tests/`, including negative and edge cases
 (tick rounding, `check(_:)` mapping). Run them with `west twister -T tests`. No PR merges with failing builds or tests.
 
 ## Pull requests
@@ -129,5 +148,6 @@ after every rebase. Request a review from the owner listed in `CODEOWNERS`.
 
 ## Dependencies
 
-There are no third-party packages. Code uses the Embedded Swift standard library and the Zephyr C APIs exposed through `BridgingHeader.h`.
-Ask before adding anything else.
+There are no third-party packages. Code uses the Embedded Swift standard library and the Zephyr C APIs exposed through `ZephyrCore`.
+Ask before adding anything else. Applications built on this module may add SwiftPM packages that build with Embedded Swift for a bare-metal target; they
+commit `Package.resolved`, and CI builds them with `-DZEPHYR_SWIFT_OFFLINE=ON`.
