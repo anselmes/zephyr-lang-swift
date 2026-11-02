@@ -1,7 +1,9 @@
 rules:
   quoted-strings:
     required: only-when-needed
-    extra-allowed: ["{|}"]
+    # A quoted __token__ in a plugin template is replaced by a value that may need
+    # the quotes, such as a title with a colon.
+    extra-allowed: ["{|}", ^__.+__$]
   key-duplicates: {}
   octal-values:
     forbid-implicit-octal: true

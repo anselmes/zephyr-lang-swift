@@ -30,6 +30,7 @@ jobs:
             codeload.github.com:443
             ghcr.io:443
             github.com:443
+            mirror.gcr.io:443
             objects.githubusercontent.com:443
             pipelines.actions.githubusercontent.com:443
             pypi.org:443
