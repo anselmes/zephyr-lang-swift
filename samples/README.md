@@ -86,31 +86,39 @@ The application is in `app+lib/app`. `app+lib/Package.swift` describes both the 
 
 ```swift
 import Hello
+import Zephyr
 
 @c(entrypoint)
 func entrypoint() {
   print("Hello from Swift app+lib!!!")
-  hello()
+  Hello.run()
   while true {
     sleep(Duration.milliseconds(2000))
   }
 }
 ```
 
-`hello()` never returns, so the `while true` loop after it is never reached. Expected output:
+`Hello.run()` never returns, so the `while true` loop after it is never reached. Expected output:
 
 ```text
 Hello from Swift app+lib!!!
 Hello from Swift!!!
-still running...
-still running...
+```
+
+The library logs `still running...` every second with `Log.info`, which prints only when logging is on. Uncomment `CONFIG_LOG=y` in `prj.conf` to see it:
+
+```text
+Hello from Swift app+lib!!!
+Hello from Swift!!!
+[00:00:01.020,000] <inf> swift: still running...
+[00:00:02.030,000] <inf> swift: still running...
 ```
 
 The application's source files are in `app+lib/app/src`.
 
 ## Library: lib
 
-The Hello library (`lib/hello`) exports two entry points, both of which print a greeting and then `still running...` every `timeout` milliseconds, and never return:
+The Hello library (`lib/hello`) exports two entry points, both of which print a greeting and then log `still running...` every `timeout` milliseconds, and never return:
 
 ```swift
 public func hello(timeout: Int = 1000)
@@ -132,6 +140,7 @@ Both applications set these options in `prj.conf`:
 | `CONFIG_MINIMAL_LIBC`                  | The libc that the Embedded Swift runtime allocates through                                        |
 | `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE` | Heap size in bytes. The minimal libc defaults it to zero, so set it for the board and application |
 | `CONFIG_SWIFT_DEBUG_INFO`              | Optional. Defines `SWIFT_DEBUG_INFO` for `#if` blocks; adds no `-g`                               |
+| `CONFIG_LOG`                           | Optional. Prints `Log` output; the debug-info lines also need `CONFIG_LOG_DEFAULT_LEVEL=4`        |
 | `CONFIG_HELLO`                         | `app+lib` only. Builds the Hello library                                                          |
 
 ## Create your own

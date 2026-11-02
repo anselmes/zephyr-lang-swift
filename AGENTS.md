@@ -50,6 +50,28 @@ belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
 - Kconfig symbols are `CONFIG_SWIFT` (master switch) and `CONFIG_SWIFT_DEBUG_INFO`. CMake cache options are `ZEPHYR_SWIFT_OFFLINE`,
   `ZEPHYR_SWIFT_LSP_CONFIG` and `ZEPHYR_SWIFT_BUILD_SYSTEM`. Document new options in `Kconfig` or `CMakeLists.txt`, and in `README.md`.
 
+## Package manifests
+
+Every `Package.swift` (the root, the samples and the plugin templates) has the same layout, so manifests read alike and diff cleanly:
+
+1. `// swift-tools-version: 6.4`, the SPDX header, a comment saying what the package is and how it is built, then `import PackageDescription`.
+2. `let settings: [SwiftSetting]`, declared before `package`. Its entries are `.strictMemorySafety()`, then the `.enableUpcomingFeature` entries,
+   then the `.enableExperimentalFeature` entries, each group in alphabetical order. No `unsafeFlags` and no `.define` for Kconfig symbols.
+3. `let package = Package(...)` with its arguments in this order: `name`, `products`, `dependencies`, `targets`, `swiftLanguageModes: [.v6]`. No
+   `platforms`.
+4. `products` in alphabetical order by name. An application's product is `.library(name: "App", type: .static, targets: ["App"])`; other
+   products keep the default library type.
+5. `dependencies` in alphabetical order by package name. In-tree packages use `.package(name:path:)` with a relative path; others use
+   `zephyrLangSwift()` or a pinned `.package(url:...)`.
+6. `targets`: Swift targets in alphabetical order by name, then `.systemLibrary` targets. A target's arguments are, in order, `name`,
+   `dependencies`, `path`, `exclude`, `swiftSettings: settings`. Every target sets `path` explicitly, and `exclude` lists the CMake and Kconfig
+   files in a directory that Zephyr also reads.
+7. A target's `dependencies` are `.target(name:)` entries first, then `.product(name:package:)` entries ordered by package and then by name. Use
+   the explicit forms, not bare strings. List every module the target's sources import; do not rely on a transitive dependency.
+8. Helper functions, such as `zephyrLangSwift()`, come after `package`, below `// MARK: - Helpers`.
+
+Format manifests with `swift format format --in-place` and check them with `swift format lint --strict` and `swift package describe`.
+
 ## Embedded Swift rules
 
 Every Swift target is compiled with this flag set, from the manifest's `settings` and `swiftLanguageModes: [.v6]`:
