@@ -1,5 +1,7 @@
-# SPDX-License-Identifier: GPL-3.0 Copyright (c) 2025 Schubert Anselme
-# <schubert@anselm.es>
+# cmake-format: off
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+# cmake-format: on
 
 # Hello: a sample Swift library.
 #

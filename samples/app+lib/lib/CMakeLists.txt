@@ -1,5 +1,7 @@
+# cmake-format: off
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+# cmake-format: on
 
 # Add the Hello library only when CONFIG_HELLO is enabled, for example with
 # CONFIG_HELLO=y in the application's prj.conf. CONFIG_HELLO is defined in

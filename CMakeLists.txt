@@ -390,31 +390,21 @@ function(zephyr_swift_application)
     list(APPEND build_env "TOOLCHAINS=$ENV{TOOLCHAINS}")
   endif()
 
-  # Rebuild when a Swift source, manifest, lock file or ZephyrCore header of the
-  # application package or of this module changes. SwiftPM itself decides what
-  # to recompile. Build directories are skipped.
-  file(
-    GLOB_RECURSE
-    inputs
-    CONFIGURE_DEPENDS
-    "${package_dir}/*.swift"
-    "${package_dir}/Package.resolved"
-    "${SWIFT_MODULE_DIR}/Package.swift"
-    "${SWIFT_MODULE_DIR}/zephyr/*.swift"
-    "${SWIFT_MODULE_DIR}/zephyr-sys/*.swift"
-    "${SWIFT_MODULE_DIR}/zephyr-sys/include/*")
-  list(FILTER inputs EXCLUDE REGEX "/(\\.build|build|\\.swiftpm)/")
-  list(REMOVE_DUPLICATES inputs)
-
-  add_custom_command(
-    OUTPUT "${archive}"
+  # SwiftPM runs on every build. Its planner tracks the whole package graph, so
+  # a change in this module, in the application package or in any package the
+  # application depends on, by path or by URL, is noticed; CMake cannot list
+  # those inputs up front. When nothing changed SwiftPM only plans and leaves
+  # the archive alone, and the archive is a byproduct, so Ninja does not relink
+  # the image.
+  add_custom_target(
+    swift_build
     COMMAND ${CMAKE_COMMAND} -E env ${build_env} ${SWIFT_EXECUTABLE}
             ${build_args}
-    DEPENDS ${inputs} "${toolset}"
+    BYPRODUCTS "${archive}"
+    DEPENDS "${toolset}"
     WORKING_DIRECTORY "${package_dir}"
     COMMENT "Building Swift package ${package_dir} (${SWIFTAPP_PRODUCT})"
     USES_TERMINAL)
-  add_custom_target(swift_build DEPENDS "${archive}")
 
   # Swift imports Zephyr's generated headers (syscalls, offsets, version).
   if(TARGET zephyr_generated_headers)
