@@ -6,8 +6,8 @@ import ZephyrSystem
 /// Turns a Zephyr return code into a typed throw.
 ///
 /// ```swift
-/// // SAFETY: `sem` is an initialized `k_sem` that outlives the call.
-/// try check(unsafe k_sem_take(&sem, .forever))
+/// // `code` is the return value of a ZephyrSystem wrapper over a Zephyr call.
+/// try check(code)
 /// ```
 ///
 /// - Parameter code: A Zephyr return value: negative `-errno` on failure.
