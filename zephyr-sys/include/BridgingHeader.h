@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-// Bridging header for the ZephyrSystem module.
+// Bridging header for the ZephyrCore module.
 //
 // It exposes the Zephyr C APIs to Swift, and declares the C functions that
-// ZephyrSystem implements in Swift with `@c @implementation`
+// ZephyrCore implements in Swift with `@c @implementation`
 // (see zephyr-sys/src). Swift compiles it with `-import-bridging-header`.
 
 #pragma once
@@ -30,10 +30,14 @@
 #include <zephyr/random/random.h>
 #include <zephyr/sys/atomic.h>
 
+// Logging: the LOG_LEVEL_* constants and z_log_msg_static_create(). `log.h` is
+// safe to include without `CONFIG_LOG`.
+#include <zephyr/logging/log.h>
+
 // ===== Device and Hardware APIs =====
 
-#include <zephyr/device.h>        // Generic device model interfaces for hardware access
-#include <zephyr/drivers/gpio.h>  // GPIO interfaces for pin control and interrupts
+#include <zephyr/device.h> // Generic device model interfaces for hardware access
+#include <zephyr/drivers/gpio.h> // GPIO interfaces for pin control and interrupts
 
 // ===== Filesystem =====
 
@@ -48,25 +52,7 @@
 #include <wasm_export.h>
 #endif
 
-// ===== ZephyrSystem C Interface Declarations =====
+// ===== Zephyr Core Imports =====
 
-// Functions declared here are implemented in Swift with `@c @implementation`,
-// which makes the compiler check each Swift signature against this C
-// declaration.
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Reserved initialization hook for the ZephyrSystem runtime support. Currently
-// empty (zephyr-sys/src/init.swift).
-void zephyr_sys_init(void);
-
-// POSIX aligned allocation, implemented in zephyr-sys/src/malloc.swift. The
-// Embedded Swift runtime calls it for every heap allocation. It is built on
-// `aligned_alloc` from Zephyr's common libc malloc.
-int posix_memalign(void **memptr, size_t alignment, size_t size);
-
-#ifdef __cplusplus
-}
-#endif
+#include "core.h"
+#include "log.h"
