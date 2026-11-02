@@ -17,7 +17,7 @@ public struct Hello {
   public static func run(timeout: Int = 1000) {
     // Printed only when CONFIG_SWIFT_DEBUG_INFO is enabled.
     #if SWIFT_DEBUG_INFO
-      print("debug: Module Hello compiled with debug info")
+      Log.info("Module Hello compiled with debug info")
     #endif
 
     hello(timeout: timeout)
@@ -34,6 +34,6 @@ public func hello(timeout: Int = 1000) {
   let duration: Duration = .milliseconds(timeout)
   while true {
     sleep(duration)
-    print("still running...")
+    Log.info("still running...")
   }
 }
