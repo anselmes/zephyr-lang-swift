@@ -18,8 +18,7 @@ import ZephyrCore
 /// ```
 ///
 /// When the build defines `SWIFT_DEBUG_INFO` (`CONFIG_SWIFT_DEBUG_INFO=y`),
-/// two debug-level lines are logged first; they appear only with `CONFIG_LOG=y`
-/// and `CONFIG_LOG_DEFAULT_LEVEL=4`.
+/// two info-level lines are logged first; they appear with `CONFIG_LOG=y`.
 ///
 /// - Important: `entrypoint()` must be implemented by the application. The
 ///   link fails without it.
