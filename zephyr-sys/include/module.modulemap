@@ -3,8 +3,8 @@
 
 // Clang module map for ZephyrSystem: the Zephyr C APIs and the C functions
 // implemented in Swift, as declared in BridgingHeader.h.
-module ZephyrSystem {
+module ZephyrCore {
   umbrella header "BridgingHeader.h"
-  link "ZephyrSystem"
+  link "ZephyrCore"
   export *
 }
