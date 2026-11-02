@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
+import ZephyrCore
+
 /// Swift spellings of Zephyr's timeout macros (`K_NO_WAIT`, `K_FOREVER`,
 /// `K_MSEC`). They are compound-literal and function-like macros
 /// (include/zephyr/sys/clock.h, include/zephyr/sys/time_units.h), which
