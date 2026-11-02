@@ -220,10 +220,24 @@ endfunction()
 
 # Write `content` to `path` only when it differs from the file there, so that
 # reconfiguring does not touch the file and rebuild Swift needlessly.
+#
+# Two build directories of the same application may be configured at once, and
+# both write the files that live in the package (.sourcekit-lsp/config.json).
+# The content goes to a temporary file that is named after this build directory
+# and sits next to `path`, and replaces `path` with a rename, which is atomic on
+# one file system: neither configuration can remove the other's temporary file,
+# and a reader never sees a half-written file.
 function(_swift_write_if_changed path content)
-  file(WRITE "${path}.tmp" "${content}")
-  file(COPY_FILE "${path}.tmp" "${path}" ONLY_IF_DIFFERENT)
-  file(REMOVE "${path}.tmp")
+  if(EXISTS "${path}")
+    file(READ "${path}" existing)
+    if(existing STREQUAL content)
+      return()
+    endif()
+  endif()
+  string(MD5 id "${CMAKE_BINARY_DIR}")
+  set(tmp "${path}.${id}.tmp")
+  file(WRITE "${tmp}" "${content}")
+  file(RENAME "${tmp}" "${path}")
 endfunction()
 
 # Write the SwiftPM toolset for this build to `path`: the target options every
