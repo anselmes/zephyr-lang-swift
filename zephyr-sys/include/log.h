@@ -67,8 +67,20 @@ enum {
 // the enabled backends. A message that fails must not be created: it would take
 // room in the log buffer that messages the backends do want could need.
 static inline bool zephyr_swift_log_enabled(uint32_t level) {
-  return level <= ZEPHYR_SWIFT_LOG_LEVEL &&
-         Z_LOG_DYNAMIC_LEVEL_CHECK(level, zephyr_swift_log_source());
+  if (level > ZEPHYR_SWIFT_LOG_LEVEL) {
+    return false;
+  }
+#if defined(CONFIG_LOG_RUNTIME_FILTERING)
+  // The logger writes the filters when it starts and whenever they change,
+  // which the compiler cannot see from this module. It would take the zero in
+  // the initializer above for a constant, fold this check to false and drop
+  // every message, so read the filters through a volatile access.
+  const uint32_t filters =
+      *(const volatile uint32_t *)&log_dynamic_swift.filters;
+  return level <= Z_LOG_RUNTIME_FILTER(filters);
+#else
+  return true;
+#endif
 }
 
 // Logs `msg` at `level` like LOG_ERR("%s", msg) and the other LOG_* macros do,
