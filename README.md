@@ -173,6 +173,8 @@ do {
 | `CONFIG_SWIFT`            | Enable Swift language support                                   | `n`            |
 | `CONFIG_SWIFT_DEBUG_INFO` | Define `SWIFT_DEBUG_INFO` for Swift code; adds no debug symbols | `y` if `DEBUG` |
 
+With `CONFIG_SWIFT=y`, the module also makes `CONFIG_LOG_MODE_IMMEDIATE` the default log mode, so `Log` output and `print()` output appear in order. Set `CONFIG_LOG_MODE_DEFERRED=y` in `prj.conf` to use deferred logging instead.
+
 Swift code cannot see `CONFIG_*` macros, so a Kconfig symbol used in an `#if` needs a matching `-D` in the module's `swiftc` calls. `CONFIG_TIMEOUT_64BIT` already has one.
 
 ## Architecture

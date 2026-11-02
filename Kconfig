@@ -39,6 +39,17 @@ config SWIFT
     - A target architecture that the toolchain supports and the module maps
       to a Swift target triple.
 
+# Swift's print() writes straight to the console, while Zephyr's default
+# deferred log mode prints log lines (and the boot banner, via printk) later
+# from a background thread. Default to immediate logging so that Log output and
+# print() output appear in the order they were made. A project can still pick
+# another mode, for example CONFIG_LOG_MODE_DEFERRED=y in prj.conf.
+# The modules' Kconfig is read before subsys/logging, so this default comes
+# first and wins over the logging subsystem's own defaults.
+choice LOG_MODE
+  default LOG_MODE_IMMEDIATE if SWIFT
+endchoice
+
 config SWIFT_DEBUG_INFO
   bool "Define SWIFT_DEBUG_INFO for Swift code"
   depends on SWIFT
