@@ -1,16 +1,16 @@
 # Zephyr Swift Claude Code plugin
 
 Skills that scaffold Embedded Swift projects on Zephyr RTOS using the `zephyr-lang-swift` module and its conventions:
-typed throws, one type per file, `zephyr_swift_application()` and `zephyr_swift_library()`, a `west.yml` manifest, signed commits,
+typed throws, one type per file, `Package.swift` manifests built by `zephyr_swift_application()`, `zephyr_swift_library()`, a `west.yml` manifest, signed commits,
 and the `anselmes/repository` template fetched from GitHub with this kit's tooling layered on top.
 
 ## Features
 
-| Skill         | Scaffolds                                                                                                 |
-| ------------- | --------------------------------------------------------------------------------------------------------- |
-| `new-project` | A standalone Swift application repository: `west.yml`, `app/`, `AGENTS.md`, CI that builds with `west`    |
-| `add-app`     | An application in an existing project: `CMakeLists.txt`, `prj.conf`, `sample.yaml`, `.env.example`, `src/` |
-| `add-library` | A library module: its `Kconfig` symbol, `CMakeLists.txt`, `zephyr/module.yml` entry and Swift sources     |
+| Skill         | Scaffolds                                                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `new-project` | A standalone Swift application repository: `west.yml`, `app/`, `AGENTS.md`, CI that builds with `west`                      |
+| `add-app`     | An application in an existing project: `Package.swift`, `CMakeLists.txt`, `prj.conf`, `sample.yaml`, `.env.example`, `src/` |
+| `add-library` | A library module: its `Kconfig` symbol, `CMakeLists.txt`, `zephyr/module.yml` entry and Swift sources                       |
 
 Each skill infers what it can from the project it runs in (`west.yml`, the Git remote, `hack/copyright.txt`) and asks once for the rest.
 Generated code is built with `west build` when `west` and the SDK are present; nothing is committed.

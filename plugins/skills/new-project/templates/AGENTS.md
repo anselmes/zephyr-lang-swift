@@ -5,17 +5,18 @@ one copy. Change the rules here. Anything not stated here follows the owner's gl
 
 ## What this repository is
 
-__description__ It is an Embedded Swift application on Zephyr RTOS, built on the `zephyr-lang-swift` module.
+**description** It is an Embedded Swift application on Zephyr RTOS, built on the `zephyr-lang-swift` module.
 
 ## Layout
 
-| Path                | Purpose                                                               |
-| ------------------- | --------------------------------------------------------------------- |
-| `west.yml`          | West manifest: Zephyr and `zephyr-lang-swift`                         |
-| `app/`              | The application: `CMakeLists.txt`, `prj.conf`, `src/Entrypoint.swift` |
-| `lib/`              | Library modules, each gated by a Kconfig symbol                       |
-| `zephyr/module.yml` | Makes the repository root a Zephyr module                             |
-| `tests/`            | Ztest/Twister cases                                                   |
+| Path                | Purpose                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| `west.yml`          | West manifest: Zephyr and `zephyr-lang-swift`                                          |
+| `app/`              | The application: `Package.swift`, `CMakeLists.txt`, `prj.conf`, `src/Entrypoint.swift` |
+| `lib/`              | Library modules, each gated by a Kconfig symbol                                        |
+| `Package.swift`     | The libraries' Swift package: one target and product per `lib/` module                 |
+| `zephyr/module.yml` | Makes the repository root a Zephyr module                                              |
+| `tests/`            | Ztest/Twister cases                                                                    |
 
 ## Conventions
 
@@ -32,6 +33,10 @@ __description__ It is an Embedded Swift application on Zephyr RTOS, built on the
   (`throws(E)`), never `Result`; wrap `-errno` returns with `try check(_:)`. Implicit member syntax where the type is inferable.
   Annotate unsafe pointer use with `// SAFETY:`. Format with `swift format` and `trunk fmt`.
 - **Configuration**: board and toolchain come from `.env` (copy `app/.env.example`); never commit `.env`, keys or certificates.
+- **Swift packages**: `west build` builds the Swift code with SwiftPM. Manifests hold only the Embedded Swift `settings`, declared before
+  `package`; never add `unsafeFlags`, `platforms` or include paths, which zephyr-lang-swift's CMake writes to the build's toolset. Commit
+  `Package.resolved` when a manifest uses a package by URL. To iterate on Swift alone: `west build -t swift_build`, then
+  `build/swift/swift-build.sh`.
 
 ## Build and test
 

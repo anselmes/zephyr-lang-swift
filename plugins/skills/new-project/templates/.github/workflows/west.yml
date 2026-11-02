@@ -34,10 +34,12 @@ jobs:
           . "${SWIFTLY_HOME_DIR:-${HOME}/.local/share/swiftly}/env.sh"
           swiftly install --assume-yes --use "${SWIFT_VERSION}"
           swiftc --version
+          swift build --version
           echo "${SWIFTLY_BIN_DIR:-${HOME}/.local/share/swiftly/bin}" >> "${GITHUB_PATH}"
       - name: Install the SDK
         run: west sdk install --no-gnu-toolchains --llvm
       - name: Build
         env:
           ZEPHYR_TOOLCHAIN_VARIANT: zephyr/llvm
-        run: west build -p -b __board__ __name__/app
+        # Package.resolved pins any package used by URL; never resolve in CI.
+        run: west build -p -b __board__ __name__/app -- -DZEPHYR_SWIFT_OFFLINE=ON

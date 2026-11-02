@@ -38,30 +38,30 @@ remembered or placeholder value.
 
 Templates use `__token__` placeholders. Replace every one; none may remain in the output (`grep -rnE '__[a-zA-Z0-9_-]+__' . | grep -v '"__copyright__"'` must find nothing; the `.swift-format` key `__copyright__` is a real key, not a token).
 
-| Token             | Meaning                                                     | Example                                 |
-| ----------------- | ----------------------------------------------------------- | --------------------------------------- |
-| `__name__`        | Repository name                                             | `blinky`                                |
-| `__dir__`         | Directory the repository is created in                      | `./firmware`                            |
-| `__owner__`       | GitHub owner                                                | `anselmes`                              |
-| `__app__`         | Application directory, relative to the project root         | `app`, `apps/blinky`                    |
-| `__project__`     | CMake project name: `__app__`'s basename, `[A-Za-z0-9_]`    | `app`, `blinky`                         |
-| `__Module__`      | Swift module name of a library, `UpperCamelCase`            | `Sensor`                                |
-| `__module__`      | Directory name of a library, lowercase                      | `sensor`                                |
-| `__MODULE__`      | Kconfig symbol, uppercase, no `CONFIG_` prefix              | `SENSOR`                                |
-| `__board__`       | Zephyr board identifier                                     | `esp32c6_devkitc`                       |
-| `__year__`        | Copyright year                                              | `2026`                                  |
-| `__author__`      | Author name and email                                       | `Schubert Anselme <schubert@anselm.es>` |
-| `__license__`     | SPDX license identifier                                     | `GPL-3.0`                               |
-| `__zephyr-rev__`  | Zephyr revision, looked up                                  | a release tag                           |
-| `__zephyr-owner__` | GitHub owner of the Zephyr source (default `anselmes`)     | `anselmes`                              |
-| `__zephyr-repo__` | Repository name of the Zephyr source (default `zephyr`)     | `zephyr`                                |
-| `__swift-rev__`   | `zephyr-lang-swift` revision, looked up                     | a tag or commit SHA                     |
-| `__Title__`       | Human-readable application name, as typed                   | `Blinky: ESP32`                         |
-| `__Title-yaml__`  | `__Title__` for a YAML double-quoted scalar (`\` and `"` escaped) | `Blinky: ESP32`                   |
-| `__Title-swift__` | `__Title__` for a Swift string literal (`\` and `"` escaped)  | `Blinky: ESP32`                         |
-| `__swift-version__` | Swift toolchain version for CI, looked up (6.4 or later)  | `6.4.2`                                 |
-| `__description__` | One-sentence description of the project or library          | `Blinks an LED.`                        |
-| `__hal-module__`  | A HAL module the board needs; one allowlist line per module | `hal_espressif`                         |
+| Token               | Meaning                                                           | Example                                 |
+| ------------------- | ----------------------------------------------------------------- | --------------------------------------- |
+| `__name__`          | Repository name                                                   | `blinky`                                |
+| `__dir__`           | Directory the repository is created in                            | `./firmware`                            |
+| `__owner__`         | GitHub owner                                                      | `anselmes`                              |
+| `__app__`           | Application directory, relative to the project root               | `app`, `apps/blinky`                    |
+| `__project__`       | CMake project name: `__app__`'s basename, `[A-Za-z0-9_]`          | `app`, `blinky`                         |
+| `__Module__`        | Swift module name of a library, `UpperCamelCase`                  | `Sensor`                                |
+| `__module__`        | Directory name of a library, lowercase                            | `sensor`                                |
+| `__MODULE__`        | Kconfig symbol, uppercase, no `CONFIG_` prefix                    | `SENSOR`                                |
+| `__board__`         | Zephyr board identifier                                           | `esp32c6_devkitc`                       |
+| `__year__`          | Copyright year                                                    | `2026`                                  |
+| `__author__`        | Author name and email                                             | `Schubert Anselme <schubert@anselm.es>` |
+| `__license__`       | SPDX license identifier                                           | `GPL-3.0`                               |
+| `__zephyr-rev__`    | Zephyr revision, looked up                                        | a release tag                           |
+| `__zephyr-owner__`  | GitHub owner of the Zephyr source (default `anselmes`)            | `anselmes`                              |
+| `__zephyr-repo__`   | Repository name of the Zephyr source (default `zephyr`)           | `zephyr`                                |
+| `__swift-rev__`     | `zephyr-lang-swift` revision, looked up                           | a tag or commit SHA                     |
+| `__Title__`         | Human-readable application name, as typed                         | `Blinky: ESP32`                         |
+| `__Title-yaml__`    | `__Title__` for a YAML double-quoted scalar (`\` and `"` escaped) | `Blinky: ESP32`                         |
+| `__Title-swift__`   | `__Title__` for a Swift string literal (`\` and `"` escaped)      | `Blinky: ESP32`                         |
+| `__swift-version__` | Swift toolchain version for CI, looked up (6.4 or later)          | `6.4.2`                                 |
+| `__description__`   | One-sentence description of the project or library                | `Blinks an LED.`                        |
+| `__hal-module__`    | A HAL module the board needs; one allowlist line per module       | `hal_espressif`                         |
 
 ## Swift files
 
@@ -84,10 +84,15 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 
 ## Zephyr rules
 
-- An application is a CMake project: `find_package(Zephyr ...)`, `project(__project__)`, then `zephyr_swift_application()`. Its Swift sources live in `src/`.
-- A library is a Zephyr module: a `zephyr/module.yml` naming it and pointing `build.cmake` and `build.kconfig` at it, a `Kconfig` symbol that gates it,
-  and a `CMakeLists.txt` calling `zephyr_swift_library(MODULE_NAME __Module__)` under `add_subdirectory_ifdef`. Apps enable it with `CONFIG___MODULE__=y`
-  in `prj.conf` and see it through `ZEPHYR_EXTRA_MODULES`.
+- Swift code is built by SwiftPM from `west build`. Manifests hold only the Embedded Swift `settings` (declared before `package`); CMake writes the
+  target triple, include paths and Kconfig defines to the build's toolset, so never add `unsafeFlags` or `platforms`. Manifests resolve zephyr-lang-swift
+  with `zephyrLangSwift()`, which uses `ZEPHYR_LANG_SWIFT_PATH` from CMake.
+- An application is a CMake project and a Swift package: `find_package(Zephyr ...)`, `project(__project__)`, then `zephyr_swift_application()`, plus a
+  `Package.swift` with a static `App` product whose target (`path: "src"`) depends on `Zephyr` and `ZephyrApplication`. Its Swift sources live in `src/`.
+- A library is a target and product of the project's root `Package.swift` and a Zephyr module: a `zephyr/module.yml` naming it and pointing
+  `build.cmake` and `build.kconfig` at it, a `Kconfig` symbol that gates it, and a `CMakeLists.txt` calling `zephyr_swift_library(MODULE_NAME __Module__)`
+  under `add_subdirectory_ifdef`. Apps enable it with `CONFIG___MODULE__=y` in `prj.conf`, depend on its product in their `Package.swift`, and see its
+  Kconfig option through `ZEPHYR_EXTRA_MODULES`.
 - `prj.conf` always has `CONFIG_SWIFT=y`, `CONFIG_MINIMAL_LIBC=y` and a nonzero `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE`.
 - Board, toolchain and paths come from environment variables in `.env` (copied from `.env.example`, git-ignored); never hard-code them.
 - `.env`, keys and certificates are never committed.

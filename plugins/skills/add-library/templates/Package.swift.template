@@ -1,0 +1,54 @@
+// swift-tools-version: 6.4
+// SPDX-License-Identifier: __license__
+// Copyright (c) __year__ __author__
+
+// The libraries of __name__, one target and product per directory under lib/.
+// Applications add this package to their own Package.swift by path and depend
+// on a library's product; SwiftPM compiles the library with the application.
+
+import PackageDescription
+
+// The Embedded Swift settings of every target. Declared before `package`:
+// top-level manifest code runs in order, so a later declaration would still
+// be empty when `package` reads it.
+let settings: [SwiftSetting] = [
+  .strictMemorySafety(),
+  .enableExperimentalFeature("CImplementation"),
+  .enableExperimentalFeature("Embedded"),
+  .enableExperimentalFeature("Extern"),
+  .enableUpcomingFeature("ExistentialAny"),
+  .enableUpcomingFeature("InternalImportsByDefault"),
+  .enableUpcomingFeature("MemberImportVisibility"),
+]
+
+let package = Package(
+  name: "__name__",
+  products: [
+    .library(name: "__Module__", targets: ["__Module__"])
+  ],
+  dependencies: [
+    zephyrLangSwift()
+  ],
+  targets: [
+    .target(
+      name: "__Module__",
+      dependencies: [
+        .product(name: "Zephyr", package: "zephyr-lang-swift")
+      ],
+      path: "lib/__module__",
+      exclude: ["CMakeLists.txt", "Kconfig"],
+      swiftSettings: settings,
+    )
+  ],
+  swiftLanguageModes: [.v6],
+)
+
+/// zephyr-lang-swift: the checkout that `west build` uses, which CMake passes
+/// in `ZEPHYR_LANG_SWIFT_PATH`, or the repository when SwiftPM runs on its own
+/// (for example in an editor).
+func zephyrLangSwift() -> Package.Dependency {
+  if let path = Context.environment["ZEPHYR_LANG_SWIFT_PATH"], !path.isEmpty {
+    return .package(name: "zephyr-lang-swift", path: path)
+  }
+  return .package(url: "https://github.com/anselmes/zephyr-lang-swift", branch: "main")
+}

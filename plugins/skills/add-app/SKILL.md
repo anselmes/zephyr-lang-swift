@@ -1,8 +1,8 @@
 ---
 name: add-app
 description: >
-  Add a Swift application to a Zephyr project built on zephyr-lang-swift: a CMake project with
-  zephyr_swift_application(), prj.conf, sample.yaml, .env.example and a src/Entrypoint.swift with the
+  Add a Swift application to a Zephyr project built on zephyr-lang-swift: a Package.swift, a CMake project
+  with zephyr_swift_application(), prj.conf, sample.yaml, .env.example and a src/Entrypoint.swift with the
   @c(entrypoint) function. Use when the user wants a new app, application, firmware image or board target
   in a Zephyr Swift project, or says "add an app".
 license: GPL-3.0
@@ -40,5 +40,5 @@ Do not overwrite `.env`; only create `.env.example` when missing and tell the us
 ## 4. Verify
 
 Follow the verification rules in the conventions: `west build -p -b __board__ __app__` when `west` is present,
-`swift format lint --strict` on `src/`. Do not commit; tell the user what was created and what to run next
+`swift format lint --strict` on `src/` and `Package.swift`, and `swift package describe --package-path __app__`. Do not commit; tell the user what was created and what to run next
 (`/zephyr-swift:add-library` for a library the app can import).
