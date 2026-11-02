@@ -22,8 +22,9 @@
 #   zephyr_swift_library()      Register a Swift library module with Kconfig.
 #
 # Cache options:
-#   ZEPHYR_SWIFT_OFFLINE       ON: never resolve package dependencies; fail if
-#                              Package.resolved is missing or stale. For CI.
+#   ZEPHYR_SWIFT_OFFLINE       ON: use only the versions in Package.resolved and
+#                              fail if it is missing or stale. Missing sources
+#                              are still fetched. For CI.
 #   ZEPHYR_SWIFT_LSP_CONFIG    ON (default): write .sourcekit-lsp/config.json
 #                              into the application package for the editor.
 #   ZEPHYR_SWIFT_BUILD_SYSTEM  SwiftPM build system, `native` by default.
