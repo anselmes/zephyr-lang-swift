@@ -36,9 +36,19 @@ static STRUCT_SECTION_ITERABLE_ALTERNATE(log_dynamic, log_source_dynamic_data,
 
 // The `swift` log source that the logger expects: the dynamic data with runtime
 // filtering, otherwise the constant data.
+//
+// The logger pairs every dynamic source with the constant source at the same
+// index, so with runtime filtering both must be in the image or the filter
+// state of the `swift` source is never initialized. Swift emits only the C
+// variables that the code it imports refers to, so the table below refers to
+// both; the compiler may fold the lookup away, but the variables stay.
 static inline const void *zephyr_swift_log_source(void) {
-  return COND_CODE_1(CONFIG_LOG_RUNTIME_FILTERING, (&log_dynamic_swift),
-                     (&log_const_swift));
+#if defined(CONFIG_LOG_RUNTIME_FILTERING)
+  static const void *const sources[] = {&log_const_swift, &log_dynamic_swift};
+  return sources[1];
+#else
+  return &log_const_swift;
+#endif
 }
 
 // The highest level the `swift` module logs at, as the LOG_* macros work it
