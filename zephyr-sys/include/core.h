@@ -26,6 +26,10 @@ int posix_memalign(void **memptr, size_t alignment, size_t size);
 // empty (zephyr-sys/src/init.swift).
 void zephyr_sys_init(void);
 
+// Raises a fatal kernel panic through zephyr_panic(). Implemented in
+// zephyr/src/Application.swift.
+void swift_panic_wrap(void);
+
 // Logs `msg` to the `swift` log module at `level` (`LOG_LEVEL_ERR` through
 // `LOG_LEVEL_DBG`; anything else logs at debug), like `LOG_ERR("%s", msg)` and
 // the other `LOG_*` macros. Implemented in zephyr-sys/src/log.swift. Does
