@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
+import ZephyrCore
 import ZephyrSystem
 
 #if CONFIG_TIMEOUT_64BIT
