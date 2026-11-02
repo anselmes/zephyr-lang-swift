@@ -37,6 +37,12 @@ void swift_panic_wrap(void);
 // may call it too.
 void zephyr_log(uint32_t level, const char *msg);
 
+// The application's entry point, which every Swift application implements with
+// `@c(entrypoint) func entrypoint()`. The C `main` in
+// zephyr/src/Application.swift calls it. The application is a separate Swift
+// module, so `main` reaches it through this declaration.
+void entrypoint(void);
+
 #ifdef __cplusplus
 }
 #endif

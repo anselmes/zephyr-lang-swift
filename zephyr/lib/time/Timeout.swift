@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrCore
+public import ZephyrCore
 import ZephyrSystem
 
 /// A value that can be turned into a kernel `Timeout`.

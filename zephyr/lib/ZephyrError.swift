@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
+public import ZephyrCore
 import ZephyrSystem
 
 /// A failed Zephyr call, decoded from the negative `-errno` it returned.
