@@ -4,11 +4,15 @@
 import ZephyrCore
 import ZephyrSystem
 
-/// Allocation-free logging to Zephyr's `swift` log module.
+/// Logging to Zephyr's `swift` log module, without heap allocation.
 ///
-/// Messages are string literals (`StaticString`), so logging never copies or
-/// allocates. Nothing is logged unless the build sets `CONFIG_LOG=y`, and
-/// messages below `CONFIG_LOG_DEFAULT_LEVEL` (info by default) are dropped.
+/// Messages are string literals (`StaticString`), so Swift never allocates or
+/// copies the text, and the logger keeps a pointer to it. Logging is not free
+/// of buffering: with `CONFIG_LOG_MODE_DEFERRED` the logger records each
+/// message in its own log buffer (`CONFIG_LOG_BUFFER_SIZE`) and prints it later
+/// from its thread, and messages are dropped when that buffer is full. Nothing
+/// is logged unless the build sets `CONFIG_LOG=y`, and messages more verbose
+/// than `CONFIG_LOG_DEFAULT_LEVEL` (info by default) are dropped.
 ///
 /// ```swift
 /// import Zephyr
