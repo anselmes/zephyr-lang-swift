@@ -5,3 +5,7 @@ rules:
   key-duplicates: {}
   octal-values:
     forbid-implicit-octal: true
+# Plugin templates carry __token__ placeholders, some inside quotes that the
+# rule above would call redundant until the token is replaced.
+ignore: |
+  plugins/skills/*/templates/
