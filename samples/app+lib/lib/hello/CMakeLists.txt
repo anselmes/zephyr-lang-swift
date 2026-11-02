@@ -1,11 +1,14 @@
+# cmake-format: off
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+# cmake-format: on
 
 # Hello: a sample Swift library.
 #
-# Compiles the Swift sources in this directory into the `Hello` module, a static
-# library that applications import with `import Hello`. It is only added to the
-# build when CONFIG_HELLO=y (see ../CMakeLists.txt), and it is found through
-# ZEPHYR_EXTRA_MODULES and the module's zephyr/module.yml.
+# The `Hello` target of the package's Package.swift, which applications import
+# with `import Hello`. SwiftPM compiles it as part of each application that
+# depends on it; this file only registers it with the Zephyr build. It is only
+# added to the build when CONFIG_HELLO=y (see ../CMakeLists.txt), and it is
+# found through ZEPHYR_EXTRA_MODULES and the module's zephyr/module.yml.
 
 zephyr_swift_library(MODULE_NAME Hello)

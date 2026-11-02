@@ -1,12 +1,13 @@
-# SPDX-License-Identifier: GPL-3.0 Copyright (c) 2025 Schubert Anselme
-# <schubert@anselm.es>
+# cmake-format: off
+# SPDX-License-Identifier: GPL-3.0
+# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+# cmake-format: on
 
 # Swift application sample that uses a Swift library.
 #
 # Same as samples/app, plus the Hello library from the parent directory
 # (samples/app+lib/lib), which prj.conf enables with CONFIG_HELLO=y. The
-# application is the Swift code in src/, which is shared with the parent
-# directory through the src symlink.
+# application is the Swift code in src/; ../Package.swift describes both.
 #
 # Environment variables read here (all set by .env.example): ZEPHYR_BOARD Board
 # to build for unless `west build -b` gives one, for example
@@ -46,6 +47,7 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(app)
 
-# Compile the Swift sources in src/ into the `app` target (see the root
-# CMakeLists.txt of this module).
+# Build the Swift package in the parent directory (../Package.swift, product
+# App: this application and the Hello library) with SwiftPM and link it into the
+# `app` target (see the root CMakeLists.txt of this module).
 zephyr_swift_application()
