@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
+import ZephyrCore
+
 /// `posix_memalign` for the Embedded Swift runtime, which calls it for every
 /// heap allocation (`swift_slowAlloc`). Zephyr's common libc malloc
 /// (`lib/libc/common/source/stdlib/malloc.c`) provides `aligned_alloc` and
