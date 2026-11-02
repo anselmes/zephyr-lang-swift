@@ -17,7 +17,7 @@ public struct Hello {
   public static func run(timeout: Int = 1000) {
     // Printed only when CONFIG_SWIFT_DEBUG_INFO is enabled.
     #if SWIFT_DEBUG_INFO
-      Log.info("Module Hello compiled with debug info")
+      Log.debug("Module Hello compiled with debug info")
     #endif
 
     hello(timeout: timeout)
