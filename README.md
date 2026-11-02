@@ -231,11 +231,11 @@ Swift code cannot see `CONFIG_*` macros, so a Kconfig symbol used in an `#if` ne
 
 These CMake cache options change how the Swift package is built. Pass them to `west build` after `--`, for example `west build -- -DZEPHYR_SWIFT_OFFLINE=ON`:
 
-| Option                      | Description                                                                                      | Default  |
-| --------------------------- | ------------------------------------------------------------------------------------------------ | -------- |
-| `ZEPHYR_SWIFT_OFFLINE`      | Never resolve package dependencies; fail when `Package.resolved` is missing or stale. Use in CI. | `OFF`    |
-| `ZEPHYR_SWIFT_LSP_CONFIG`   | Write `.sourcekit-lsp/config.json` into the application package for the editor                   | `ON`     |
-| `ZEPHYR_SWIFT_BUILD_SYSTEM` | The SwiftPM build system                                                                         | `native` |
+| Option                      | Description                                                                               | Default  |
+| --------------------------- | ----------------------------------------------------------------------------------------- | -------- |
+| `ZEPHYR_SWIFT_OFFLINE`      | Use only the versions in `Package.resolved`; fail when it is missing or stale. Use in CI. | `OFF`    |
+| `ZEPHYR_SWIFT_LSP_CONFIG`   | Write `.sourcekit-lsp/config.json` into the application package for the editor            | `ON`     |
+| `ZEPHYR_SWIFT_BUILD_SYSTEM` | The SwiftPM build system                                                                  | `native` |
 
 ## Architecture
 
@@ -305,7 +305,7 @@ west build -d .build -t run                                               # buil
 
 `swift-build.sh` needs the headers that the `swift_build` target generates, and says so if they are missing. Configuring with plain CMake works the same way: `cmake -G Ninja -B .build -DBOARD=qemu_riscv32/qemu_virt_riscv32/smp`, then `ninja -C .build swift_build`.
 
-To use another SwiftPM package, add it to the application's `Package.swift` and rebuild. SwiftPM resolves it on the next build and caches it under `.build/swift/cache`. Commit the `Package.resolved` it writes, so every build uses the same versions, and configure CI with `-DZEPHYR_SWIFT_OFFLINE=ON`, which never resolves dependencies and fails when `Package.resolved` is missing or stale. Offline mode fetches nothing, and `Package.resolved` pins revisions but carries no sources, so a disconnected build also needs the sources already in the cache, or path dependencies. The package must build with Embedded Swift for a bare-metal target: no Foundation, and no unsafe flags when it is pinned to a version range.
+To use another SwiftPM package, add it to the application's `Package.swift` and rebuild. SwiftPM resolves it on the next build and caches it under `.build/swift/cache`. Commit the `Package.resolved` it writes, so every build uses the same versions, and configure CI with `-DZEPHYR_SWIFT_OFFLINE=ON`, which builds only the versions in `Package.resolved` and fails when it is missing or stale. The option does not block the network: `Package.resolved` pins revisions but carries no sources, so SwiftPM still downloads any pinned source that is not in the cache. A disconnected build needs the sources already cached, or path dependencies. The package must build with Embedded Swift for a bare-metal target: no Foundation, and no unsafe flags when it is pinned to a version range.
 
 Check a change by building both buildable samples:
 
@@ -316,18 +316,18 @@ Check a change by building both buildable samples:
 
 ## Troubleshooting
 
-| Symptom                                         | Likely cause and fix                                                                                         |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org.            |
-| `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                                    |
-| `could not build C module 'ZephyrCore'`         | Zephyr has not generated its headers. Build the `swift_build` target or the image, not `swift build` alone.  |
-| `no Package.swift in ... or a parent directory` | The application has no Swift package. Add a `Package.swift`, or pass `PACKAGE_DIR`.                          |
-| `undefined reference to 'entrypoint'`           | The application has no `@c(entrypoint) func entrypoint()`.                                                   |
-| `no such module` for a library                  | The application's `Package.swift` does not depend on the library's target or product.                        |
-| Package resolution fails                        | A dependency cannot be fetched. Check the network, or build offline from a committed `Package.resolved`.     |
-| Stale Swift errors after moving a build         | `.build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                        |
-| A header edit changes nothing                   | SwiftPM does not rebuild when only a `ZephyrCore` header changes. Edit a Swift file too, or `west build -p`. |
-| `'--build-system native' has been deprecated`   | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).   |
+| Symptom                                         | Likely cause and fix                                                                                                                                       |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unable to load standard library for target`    | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org.                                                          |
+| `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                                                                                  |
+| `could not build C module 'ZephyrCore'`         | Zephyr has not generated its headers. Build the `swift_build` target or the image, not `swift build` alone.                                                |
+| `no Package.swift in ... or a parent directory` | The application has no Swift package. Add a `Package.swift`, or pass `PACKAGE_DIR`.                                                                        |
+| `undefined reference to 'entrypoint'`           | The application has no `@c(entrypoint) func entrypoint()`.                                                                                                 |
+| `no such module` for a library                  | The application's `Package.swift` does not depend on the library's target or product.                                                                      |
+| Package resolution fails                        | A dependency cannot be fetched. Check the network, or build with `-DZEPHYR_SWIFT_OFFLINE=ON` from a committed `Package.resolved`, with the sources cached. |
+| Stale Swift errors after moving a build         | `.build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                                                                      |
+| A header edit changes nothing                   | SwiftPM does not rebuild when only a `ZephyrCore` header changes. Edit a Swift file too, or `west build -p`.                                               |
+| `'--build-system native' has been deprecated`   | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).                                                 |
 
 ## License
 

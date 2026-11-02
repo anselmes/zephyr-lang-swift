@@ -175,4 +175,4 @@ after every rebase. Request a review from the owner listed in `CODEOWNERS`.
 
 There are no third-party packages. Code uses the Embedded Swift standard library and the Zephyr C APIs exposed through `ZephyrCore`.
 Ask before adding anything else. Applications built on this module may add SwiftPM packages that build with Embedded Swift for a bare-metal target; they
-commit `Package.resolved`, and CI builds them with `-DZEPHYR_SWIFT_OFFLINE=ON`. That pins revisions but fetches nothing: a disconnected build also needs cached sources or path dependencies.
+commit `Package.resolved`, and CI builds them with `-DZEPHYR_SWIFT_OFFLINE=ON`. That pins revisions but does not block the network, because SwiftPM still downloads a pinned source that is missing from the cache: a disconnected build also needs cached sources or path dependencies.
