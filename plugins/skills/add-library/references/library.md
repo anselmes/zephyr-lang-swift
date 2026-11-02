@@ -32,6 +32,8 @@ The project root is the Zephyr module: `zephyr/module.yml` points `build.cmake` 
 
 - A library is gated by its Kconfig symbol: `lib/CMakeLists.txt` adds its directory with `add_subdirectory_ifdef(CONFIG___MODULE__ __module__)`,
   so an app that does not enable it pays nothing.
+- Follow the manifest layout in the conventions. In an existing root `Package.swift`, insert the product and the target at their alphabetical
+  positions among the others, before any `.systemLibrary` target.
 - The library is a target of the project's root `Package.swift`: `.library(name: "__Module__", targets: ["__Module__"])` in `products`, and a
   `.target(name: "__Module__", ...)` with `path: "lib/__module__"` and `exclude: ["CMakeLists.txt", "Kconfig"]` in `targets`, as in the template. SwiftPM
   compiles every `*.swift` under that directory as part of each app that depends on the product. Put sources there, with an `include/` directory only

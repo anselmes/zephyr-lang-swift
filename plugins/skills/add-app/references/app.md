@@ -18,6 +18,8 @@
   the app directory to the directory holding `zephyr/module.yml` (`..` for `app/`, `../..` for `apps/blinky`). Detect that directory by walking up from the app. Otherwise remove the token's line.
 - `__library-configs__`: one `CONFIG___MODULE__=y` line per library the app enables; remove the token's line when there are none.
 - `__library-imports__`: one `import __Module__` line per enabled library, placed after `import Zephyr`; remove the token's line when none.
+- The filled `Package.swift` follows the manifest layout in the conventions. Keep `dependencies` and the `App` target's `dependencies` in
+  alphabetical order: the library entries go before or after the zephyr-lang-swift ones according to the package name.
 - `__library-package__`: when the app enables a library, `.package(name: "__name__", path: "<up>"),` for the project's root `Package.swift` (the
   package that `add-library` writes, named `__name__` there), with the same `<up>` as `__extra-modules__`. Remove the token's line when there are none.
 - `__library-products__`: one `.product(name: "__Module__", package: "__name__"),` line per enabled library; remove the token's line when none.

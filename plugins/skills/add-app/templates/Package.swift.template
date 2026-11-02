@@ -14,12 +14,12 @@ import PackageDescription
 // be empty when `package` reads it.
 let settings: [SwiftSetting] = [
   .strictMemorySafety(),
-  .enableExperimentalFeature("CImplementation"),
-  .enableExperimentalFeature("Embedded"),
-  .enableExperimentalFeature("Extern"),
   .enableUpcomingFeature("ExistentialAny"),
   .enableUpcomingFeature("InternalImportsByDefault"),
   .enableUpcomingFeature("MemberImportVisibility"),
+  .enableExperimentalFeature("CImplementation"),
+  .enableExperimentalFeature("Embedded"),
+  .enableExperimentalFeature("Extern"),
 ]
 
 let package = Package(
@@ -28,16 +28,16 @@ let package = Package(
     .library(name: "App", type: .static, targets: ["App"])
   ],
   dependencies: [
-    zephyrLangSwift(),
     __library-package__
+    zephyrLangSwift(),
   ],
   targets: [
     .target(
       name: "App",
       dependencies: [
+        __library-products__
         .product(name: "Zephyr", package: "zephyr-lang-swift"),
         .product(name: "ZephyrApplication", package: "zephyr-lang-swift"),
-        __library-products__
       ],
       path: "src",
       swiftSettings: settings,
@@ -45,6 +45,8 @@ let package = Package(
   ],
   swiftLanguageModes: [.v6],
 )
+
+// MARK: - Helpers
 
 /// zephyr-lang-swift: the checkout that `west build` uses, which CMake passes
 /// in `ZEPHYR_LANG_SWIFT_PATH`, or the repository when SwiftPM runs on its own

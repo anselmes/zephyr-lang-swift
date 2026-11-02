@@ -40,5 +40,5 @@ Do not overwrite `.env`; only create `.env.example` when missing and tell the us
 ## 4. Verify
 
 Follow the verification rules in the conventions: `west build -p -b __board__ __app__` when `west` is present,
-`swift format lint --strict` on `src/` and `Package.swift`, and `swift package describe --package-path __app__`. Do not commit; tell the user what was created and what to run next
+`swift format format --in-place` on `Package.swift`, `swift format lint --strict` on `src/` and `Package.swift`, and `swift package describe --package-path __app__`. Do not commit; tell the user what was created and what to run next
 (`/zephyr-swift:add-library` for a library the app can import).

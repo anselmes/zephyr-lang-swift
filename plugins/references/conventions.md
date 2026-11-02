@@ -82,6 +82,23 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 - `public` only for what other modules import; document every public symbol with a DocC comment.
 - Format with `swift format` using the repository's `.swift-format` (2 spaces, 180 columns, trailing commas).
 
+## Package manifests
+
+Every generated `Package.swift` follows the layout in zephyr-lang-swift's `AGENTS.md` ("Package manifests"), which the templates already have:
+
+- The SPDX header and a purpose comment, `import PackageDescription`, then `let settings` before `package`: `.strictMemorySafety()`, the upcoming
+  features, then the experimental features, each group alphabetical.
+- `Package(name:products:dependencies:targets:swiftLanguageModes:)` in that order, with no `platforms` and no `unsafeFlags`.
+- Products, dependencies (by package name) and Swift targets in alphabetical order; `.systemLibrary` targets last. Target arguments in the order
+  `name`, `dependencies`, `path`, `exclude`, `swiftSettings`.
+- Target dependencies: `.target(name:)` entries first, then `.product(name:package:)` entries by package and then name. Every imported module is
+  listed.
+- Helpers such as `zephyrLangSwift()` after `package`, under `// MARK: - Helpers`.
+
+When adding to an existing manifest, insert each new product, dependency and target at its alphabetical position instead of appending it. After
+filling a template or editing a manifest, run `swift format format --in-place` on it (it drops the trailing comma a single remaining element
+must not have), then `swift format lint --strict` and `swift package describe`.
+
 ## Zephyr rules
 
 - Swift code is built by SwiftPM from `west build`. Manifests hold only the Embedded Swift `settings` (declared before `package`); CMake writes the
