@@ -140,7 +140,7 @@ Both applications set these options in `prj.conf`:
 | `CONFIG_MINIMAL_LIBC`                  | The libc that the Embedded Swift runtime allocates through                                        |
 | `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE` | Heap size in bytes. The minimal libc defaults it to zero, so set it for the board and application |
 | `CONFIG_SWIFT_DEBUG_INFO`              | Optional. Defines `SWIFT_DEBUG_INFO` for `#if` blocks; adds no `-g`                               |
-| `CONFIG_LOG`                           | Optional. Prints `Log` output; the debug-info lines also need `CONFIG_LOG_DEFAULT_LEVEL=4`        |
+| `CONFIG_LOG`                           | Optional. Prints `Log` output, including the `CONFIG_SWIFT_DEBUG_INFO` lines                      |
 | `CONFIG_HELLO`                         | `app+lib` only. Builds the Hello library                                                          |
 
 ## Create your own

@@ -32,9 +32,9 @@ belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
 ## Build system
 
 - Swift is built by SwiftPM, driven by CMake. `zephyr_swift_application()` runs one `swift build --product App` for the application's package (the nearest
-  `Package.swift` at or above the application, or `PACKAGE_DIR`) and links `build/swift/<triple>/release/libApp.a` into `app`. Every Swift module the
+  `Package.swift` at or above the application, or `PACKAGE_DIR`) and links `.build/swift/<triple>/release/libApp.a` into `app`. Every Swift module the
   application uses, this module's included, is in that archive. There is no other Swift compile step.
-- Per-build options live in the toolset that `_swift_write_toolset()` writes to `build/swift/toolset.json`: `-Osize`, `-Xfrontend -function-sections`, the
+- Per-build options live in the toolset that `_swift_write_toolset()` writes to `.build/swift/toolset.json`: `-Osize`, `-Xfrontend -function-sections`, the
   Kconfig defines from `_swift_defines()`, the Zephyr include paths and the C library headers (`_swift_sysroot_flags()`). Never put them, or any
   `unsafeFlags`, in a `Package.swift`: they differ per build, and unsafe flags stop other packages from depending on the root package by URL.
 - Language settings live in the `settings` array of each manifest. Declare it before `package`; a later declaration is still empty when `package` reads it.
@@ -150,7 +150,7 @@ Both must compile without new warnings. To iterate on Swift alone, generate the 
 ```bash
 west build -b <board> --cmake-only samples/app
 west build -t swift_build          # Zephyr's generated headers, then the Swift package
-build/swift/swift-build.sh -v      # the same swift build, again, with its command lines
+.build/swift/swift-build.sh -v      # the same swift build, again, with its command lines
 ```
 
 Check every manifest with `swift package describe`; `swift build` on its own cannot work, because the Zephyr headers come from a build directory. New logic should come with Ztest/Twister cases under `tests/`, including negative and edge cases

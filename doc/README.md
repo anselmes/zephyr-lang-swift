@@ -62,7 +62,7 @@ After installing, describe a Zephyr application or library as a Swift package wi
 
 ## Troubleshooting
 
-- **Build errors?** Check that the swift.org toolchain is the one `swift` resolves to: set `TOOLCHAINS=swift` and run `swift --version`. The `swift build` command that failed is in `build/swift/swift-build.sh`; run it with `-v` to see every compiler invocation.
+- **Build errors?** Check that the swift.org toolchain is the one `swift` resolves to: set `TOOLCHAINS=swift` and run `swift --version`. The `swift build` command that failed is in `.build/swift/swift-build.sh`; run it with `-v` to see every compiler invocation.
 - **Zephyr cannot find the module?** Check the module path in `CMakeLists.txt` or the manifest.
 - **`BOARD is not being defined`?** The samples read `ZEPHYR_BOARD` and `ZEPHYR_TOOLCHAIN_VARIANT` from the environment; source the `.env` created from `.env.example`.
 

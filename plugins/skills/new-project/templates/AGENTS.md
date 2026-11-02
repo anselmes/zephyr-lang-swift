@@ -36,7 +36,7 @@ one copy. Change the rules here. Anything not stated here follows the owner's gl
 - **Swift packages**: `west build` builds the Swift code with SwiftPM. Manifests hold only the Embedded Swift `settings`, declared before
   `package`; never add `unsafeFlags`, `platforms` or include paths, which zephyr-lang-swift's CMake writes to the build's toolset. Commit
   `Package.resolved` when a manifest uses a package by URL. To iterate on Swift alone: `west build -t swift_build`, then
-  `build/swift/swift-build.sh`.
+  `.build/swift/swift-build.sh`.
 
 ## Build and test
 

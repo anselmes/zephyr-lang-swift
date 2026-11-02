@@ -24,15 +24,15 @@ __name__/
 
 ## What this kit adds to the template
 
-| File                         | Source                                 | Notes                                                                                                                  |
-| ---------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `west.yml`                   | `templates/west.yml`                   | Fill the revisions and HAL allowlist                                                                                   |
-| `AGENTS.md`, `CLAUDE.md`     | `templates/AGENTS.md`                  | `CLAUDE.md` is a symlink                                                                                               |
-| `.github/workflows/west.yml` | `templates/.github/workflows/west.yml` | Builds the app with `west`; lock actions with `gh actions-lock`                                                        |
-| `.swift-format`              | `templates/.swift-format`              | Always written, replacing any the template ships; read from the repository root                                        |
-| `.trunk/`                    | zephyr-lang-swift on GitHub            | Copy; do not edit                                                                                                      |
-| `README.md`                  | the template's, edited                 | Keep its sections; describe the project, board and `west` steps                                                        |
-| `.gitignore`                 | the template's, appended               | Add `.west/`, `build/`, `.venv/`, `.env`, `.build/`, `.sourcekit-lsp/`; never ignore `zephyr/` (it holds `module.yml`) |
+| File                         | Source                                 | Notes                                                                                                        |
+| ---------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `west.yml`                   | `templates/west.yml`                   | Fill the revisions and HAL allowlist                                                                         |
+| `AGENTS.md`, `CLAUDE.md`     | `templates/AGENTS.md`                  | `CLAUDE.md` is a symlink                                                                                     |
+| `.github/workflows/west.yml` | `templates/.github/workflows/west.yml` | Builds the app with `west`; lock actions with `gh actions-lock`                                              |
+| `.swift-format`              | `templates/.swift-format`              | Always written, replacing any the template ships; read from the repository root                              |
+| `.trunk/`                    | zephyr-lang-swift on GitHub            | Copy; do not edit                                                                                            |
+| `README.md`                  | the template's, edited                 | Keep its sections; describe the project, board and `west` steps                                              |
+| `.gitignore`                 | the template's, appended               | Add `.west/`, `.venv/`, `.env`, `.build/`, `.sourcekit-lsp/`; never ignore `zephyr/` (it holds `module.yml`) |
 
 Do not copy `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` or `SECURITY.md`; they come from the organization's defaults. `.env`, keys and
 certificates are never committed.

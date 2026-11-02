@@ -260,9 +260,9 @@ The package's targets depend on each other in this order: `ZephyrCore` (a Clang 
 
 Swift imports headers that only a Zephyr build generates, and its target options depend on Kconfig, so `swift build` does not run on its own. `west build` drives it:
 
-1. Kconfig turns Swift support on, and configuring writes `build/swift/toolset.json`: `-Osize`, the Zephyr include paths, the C library headers and the Kconfig defines.
+1. Kconfig turns Swift support on, and configuring writes `.build/swift/toolset.json`: `-Osize`, the Zephyr include paths, the C library headers and the Kconfig defines.
 2. Zephyr generates its headers.
-3. `swift build --product App` builds the application's package for the board's target triple, into `build/swift/`.
+3. `swift build --product App` builds the application's package for the board's target triple, into `.build/swift/`.
 4. The static library it produces is linked into the Zephyr image with `--whole-archive`, so that Swift's `main` replaces the kernel's weak one.
 
 ## Supported architectures
@@ -293,19 +293,19 @@ To add runtime support that Swift needs from C:
 
 ### Working on Swift code
 
-`west build` remains the way to build and run an image. To iterate on Swift without building the whole image, let CMake generate the build directory first. Configuring writes the SwiftPM toolset, `build/swift/swift-build.sh` with the exact `swift build` command, and `.sourcekit-lsp/config.json` in the application package, so SourceKit-LSP in your editor resolves `ZephyrCore` and the Zephyr headers of that build:
+`west build` remains the way to build and run an image. To iterate on Swift without building the whole image, let CMake generate the build directory first. Configuring writes the SwiftPM toolset, `.build/swift/swift-build.sh` with the exact `swift build` command, and `.sourcekit-lsp/config.json` in the application package, so SourceKit-LSP in your editor resolves `ZephyrCore` and the Zephyr headers of that build:
 
 ```bash
 cd samples/app
-west build -b qemu_riscv32/qemu_virt_riscv32/smp --cmake-only   # generate build/ with CMake
+west build -b qemu_riscv32/qemu_virt_riscv32/smp --cmake-only   # generate .build/ with CMake
 west build -t swift_build                                       # generate Zephyr's headers, compile Swift
-build/swift/swift-build.sh                                      # recompile Swift only; add -v to see the flags
+.build/swift/swift-build.sh                                      # recompile Swift only; add -v to see the flags
 west build -t run                                               # build and run the image
 ```
 
 `swift-build.sh` needs the headers that the `swift_build` target generates, and says so if they are missing. Configuring with plain CMake works the same way: `cmake -G Ninja -B build -DBOARD=qemu_riscv32/qemu_virt_riscv32/smp`, then `ninja -C build swift_build`.
 
-To use another SwiftPM package, add it to the application's `Package.swift` and rebuild. SwiftPM resolves it on the next build and caches it under `build/swift/cache`. Commit the `Package.resolved` it writes, so every build uses the same versions, and configure CI with `-DZEPHYR_SWIFT_OFFLINE=ON`. The package must build with Embedded Swift for a bare-metal target: no Foundation, and no unsafe flags when it is pinned to a version range.
+To use another SwiftPM package, add it to the application's `Package.swift` and rebuild. SwiftPM resolves it on the next build and caches it under `.build/swift/cache`. Commit the `Package.resolved` it writes, so every build uses the same versions, and configure CI with `-DZEPHYR_SWIFT_OFFLINE=ON`. The package must build with Embedded Swift for a bare-metal target: no Foundation, and no unsafe flags when it is pinned to a version range.
 
 Check a change by building both buildable samples:
 
@@ -325,7 +325,7 @@ Check a change by building both buildable samples:
 | `undefined reference to 'entrypoint'`           | The application has no `@c(entrypoint) func entrypoint()`.                                                   |
 | `no such module` for a library                  | The application's `Package.swift` does not depend on the library's target or product.                        |
 | Package resolution fails                        | A dependency cannot be fetched. Check the network, or build offline from a committed `Package.resolved`.     |
-| Stale Swift errors after moving a build         | `build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                         |
+| Stale Swift errors after moving a build         | `.build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                        |
 | A header edit changes nothing                   | SwiftPM does not rebuild when only a `ZephyrCore` header changes. Edit a Swift file too, or `west build -p`. |
 | `'--build-system native' has been deprecated`   | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).   |
 
