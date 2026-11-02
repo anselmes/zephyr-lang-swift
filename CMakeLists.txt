@@ -278,6 +278,12 @@ function(_swift_write_toolset path)
       "-I${ZEPHYR_BASE}/include"
       ${SWIFT_SYSROOT_FLAGS})
   list(FILTER c_options EXCLUDE REGEX "^-Xcc$")
+  # Zephyr compiles its C and C++ with the kernel configuration loaded as macros
+  # (-imacros autoconf.h). Do the same, or a dependency that includes Zephyr
+  # headers sees no CONFIG_* symbols and can lay a type out differently from the
+  # kernel, for example k_timeout_t with CONFIG_TIMEOUT_64BIT.
+  list(APPEND c_options "-imacros"
+       "${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr/autoconf.h")
 
   _swift_json_items(items ${options})
   _swift_json_items(c_items ${c_options})
