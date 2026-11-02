@@ -1,0 +1,3 @@
+# Plugin templates carry __token__ placeholders that the formatter would
+# rewrite: `__x__` becomes `**x**` and the quotes around a token are dropped.
+plugins/skills/*/templates/

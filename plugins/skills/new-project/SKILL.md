@@ -75,6 +75,6 @@ replacing any the template ships), and copy the `.trunk` settings from zephyr-la
 ## 5. Verify
 
 Check that no `__token__` remains, then follow the conventions' verification: `west init -l .`, `west update` and
-`west build -p -b __board__ app` when `west` and the SDK are present (otherwise report them skipped and print the commands),
+`west build -p -d .build -b __board__ app` when `west` and the SDK are present (otherwise report them skipped and print the commands),
 `swift format lint --recursive --strict app`, and `trunk check`. Fix failures your change caused; after two failed attempts, stop and report
 the exact output. Do not commit; tell the user what was created, which values were inferred or looked up, and to run `/zephyr-swift:add-library` next.

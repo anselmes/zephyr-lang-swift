@@ -6,7 +6,7 @@ Install the Swift module for Zephyr and make an application find it. For what th
 
 - Zephyr RTOS and the Zephyr SDK with its LLVM toolchain (1.0.1 was used)
 - A Swift 6.4 or later toolchain from swift.org with Embedded Swift support, selected with `TOOLCHAINS=swift`. Xcode's Swift cannot target RISC-V or Arm embedded
-- CMake 3.29 or later
+- CMake 3.29 or later. SwiftPM, which builds the Swift code, comes with the Swift toolchain
 - Git
 
 ## Installation
@@ -58,11 +58,11 @@ The [anselmes/zephyr](https://github.com/anselmes/zephyr) fork carries the modul
 
 ## Example
 
-After installing, add Swift sources to a Zephyr application or library. `samples/app` is a minimal application and `samples/app+lib/lib/hello/Hello.swift` is a small library. [samples/README.md](../samples/README.md) explains how to build and run them.
+After installing, describe a Zephyr application or library as a Swift package with a `Package.swift`. `samples/app` is a minimal application and `samples/app+lib/lib/hello/Hello.swift` is a small library. [samples/README.md](../samples/README.md) explains how to build and run them.
 
 ## Troubleshooting
 
-- **Build errors?** Check that the swift.org toolchain is the one `swiftc` resolves to: set `TOOLCHAINS=swift` and run `swiftc --version`.
+- **Build errors?** Check that the swift.org toolchain is the one `swift` resolves to: set `TOOLCHAINS=swift` and run `swift --version`. The `swift build` command that failed is in `.build/swift/swift-build.sh`; run it with `-v` to see every compiler invocation.
 - **Zephyr cannot find the module?** Check the module path in `CMakeLists.txt` or the manifest.
 - **`BOARD is not being defined`?** The samples read `ZEPHYR_BOARD` and `ZEPHYR_TOOLCHAIN_VARIANT` from the environment; source the `.env` created from `.env.example`.
 

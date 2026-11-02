@@ -1,9 +1,9 @@
 ---
 name: add-library
 description: >
-  Add a Swift library module to a Zephyr project built on zephyr-lang-swift: a Kconfig symbol, a CMake
-  zephyr_swift_library() directory, wiring in lib/CMakeLists.txt, lib/Kconfig and zephyr/module.yml, and a Swift
-  source file, optionally enabled by an app. Use when the user wants a new library, module, component or reusable
+  Add a Swift library module to a Zephyr project built on zephyr-lang-swift: a target in the project's Package.swift,
+  a Kconfig symbol, a CMake zephyr_swift_library() directory, wiring in lib/CMakeLists.txt, lib/Kconfig and
+  zephyr/module.yml, and a Swift source file, optionally enabled by an app. Use when the user wants a new library, module, component or reusable
   Swift package in a Zephyr Swift project, or says "add a library".
 license: GPL-3.0
 metadata:
@@ -28,17 +28,18 @@ Infer what you can, then ask the user one combined question listing every missin
 - **Name**: `__Module__` (Swift module, `UpperCamelCase`), `__module__` (directory) and `__MODULE__` (Kconfig symbol).
   Stop if `lib/__module__/` exists or the symbol is already declared.
 - **Description**: one sentence for the Kconfig help and the DocC comment.
-- **Apps**: which existing apps enable it (adds `CONFIG___MODULE__=y` and `import __Module__`); none is fine.
+- **Apps**: which existing apps enable it (adds `CONFIG___MODULE__=y`, `import __Module__` and the product to the app's `Package.swift`); none is fine.
 - **License, author, year**: from `hack/copyright.txt` or an existing source file.
-- **Project name** (`__name__`): from `west.yml` or the Git remote, for `zephyr/module.yml` when it does not exist yet.
+- **Project name** (`__name__`): from `west.yml` or the Git remote, for `zephyr/module.yml` and the root `Package.swift` when they do not exist yet;
+  otherwise the `name` already in the root `Package.swift`.
 
 ## 3. Write it
 
 Follow `references/library.md`, honoring the project's `.editorconfig` (see conventions). Replace every `__token__`; the output must contain none.
-Create the module wiring only if it is missing; never overwrite an existing `lib/CMakeLists.txt`, `lib/Kconfig`, `Kconfig`
+Create the module wiring only if it is missing; never overwrite an existing `Package.swift`, `lib/CMakeLists.txt`, `lib/Kconfig`, `Kconfig`
 or `zephyr/module.yml`, add to them.
 
 ## 4. Verify
 
-Build an app that enables the library (`west build -p -b <board> <app>`), as the conventions describe, and run
-`swift format lint --strict` on the new sources. Do not commit; tell the user what was created and how to enable it.
+Build an app that enables the library (`west build -p -d .build -b <board> <app>`), as the conventions describe, and run
+`swift format format --in-place` on `Package.swift`, `swift format lint --strict` on the new sources and `Package.swift`, and `swift package describe` at the project root. Do not commit; tell the user what was created and how to enable it.
