@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-// The Swift application sample. `west build` runs `swift build --product App`
-// through zephyr_swift_application() and links the static `App` library into
+// The Swift application sample. `west build` runs `swift build --product app`
+// through zephyr_swift_application() and links the static `app` library into
 // the Zephyr image; the target triple, Zephyr include paths and Kconfig
 // defines come from the toolset that CMake writes for the build.
 
@@ -25,7 +25,7 @@ let settings: [SwiftSetting] = [
 let package = Package(
   name: "sample-app",
   products: [
-    .library(name: "App", type: .static, targets: ["App"])
+    .library(name: "app", type: .static, targets: ["App"])
   ],
   dependencies: [
     .package(name: "zephyr-lang-swift", path: "../..")

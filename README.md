@@ -92,7 +92,7 @@ west update zephyr-lang-swift
 
    The minimal libc defaults the arena to zero bytes, which leaves no heap and makes every Swift allocation fail. Size it for your board and application.
 
-2. Describe the application as a Swift package in `Package.swift`. The application is a target with a static library product, named `App` by default, that depends on `Zephyr` and on `ZephyrApplication`, which provides the C `main`. The target triple and Zephyr's include paths come from the build, so the manifest carries only the Embedded Swift settings:
+2. Describe the application as a Swift package in `Package.swift`. The application is a target with a static library product, named `app` by default, that depends on `Zephyr` and on `ZephyrApplication`, which provides the C `main`. The target triple and Zephyr's include paths come from the build, so the manifest carries only the Embedded Swift settings:
 
    ```swift
    // swift-tools-version: 6.4
@@ -110,7 +110,7 @@ west update zephyr-lang-swift
 
    let package = Package(
      name: "my-swift-app",
-     products: [.library(name: "App", type: .static, targets: ["App"])],
+     products: [.library(name: "app", type: .static, targets: ["App"])],
      dependencies: [
        .package(url: "https://github.com/anselmes/zephyr-lang-swift", branch: "main")
      ],
@@ -268,7 +268,7 @@ Swift imports headers that only a Zephyr build generates, and its target options
 
 1. Kconfig turns Swift support on, and configuring writes `.build/swift/toolset.json`: `-Osize`, the Zephyr include paths, the C library headers and the Kconfig defines.
 2. Zephyr generates its headers.
-3. `swift build --product App` builds the application's package for the board's target triple, into `.build/swift/`.
+3. `swift build --product app` builds the application's package for the board's target triple, into `.build/swift/`.
 4. The static library it produces is linked into the Zephyr image with `--whole-archive`, so that Swift's `main` replaces the kernel's weak one.
 
 ## Supported architectures

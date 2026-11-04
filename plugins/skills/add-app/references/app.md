@@ -26,8 +26,8 @@
 
 ## Rules
 
-- The app is a Swift package: `zephyr_swift_application()` runs `swift build --product App` for the nearest `Package.swift` at or above the app
-  directory and links the static `App` library. The `App` target's `path` is `src`, so every Swift file belongs there, not beside `CMakeLists.txt`.
+- The app is a Swift package: `zephyr_swift_application()` runs `swift build --product app` for the nearest `Package.swift` at or above the app
+  directory and links the static `app` library. The `App` target's `path` is `src`, so every Swift file belongs there, not beside `CMakeLists.txt`.
 - The manifest holds only the Embedded Swift `settings`, declared before `package`. Never add `unsafeFlags`, a `platforms` entry, `-target` or include
   paths: CMake writes those to the build's toolset. `zephyrLangSwift()` resolves zephyr-lang-swift through `ZEPHYR_LANG_SWIFT_PATH`, which CMake sets
   to the checkout `west build` uses; keep it.
