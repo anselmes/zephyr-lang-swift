@@ -18,7 +18,7 @@ A Zephyr module that lets you write applications and libraries in Embedded Swift
 ## Features
 
 - **SwiftPM packages**: Swift code is described by `Package.swift`. This module's package provides `ZephyrCore`, `ZephyrSystem`, `Zephyr` and `ZephyrApplication`; applications and libraries depend on it by path or URL, and may use other Embedded-compatible packages.
-- **CMake functions**: `zephyr_swift_application()` runs `swift build` for the application's package with the target options of the Zephyr build and links the result, `zephyr_swift_library()` registers a library module with the Zephyr build, and `zephyr_swift_include_directories()` adds header search paths to the Swift builds.
+- **CMake functions**: `zephyr_swift_application()` runs `swift build` for the application's package with the target options of the Zephyr build and links the result, `zephyr_swift_library()` registers a library module with the Zephyr build, `zephyr_swift_include_directories()` adds header search paths to the Swift builds, and `zephyr_swift_traits()` enables traits of the application package.
 - **Kconfig options**: `CONFIG_SWIFT` turns Swift support on, and `CONFIG_SWIFT_DEBUG_INFO` defines `SWIFT_DEBUG_INFO` for `#if` blocks in Swift code.
 - **Runtime support** (`ZephyrSystem`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
 - **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)`, and `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw.
@@ -200,6 +200,14 @@ A module that wraps a C library Zephyr does not provide (for example a header th
 
 ```cmake
 zephyr_swift_include_directories(${ZEPHYR_MYLIB_MODULE_DIR}/include)
+```
+
+A Kconfig option can choose a [trait](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0450-swiftpm-package-traits.md) of the application's package with `zephyr_swift_traits()`, which adds it to the `--traits` of every `swift build`. SwiftPM then ignores the package's default traits, so the application declares none and chooses all of them in CMake. The manifest forwards the trait to a dependency:
+
+```cmake
+if(CONFIG_MYLIB_FAST)
+  zephyr_swift_traits(Fast)
+endif()
 ```
 
 Every package of the build, dependencies included, is compiled as Embedded Swift, because a dependency's manifest cannot know it is built for firmware. Set `ZEPHYR_SWIFT_EMBEDDED=OFF` to leave the choice to each package's own settings.
