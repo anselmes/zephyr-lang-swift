@@ -2,9 +2,9 @@
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
 // Clang module map for ZephyrCore: the Zephyr C APIs and the C functions
-// implemented in Swift, as declared in BridgingHeader.h. Package.swift exposes
+// implemented in Swift, as declared in ZephyrCore.h. Package.swift exposes
 // it as the ZephyrCore system library target.
 module ZephyrCore {
-  umbrella header "BridgingHeader.h"
+  umbrella header "ZephyrCore.h"
   export *
 }

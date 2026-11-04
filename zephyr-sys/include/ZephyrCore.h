@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-// Bridging header for the ZephyrCore module.
+// Umbrella header of the ZephyrCore module.
 //
 // It exposes the Zephyr C APIs to Swift, and declares the C functions that
 // ZephyrCore implements in Swift with `@c @implementation`

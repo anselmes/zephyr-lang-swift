@@ -5,7 +5,7 @@ import ZephyrCore
 
 /// Reserved initialization hook for the ZephyrSystem runtime support.
 ///
-/// Implements `zephyr_sys_init`, declared in `BridgingHeader.h`, with
+/// Implements `zephyr_sys_init`, declared in `ZephyrCore.h`, with
 /// `@c @implementation`, so the compiler checks the signature against the C
 /// declaration. The hook is empty because the runtime support in this module
 /// (`posix_memalign`) is stateless, and nothing calls it yet.

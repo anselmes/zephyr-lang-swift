@@ -14,7 +14,7 @@ application's package from `west build`, and samples. It has no application or d
 | Path                          | Target / product    | Purpose                                                                                                                           |
 | ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `Package.swift`               | all four            | The root package: targets, products and the Embedded Swift `settings`; no per-build or unsafe flags                               |
-| `zephyr-sys/include`          | `ZephyrCore`        | `BridgingHeader.h` (umbrella: Zephyr C APIs, `core.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`      |
+| `zephyr-sys/include`          | `ZephyrCore`        | `ZephyrCore.h` (umbrella: Zephyr C APIs, `core.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`          |
 | `zephyr-sys/src`              | `ZephyrSystem`      | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `log.swift`, `malloc.swift`, `init.swift`      |
 | `zephyr/lib`                  | `Zephyr`            | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `Log.swift`, `ZephyrError.swift`, `Check.swift`          |
 | `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
@@ -89,7 +89,7 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
 -enable-experimental-feature CImplementation
 ```
 
-- Declare C interfaces in `core.h` (included by `BridgingHeader.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
+- Declare C interfaces in `core.h` (included by `ZephyrCore.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
   A C function that one Swift module calls and another implements, such as `entrypoint`, is declared there too.
 - No `async`/`await`, `Task` or actors. No `Codable` or runtime reflection. Avoid existentials and anything that allocates (`Array` growth, `String` building)
   in ISRs and tight loops.
