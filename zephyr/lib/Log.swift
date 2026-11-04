@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrCore
 import ZephyrSystem
+import ZephyrCore
 
 /// Logging to Zephyr's `swift` log module, without heap allocation.
 ///

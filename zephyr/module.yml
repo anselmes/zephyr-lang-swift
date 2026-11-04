@@ -14,7 +14,7 @@
 # - Swift compiler integration with Zephyr's build system
 # - Cross-compilation support for embedded targets
 # - Swift runtime support libraries
-# - C-Swift interoperability through the ZephyrCore Clang module
+# - C-Swift interoperability through the ZephyrSystem Clang module
 # - Sample applications and test cases
 #
 # Integration with Zephyr:
@@ -28,13 +28,13 @@
 # Directory Structure:
 # --------------------
 # The module follows Zephyr's standard module layout:
-# - Package.swift: The Swift package (ZephyrCore, ZephyrSystem, Zephyr,
+# - Package.swift: The Swift package (ZephyrSystem, ZephyrCore, Zephyr,
 #   ZephyrApplication)
 # - CMakeLists.txt: Main CMake build script
 # - Kconfig: Configuration options for Swift features
 # - samples/: Example Swift applications for Zephyr
 # - tests/: Test cases for Swift functionality validation
-# - zephyr-sys/: ZephyrCore headers and ZephyrSystem runtime support
+# - zephyr-sys/: ZephyrSystem headers and ZephyrCore runtime support
 # - zephyr/: The Zephyr Swift library and ZephyrApplication's C main
 #
 # =============================================================================

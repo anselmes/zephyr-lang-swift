@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-// The Swift packages of zephyr-lang-swift. Dependencies flow ZephyrCore (the
-// Zephyr C APIs as a Clang module) <- ZephyrSystem <- Zephyr <-
+// The Swift packages of zephyr-lang-swift. Dependencies flow ZephyrSystem (the
+// Zephyr C APIs as a Clang module) <- ZephyrCore <- Zephyr <-
 // ZephyrApplication <- the application.
+//
+// ZephyrSystem holds all C (headers and the declarations Swift implements);
+// ZephyrCore is the only Swift that touches it. ZephyrSystem is not a product:
+// other packages depend on ZephyrCore and never import ZephyrSystem.
 //
 // This manifest does not build on its own: the target triple, the Zephyr
 // include paths, the Kconfig defines and -Osize differ per Zephyr build, so
@@ -33,7 +37,6 @@ let package = Package(
     .library(name: "Zephyr", targets: ["Zephyr"]),
     .library(name: "ZephyrApplication", targets: ["ZephyrApplication"]),
     .library(name: "ZephyrCore", targets: ["ZephyrCore"]),
-    .library(name: "ZephyrSystem", targets: ["ZephyrSystem"]),
   ],
   targets: [
     .target(
@@ -49,20 +52,20 @@ let package = Package(
       name: "ZephyrApplication",
       dependencies: [
         .target(name: "Zephyr"),
-        .target(name: "ZephyrCore"),
+        .target(name: "ZephyrSystem"),
       ],
       path: "zephyr/src",
       swiftSettings: settings,
     ),
     .target(
-      name: "ZephyrSystem",
+      name: "ZephyrCore",
       dependencies: [
-        .target(name: "ZephyrCore")
+        .target(name: "ZephyrSystem")
       ],
       path: "zephyr-sys/src",
       swiftSettings: settings,
     ),
-    .systemLibrary(name: "ZephyrCore", path: "zephyr-sys/include"),
+    .systemLibrary(name: "ZephyrSystem", path: "zephyr-sys/include"),
   ],
   swiftLanguageModes: [.v6],
 )

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
+import ZephyrCore
 
 #if CONFIG_TIMEOUT_64BIT
   /// A point in time, as kernel ticks since boot.
@@ -32,7 +32,7 @@ import ZephyrSystem
     TimeoutConvertible
   {}
 
-  // MARK: - Public
+  // MARK: - Public API
 
   public extension Instant {
     /// Orders instants by tick count.

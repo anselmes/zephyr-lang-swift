@@ -16,7 +16,7 @@
 // These are statics, so every Swift module that referenced them would get its
 // own copy (and the logger would see several `swift` sources). Only the
 // zephyr_log() implementation uses them, and other modules call it through
-// the C declaration above, so ZephyrCore holds the only copy.
+// the C declaration above, so ZephyrSystem holds the only copy.
 //
 // CONFIG_LOG_MODE_MINIMAL builds no logging core: there are no message records,
 // no sources and no z_log_msg_runtime_create(). There is nothing to log into,

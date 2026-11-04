@@ -5,8 +5,8 @@ Change the rules here. Anything not stated here follows the owner's global guide
 
 ## What this repository is
 
-A Zephyr RTOS module that adds Embedded Swift support as a SwiftPM package: the Zephyr C APIs as a Clang module (`ZephyrCore`), C runtime stubs and thin
-kernel wrappers (`ZephyrSystem`), a high-level Swift library built on them (`Zephyr`), the C `main` (`ZephyrApplication`), the CMake that builds an
+A Zephyr RTOS module that adds Embedded Swift support as a SwiftPM package: the Zephyr C APIs as a Clang module (`ZephyrSystem`), C runtime stubs and thin
+kernel wrappers (`ZephyrCore`), a high-level Swift library built on them (`Zephyr`), the C `main` (`ZephyrApplication`), the CMake that builds an
 application's package from `west build`, and samples. It has no application or domain logic.
 
 ## Layout
@@ -14,8 +14,8 @@ application's package from `west build`, and samples. It has no application or d
 | Path                          | Target / product    | Purpose                                                                                                                           |
 | ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `Package.swift`               | all four            | The root package: targets, products and the Embedded Swift `settings`; no per-build or unsafe flags                               |
-| `zephyr-sys/include`          | `ZephyrCore`        | `ZephyrCore.h` (umbrella: Zephyr C APIs, `core.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`          |
-| `zephyr-sys/src`              | `ZephyrSystem`      | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `log.swift`, `malloc.swift`, `init.swift`      |
+| `zephyr-sys/include`          | `ZephyrSystem`      | `ZephyrSystem.h` (umbrella: Zephyr C APIs, `core.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`        |
+| `zephyr-sys/src`              | `ZephyrCore`        | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `log.swift`, `malloc.swift`, `init.swift`      |
 | `zephyr/lib`                  | `Zephyr`            | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `Log.swift`, `ZephyrError.swift`, `Check.swift`          |
 | `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
 | `CMakeLists.txt`, `Kconfig`   | —                   | Target mapping, toolset generation, the `swift build` command and linking; `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`           |
@@ -25,8 +25,8 @@ application's package from `west build`, and samples. It has no application or d
 | `doc/`                        | —                   | Documentation                                                                                                                     |
 | `plugins/`, `.claude-plugin/` | `zephyr-swift`      | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
 
-Dependencies flow `ZephyrCore` ← `ZephyrSystem` ← `Zephyr` ← `ZephyrApplication` ← the application, never the reverse. C declarations belong in
-`ZephyrCore`'s headers. Code that only wraps a Zephyr C API or provides runtime support belongs in `ZephyrSystem`; Swift-native abstractions over it
+Dependencies flow `ZephyrSystem` ← `ZephyrCore` ← `Zephyr` ← `ZephyrApplication` ← the application, never the reverse. C declarations belong in
+`ZephyrSystem`'s headers. Code that only wraps a Zephyr C API or provides runtime support belongs in `ZephyrCore`; Swift-native abstractions over it
 belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
 
 ## Build system
@@ -42,7 +42,7 @@ belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
   discards `.swift_modhash` and `.swift1_autolink_entries`.
 - `swift_build` runs on every build, because only SwiftPM's planner knows the whole package graph, including packages the application depends on by
   path; CMake cannot list those inputs. When nothing changed it leaves the archive alone, and Ninja does not relink. SwiftPM does not notice a change to a
-  `ZephyrCore` header on its own: edit a Swift file too, or build with `-p`.
+  `ZephyrSystem` header on its own: edit a Swift file too, or build with `-p`.
 - `--build-system native` is used because swiftbuild archives with the host's libtool, which cannot write ELF archives. The deprecation warning it prints is
   expected.
 - A `#if CONFIG_FOO` in Swift only works if `_swift_defines()` passes `-DCONFIG_FOO`. Today `SWIFT_DEBUG_INFO`, `CONFIG_TIMEOUT_64BIT` (makes `Tick` `Int64`
@@ -89,12 +89,12 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
 -enable-experimental-feature CImplementation
 ```
 
-- Declare C interfaces in `core.h` (included by `ZephyrCore.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
+- Declare C interfaces in `core.h` (included by `ZephyrSystem.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
   A C function that one Swift module calls and another implements, such as `entrypoint`, is declared there too.
 - No `async`/`await`, `Task` or actors. No `Codable` or runtime reflection. Avoid existentials and anything that allocates (`Array` growth, `String` building)
   in ISRs and tight loops.
 - Annotate every unsafe pointer operation with a `// SAFETY:` comment stating the invariant.
-- Use access-level imports: `public import ZephyrCore` or `public import ZephyrSystem` only when a public signature or an `@inlinable` body uses a declaration
+- Use access-level imports: `public import ZephyrSystem` or `public import ZephyrCore` only when a public signature or an `@inlinable` body uses a declaration
   from it (for example `k_timeout_t`, or the errno constants in `ZephyrError`). Imports are not re-exported, so each file imports what it uses.
 - Prefer value types. Keep the Swift layer a thin bridge over the Zephyr C API.
 
@@ -130,7 +130,7 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
   and do not alias `Error` (it would shadow `Swift.Error`).
 - `ZephyrError` is an enum (`Error`, `Sendable`, `Equatable`; no `Codable` in Embedded). Wrap Zephyr calls that return `-errno` with `try check(_:)`,
   which throws `ZephyrError`. New fallible wrappers use `throws(ZephyrError)`. Consume with a single `do` and one `catch` per case.
-- Time: build on `k_timeout_t` (`.noWait`, `.forever`, `.init(_: Duration)`, `.absolute(ticks:)`) and `Kernel` from `ZephyrSystem` instead of re-implementing them.
+- Time: build on `k_timeout_t` (`.noWait`, `.forever`, `.init(_: Duration)`, `.absolute(ticks:)`) and `Kernel` from `ZephyrCore` instead of re-implementing them.
   Tick conversion uses integer math; no `Double`. Two policies, kept separate:
   timeouts (`k_timeout_t.init(_: Duration)`, `Duration.kernelTicks`) round up, so a positive duration never becomes `K_NO_WAIT` (zero and negative durations do);
   instant arithmetic (`Duration.ticks`, `Instant.advance(by:)`) rounds to the nearest tick (`nearestKernelTicks`), so tick counts round-trip through `Duration`.
@@ -173,6 +173,6 @@ after every rebase. Request a review from the owner listed in `CODEOWNERS`.
 
 ## Dependencies
 
-There are no third-party packages. Code uses the Embedded Swift standard library and the Zephyr C APIs exposed through `ZephyrCore`.
+There are no third-party packages. Code uses the Embedded Swift standard library and the Zephyr C APIs exposed through `ZephyrSystem`.
 Ask before adding anything else. Applications built on this module may add SwiftPM packages that build with Embedded Swift for a bare-metal target; they
 commit `Package.resolved`, and CI builds them with `-DZEPHYR_SWIFT_OFFLINE=ON`. That pins revisions but does not block the network, because SwiftPM still downloads a pinned source that is missing from the cache: a disconnected build also needs cached sources or path dependencies.
