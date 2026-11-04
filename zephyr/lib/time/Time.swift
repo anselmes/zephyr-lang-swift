@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
 import ZephyrCore
 
 #if CONFIG_TIMEOUT_64BIT
@@ -16,9 +15,9 @@ import ZephyrCore
 
 /// Kernel ticks per second (`CONFIG_SYS_CLOCK_TICKS_PER_SEC`).
 // swift-format-ignore: AlwaysUseLowerCamelCase
-public var SYS_FREQUENCY: Int32 { return CONFIG_SYS_CLOCK_TICKS_PER_SEC }
+public var SYS_FREQUENCY: Int32 { Kernel.ticksPerSecond }
 
-// MARK: - Public
+// MARK: - Public API
 
 /// Sleeps the calling thread (`k_sleep`).
 ///

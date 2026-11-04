@@ -41,7 +41,7 @@ The project root is the Zephyr module: `zephyr/module.yml` points `build.cmake` 
 - `zephyr_swift_library()` compiles nothing. It exposes the library's `include/` to Zephyr and defines `CONFIG___MODULE__` for Swift code when the
   symbol is on.
 - Only `public` declarations are visible to apps. Keep the API small, value types first, no heap and no `async` (Embedded Swift).
-- A library imports `Zephyr` (and `ZephyrCore` for raw kernel types) and other libraries by module name. A library that uses another lists it in
+- A library imports `Zephyr` (and `ZephyrCore` for the kernel wrappers; never `ZephyrSystem`, the C module) and other libraries by module name. A library that uses another lists it in
   its target's `dependencies` (`.target(name: "Other")`); enable both and add `depends on`/`select` in the Kconfig for the other library's symbol.
 - Fallible calls use `throws(E)` with an enum error type; never `Result`.
 - Enabling: `CONFIG___MODULE__=y` in the app's `prj.conf`, `import __Module__` in its sources, and in the app's `Package.swift` the project package

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-public import ZephyrSystem
-import ZephyrCore
+public import ZephyrCore
 
 /// A value that can be turned into a kernel `Timeout`.
 ///
@@ -13,10 +12,10 @@ public protocol TimeoutConvertible {
   func toTimeout() -> Timeout
 }
 
-/// A kernel timeout (`k_timeout_t`) with a Swift-native construction API.
+/// A kernel timeout (`KernelTimeout`) with a Swift-native construction API.
 public struct Timeout {
-  /// The underlying `k_timeout_t`, ready to pass to a Zephyr C API.
-  public let value: k_timeout_t
+  /// The underlying `KernelTimeout`, ready to pass to a Zephyr C API.
+  public let value: KernelTimeout
 }
 
 // MARK: - Extension
@@ -26,19 +25,19 @@ extension Timeout:
   Sendable
 {}
 
-// MARK: - Public
+// MARK: - Public API
 
 public extension Timeout {
   /// `K_FOREVER`; kept for source compatibility.
-  static var forever: k_timeout_t { .forever }
+  static var forever: KernelTimeout { .forever }
 
   /// `K_NO_WAIT`; kept for source compatibility.
-  static var nowait: k_timeout_t { .noWait }
+  static var nowait: KernelTimeout { .noWait }
 
-  /// Wraps an existing `k_timeout_t`.
+  /// Wraps an existing `KernelTimeout`.
   ///
   /// - Parameter value: The timeout to wrap.
-  init(_ value: k_timeout_t) { self.value = value }
+  init(_ value: KernelTimeout) { self.value = value }
 
   /// Creates `K_FOREVER`.
   init(from _: Forever) { self.value = .forever }
@@ -51,12 +50,7 @@ public extension Timeout {
   /// Rounds up to whole ticks; a zero duration is `K_NO_WAIT`.
   ///
   /// - Parameter duration: The duration to wait.
-  init(from duration: Duration) { self.value = k_timeout_t(duration) }
-
-  /// Two timeouts are equal when they carry the same tick value.
-  static func == (lhs: Timeout, rhs: Timeout) -> Bool {
-    return lhs.value.ticks == rhs.value.ticks
-  }
+  init(from duration: Duration) { self.value = KernelTimeout(duration) }
 
   #if CONFIG_TIMEOUT_64BIT
     /// Creates an absolute deadline that expires at an instant. An instant at
@@ -69,4 +63,9 @@ public extension Timeout {
       self.value = instant.ticks > 0 ? .absolute(ticks: instant.ticks) : .noWait
     }
   #endif
+
+  /// Two timeouts are equal when they carry the same tick value.
+  static func == (lhs: Timeout, rhs: Timeout) -> Bool {
+    return lhs.value == rhs.value
+  }
 }

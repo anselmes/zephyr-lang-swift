@@ -16,6 +16,16 @@ public enum Kernel {
     k_uptime_get()
   }
 
+  /// Kernel ticks per second (`CONFIG_SYS_CLOCK_TICKS_PER_SEC`).
+  public static var ticksPerSecond: Int32 {
+    CONFIG_SYS_CLOCK_TICKS_PER_SEC
+  }
+
+  /// Kernel ticks since boot (`k_uptime_ticks`).
+  public static var uptimeTicks: Int64 {
+    k_uptime_ticks()
+  }
+
   /// Sleeps the calling thread (`k_msleep`).
   ///
   /// The duration is truncated to whole milliseconds and clamped to
@@ -36,11 +46,6 @@ public enum Kernel {
   /// Gives up the CPU to threads of equal priority (`k_yield`).
   public static func yield() {
     k_yield()
-  }
-
-  /// Kernel ticks since boot (`k_uptime_ticks`).
-  public static var uptimeTicks: Int64 {
-    k_uptime_ticks()
   }
 
   /// Sleeps for a kernel timeout (`k_sleep`).

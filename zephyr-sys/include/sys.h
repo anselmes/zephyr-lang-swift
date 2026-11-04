@@ -27,7 +27,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size);
 void zephyr_sys_init(void);
 
 // Raises a fatal kernel panic through zephyr_panic(). Implemented in
-// zephyr/src/Application.swift.
+// zephyr-sys/src/panic.swift.
 void swift_panic_wrap(void);
 
 // Logs `msg` to the `swift` log module at `level` (`LOG_LEVEL_ERR` through
@@ -39,8 +39,9 @@ void zephyr_log(uint32_t level, const char *msg);
 
 // The application's entry point, which every Swift application implements with
 // `@c(entrypoint) func entrypoint()`. The C `main` in
-// zephyr/src/Application.swift calls it. The application is a separate Swift
-// module, so `main` reaches it through this declaration.
+// zephyr/src/Application.swift calls it through `Entrypoint.run()`. The
+// application is a separate Swift module, so `main` reaches it through this
+// declaration.
 void entrypoint(void);
 
 #ifdef __cplusplus

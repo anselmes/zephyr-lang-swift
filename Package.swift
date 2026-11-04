@@ -42,8 +42,7 @@ let package = Package(
     .target(
       name: "Zephyr",
       dependencies: [
-        .target(name: "ZephyrCore"),
-        .target(name: "ZephyrSystem"),
+        .target(name: "ZephyrCore")
       ],
       path: "zephyr/lib",
       swiftSettings: settings,
@@ -52,7 +51,7 @@ let package = Package(
       name: "ZephyrApplication",
       dependencies: [
         .target(name: "Zephyr"),
-        .target(name: "ZephyrSystem"),
+        .target(name: "ZephyrCore"),
       ],
       path: "zephyr/src",
       swiftSettings: settings,

@@ -76,7 +76,7 @@ Templates use `__token__` placeholders. Replace every one; none may remain in th
 - One type per file, named after the type; no `+` in file names.
 - Typed throws, `throws(E)`; never `Result`, never `LocalizedError`. Error enums conform to `Error` and `Sendable` (no `Codable` in Embedded).
   Wrap Zephyr calls that return `-errno` with `try check(_:)`.
-- Use `Kernel` and `k_timeout_t` from `ZephyrCore` and `sleep(_:)` from `Zephyr`; do not re-implement them.
+- Use `Kernel` and `KernelTimeout` from `ZephyrCore` and `sleep(_:)` from `Zephyr`; do not re-implement them.
 - Implicit member syntax (`.noWait`, `.init(...)`) wherever the type is inferable.
 - Annotate every unsafe pointer operation with a `// SAFETY:` comment.
 - `public` only for what other modules import; document every public symbol with a DocC comment.
