@@ -11,19 +11,19 @@ application's package from `west build`, and samples. It has no application or d
 
 ## Layout
 
-| Path                          | Target / product    | Purpose                                                                                                                           |
-| ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Package.swift`               | all four            | The root package: targets, products and the Embedded Swift `settings`; no per-build or unsafe flags                               |
-| `zephyr-sys/include`          | `ZephyrSystem`      | `ZephyrSystem.h` (umbrella: Zephyr C APIs, `sys.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`         |
-| `zephyr-sys/src`              | `ZephyrCore`        | Swift over the C module: `Kernel`, `KernelTimeout` helpers, `LogLevel`, `Errno`, `Entrypoint`, panic, malloc and init             |
-| `zephyr/lib`                  | `Zephyr`            | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `Log.swift`, `ZephyrError.swift`, `Check.swift`          |
-| `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
-| `CMakeLists.txt`, `Kconfig`   | —                   | Target mapping, toolset generation, the `swift build` command and linking; `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`           |
-| `zephyr/module.yml`           | —                   | Zephyr module definition                                                                                                          |
-| `samples/{app,lib,app+lib}`   | —                   | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib/app`)        |
-| `tests/`                      | —                   | Reserved for Ztest/Twister cases (empty today)                                                                                    |
-| `doc/`                        | —                   | Documentation                                                                                                                     |
-| `plugins/`, `.claude-plugin/` | `zephyr-swift`      | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
+| Path                          | Target / product    | Purpose                                                                                                                                                                                                   |
+| ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Package.swift`               | all four            | The root package: targets, products and the Embedded Swift `settings`; no per-build or unsafe flags                                                                                                       |
+| `zephyr-sys/include`          | `ZephyrSystem`      | `ZephyrSystem.h` (umbrella: Zephyr C APIs, `sys.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`                                                                                 |
+| `zephyr-sys/src`              | `ZephyrCore`        | Swift over the C module: `Kernel`, `KernelTimeout`, `LogLevel`, `Errno`, `ZephyrError` and `check`, `FileSystem`, `Directory`, `File`, `CRC32`, `Thread`, `AtomicFlag`, `Entrypoint`, panic, malloc, init |
+| `zephyr/lib`                  | `Zephyr`            | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `Log.swift`                                                                                                                      |
+| `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                                                                                               |
+| `CMakeLists.txt`, `Kconfig`   | —                   | Target mapping, toolset generation, the `swift build` command and linking; `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`                                                                                   |
+| `zephyr/module.yml`           | —                   | Zephyr module definition                                                                                                                                                                                  |
+| `samples/{app,lib,app+lib}`   | —                   | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib/app`)                                                                                |
+| `tests/`                      | —                   | Reserved for Ztest/Twister cases (empty today)                                                                                                                                                            |
+| `doc/`                        | —                   | Documentation                                                                                                                                                                                             |
+| `plugins/`, `.claude-plugin/` | `zephyr-swift`      | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders                                                                         |
 
 Dependencies flow `ZephyrSystem` ← `ZephyrCore` ← `Zephyr` ← `ZephyrApplication` ← the application, never the reverse. C declarations belong in
 `ZephyrSystem`'s headers. All Swift that touches C (wrappers, runtime support, `@c @implementation` bodies) belongs in `ZephyrCore`, the only module
@@ -96,7 +96,7 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
   in ISRs and tight loops.
 - Annotate every unsafe pointer operation with a `// SAFETY:` comment stating the invariant.
 - Use access-level imports: `public import ZephyrCore` (or, inside ZephyrCore only, `public import ZephyrSystem`) only when a public signature or an `@inlinable` body uses a declaration
-  from it (for example `k_timeout_t`, or the errno constants in `ZephyrError`). Imports are not re-exported, so each file imports what it uses.
+  from it (for example `k_timeout_t`, or `Errno`). Imports are not re-exported, so each file imports what it uses.
 - Prefer value types. Keep the Swift layer a thin bridge over the Zephyr C API.
 
 ## Conventions

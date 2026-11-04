@@ -171,6 +171,13 @@ function(_swift_defines)
     # on the stack.
     list(APPEND defines "-DCONFIG_LOG_MODE_DEFERRED")
   endif()
+  # ZephyrCore compiles its wrappers only for the subsystems the build has:
+  # FileSystem, Directory and File; CRC32; Thread (dynamic stacks).
+  foreach(symbol IN ITEMS FILE_SYSTEM CRC DYNAMIC_THREAD)
+    if(CONFIG_${symbol})
+      list(APPEND defines "-DCONFIG_${symbol}")
+    endif()
+  endforeach()
   if(NOT CONFIG_STACK_CANARIES)
     # swiftc adds stack protectors to functions that take the address of a
     # local, but Zephyr only provides __stack_chk_guard with

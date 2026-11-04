@@ -45,6 +45,11 @@
 
 #if defined(CONFIG_FILE_SYSTEM)
 #include <zephyr/fs/fs.h>
+#endif
+
+// ===== Checksums =====
+
+#if defined(CONFIG_CRC)
 #include <zephyr/sys/crc.h>
 #endif
 
