@@ -18,7 +18,7 @@ A Zephyr module that lets you write applications and libraries in Embedded Swift
 ## Features
 
 - **SwiftPM packages**: Swift code is described by `Package.swift`. This module's package provides `ZephyrCore`, `ZephyrSystem`, `Zephyr` and `ZephyrApplication`; applications and libraries depend on it by path or URL, and may use other Embedded-compatible packages.
-- **CMake functions**: `zephyr_swift_application()` runs `swift build` for the application's package with the target options of the Zephyr build and links the result, and `zephyr_swift_library()` registers a library module with the Zephyr build.
+- **CMake functions**: `zephyr_swift_application()` runs `swift build` for the application's package with the target options of the Zephyr build and links the result, `zephyr_swift_library()` registers a library module with the Zephyr build, and `zephyr_swift_include_directories()` adds header search paths to the Swift builds.
 - **Kconfig options**: `CONFIG_SWIFT` turns Swift support on, and `CONFIG_SWIFT_DEBUG_INFO` defines `SWIFT_DEBUG_INFO` for `#if` blocks in Swift code.
 - **Runtime support** (`ZephyrSystem`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
 - **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)`, and `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw.
@@ -196,6 +196,12 @@ public func myFunction() -> String {
 
 An application imports it with `import MyLibrary`. `samples/app+lib` shows the full setup, including the Kconfig option that enables the library.
 
+A module that wraps a C library Zephyr does not provide (for example a header that a Clang module of its own includes) tells the Swift builds where the headers are with `zephyr_swift_include_directories()`. The directories reach the Swift compiler as `-Xcc -I` options and the C targets of a package as plain `-I` options. Call it before `zephyr_swift_application()`:
+
+```cmake
+zephyr_swift_include_directories(${ZEPHYR_MYLIB_MODULE_DIR}/include)
+```
+
 ### The Zephyr library
 
 ```swift
@@ -242,7 +248,7 @@ These CMake cache options change how the Swift package is built. Pass them to `w
 ```text
 swift/
 ├── Package.swift      # ZephyrCore, ZephyrSystem, Zephyr, ZephyrApplication
-├── CMakeLists.txt     # zephyr_swift_application(), zephyr_swift_library()
+├── CMakeLists.txt     # zephyr_swift_application(), zephyr_swift_library(), ...
 ├── Kconfig            # CONFIG_SWIFT, CONFIG_SWIFT_DEBUG_INFO
 ├── zephyr-sys/
 │   ├── include/       # ZephyrCore: ZephyrCore.h and module.modulemap
