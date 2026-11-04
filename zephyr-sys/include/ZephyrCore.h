@@ -47,12 +47,6 @@
 #include <zephyr/sys/crc.h>
 #endif
 
-// ===== WASM Micro Runtime =====
-
-#if defined(CONFIG_WAMR)
-#include <wasm_export.h>
-#endif
-
 // ===== Zephyr Core Imports =====
 
 #include "core.h"  // NOLINT(build/include_subdir)
