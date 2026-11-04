@@ -202,6 +202,8 @@ A module that wraps a C library Zephyr does not provide (for example a header th
 zephyr_swift_include_directories(${ZEPHYR_MYLIB_MODULE_DIR}/include)
 ```
 
+Every package of the build, dependencies included, is compiled as Embedded Swift, because a dependency's manifest cannot know it is built for firmware. Set `ZEPHYR_SWIFT_EMBEDDED=OFF` to leave the choice to each package's own settings.
+
 ### The Zephyr library
 
 ```swift
