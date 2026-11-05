@@ -245,7 +245,7 @@ swift/
 ├── CMakeLists.txt     # zephyr_swift_application(), zephyr_swift_library()
 ├── Kconfig            # CONFIG_SWIFT, CONFIG_SWIFT_DEBUG_INFO
 ├── zephyr-sys/
-│   ├── include/       # ZephyrCore: BridgingHeader.h and module.modulemap
+│   ├── include/       # ZephyrCore: ZephyrCore.h and module.modulemap
 │   └── src/           # ZephyrSystem: init, kernel, log, malloc and timeout
 ├── zephyr/
 │   ├── lib/           # Zephyr: Duration, Timeout, Instant, sleep, Log, ZephyrError
@@ -256,7 +256,7 @@ swift/
 └── tests/             # Reserved for Ztest/Twister cases (empty)
 ```
 
-The package's targets depend on each other in this order: `ZephyrCore` (a Clang module over `BridgingHeader.h`) ← `ZephyrSystem` ← `Zephyr` ← `ZephyrApplication` ← the application.
+The package's targets depend on each other in this order: `ZephyrCore` (a Clang module over `ZephyrCore.h`) ← `ZephyrSystem` ← `Zephyr` ← `ZephyrApplication` ← the application.
 
 Swift imports headers that only a Zephyr build generates, and its target options depend on Kconfig, so `swift build` does not run on its own. `west build` drives it:
 
@@ -287,7 +287,7 @@ To add an architecture, map it to a Swift target triple in `_swift_map_target()`
 
 To add runtime support that Swift needs from C:
 
-1. Declare the C function in `zephyr-sys/include/core.h`, which `BridgingHeader.h` includes.
+1. Declare the C function in `zephyr-sys/include/core.h`, which `ZephyrCore.h` includes.
 2. Implement it in `zephyr-sys/src` with `@c @implementation`, so the compiler checks the signature against the declaration.
 3. Document it. Target options belong in `_swift_write_toolset()` in `CMakeLists.txt`; language settings belong in the `settings` of each `Package.swift`.
 

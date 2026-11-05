@@ -1,13 +1,13 @@
-# SPDX-License-Identifier: GPL-3.0
-# Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
+# SPDX-License-Identifier: GPL-3.0 Copyright (c) 2025 Schubert Anselme
+# <schubert@anselm.es>
 
 # ZephyrSystem: the Swift runtime support for Zephyr.
 #
 # Compiles src/*.swift with swiftc (not SwiftPM) into ZephyrSystem.o and
 # ZephyrSystem.swiftmodule, and packages the object in a static library: - the C
 # functions the Embedded Swift runtime needs (posix_memalign), which implement
-# the declarations in include/BridgingHeader.h with `@c @implementation` -
-# Kernel and the k_timeout_t helpers, thin wrappers over the Zephyr C API
+# the declarations in include/ZephyrCore.h with `@c @implementation` - Kernel
+# and the k_timeout_t helpers, thin wrappers over the Zephyr C API
 #
 # Requires a Swift 6.4+ toolchain with Embedded Swift support (swift.org, not
 # Xcode's; select it with TOOLCHAINS=swift), the Zephyr SDK and the generated
@@ -178,9 +178,8 @@ add_custom_command(
     -Xcc -DZEPHYR_BUILD_ENV # Passed to the C importer while reading the headers
     # === C Interoperability ===
     -import-bridging-header
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/BridgingHeader.h # Import C APIs to
-                                                         # Swift
-    # === Source Files ===
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ZephyrCore.h # Import C APIs to
+    # Swift # === Source Files ===
     ${SWIFT_SOURCES} # Swift source files to compile
   DEPENDS ${SWIFT_SOURCES}
   COMMENT
@@ -205,7 +204,7 @@ target_sources(ZephyrSystem PRIVATE ${SWIFT_OBJ_FILE})
 # Make the ZephyrSystem library target depend on successful Swift compilation
 add_dependencies(ZephyrSystem ZephyrSystem_swift_compile)
 
-# Publish include/ (BridgingHeader.h, module.modulemap) to targets that link
+# Publish include/ (ZephyrCore.h, module.modulemap) to targets that link
 # ZephyrSystem.
 target_include_directories(ZephyrSystem PUBLIC include)
 
