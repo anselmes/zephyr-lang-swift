@@ -14,8 +14,8 @@ application's package from `west build`, and samples. It has no application or d
 | Path                          | Target / product    | Purpose                                                                                                                           |
 | ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `Package.swift`               | all four            | The root package: targets, products and the Embedded Swift `settings`; no per-build or unsafe flags                               |
-| `zephyr-sys/include`          | `ZephyrSystem`      | `ZephyrSystem.h` (umbrella: Zephyr C APIs, `core.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`        |
-| `zephyr-sys/src`              | `ZephyrCore`        | Swift sources: `kernel.swift` (`Kernel`), `timeout.swift` (`k_timeout_t` helpers), `log.swift`, `malloc.swift`, `init.swift`      |
+| `zephyr-sys/include`          | `ZephyrSystem`      | `ZephyrSystem.h` (umbrella: Zephyr C APIs, `sys.h` declarations for `@c @implementation`, `log.h`) and `module.modulemap`         |
+| `zephyr-sys/src`              | `ZephyrCore`        | Swift over the C module: `Kernel`, `KernelTimeout` helpers, `LogLevel`, `Errno`, `Entrypoint`, panic, malloc and init             |
 | `zephyr/lib`                  | `Zephyr`            | High-level library: `time/` (`Duration`, `Instant`, `Timeout`, `sleep`), `Log.swift`, `ZephyrError.swift`, `Check.swift`          |
 | `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                       |
 | `CMakeLists.txt`, `Kconfig`   | —                   | Target mapping, toolset generation, the `swift build` command and linking; `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`           |
@@ -26,8 +26,9 @@ application's package from `west build`, and samples. It has no application or d
 | `plugins/`, `.claude-plugin/` | `zephyr-swift`      | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders |
 
 Dependencies flow `ZephyrSystem` ← `ZephyrCore` ← `Zephyr` ← `ZephyrApplication` ← the application, never the reverse. C declarations belong in
-`ZephyrSystem`'s headers. Code that only wraps a Zephyr C API or provides runtime support belongs in `ZephyrCore`; Swift-native abstractions over it
-belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
+`ZephyrSystem`'s headers. All Swift that touches C (wrappers, runtime support, `@c @implementation` bodies) belongs in `ZephyrCore`, the only module
+that imports `ZephyrSystem`; Swift-native abstractions over it belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`. `ZephyrSystem` is
+not a product: other packages, `Zephyr` and `ZephyrApplication` use `ZephyrCore` and never import `ZephyrSystem`.
 
 ## Build system
 
@@ -89,12 +90,12 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
 -enable-experimental-feature CImplementation
 ```
 
-- Declare C interfaces in `core.h` (included by `ZephyrSystem.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
+- Declare C interfaces in `sys.h` (included by `ZephyrSystem.h`) and implement them in Swift with `@c @implementation`. Never use `@_cdecl`.
   A C function that one Swift module calls and another implements, such as `entrypoint`, is declared there too.
 - No `async`/`await`, `Task` or actors. No `Codable` or runtime reflection. Avoid existentials and anything that allocates (`Array` growth, `String` building)
   in ISRs and tight loops.
 - Annotate every unsafe pointer operation with a `// SAFETY:` comment stating the invariant.
-- Use access-level imports: `public import ZephyrSystem` or `public import ZephyrCore` only when a public signature or an `@inlinable` body uses a declaration
+- Use access-level imports: `public import ZephyrCore` (or, inside ZephyrCore only, `public import ZephyrSystem`) only when a public signature or an `@inlinable` body uses a declaration
   from it (for example `k_timeout_t`, or the errno constants in `ZephyrError`). Imports are not re-exported, so each file imports what it uses.
 - Prefer value types. Keep the Swift layer a thin bridge over the Zephyr C API.
 

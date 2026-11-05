@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-public import ZephyrSystem
-import ZephyrCore
+public import ZephyrCore
 
 /// A failed Zephyr call, decoded from the negative `-errno` it returned.
 ///
@@ -59,15 +58,15 @@ public extension ZephyrError {
   @inlinable
   init(errno: Int32) {
     switch errno {
-    case EPERM: self = .permission
-    case ENOENT: self = .noEntry
-    case EIO: self = .io
-    case EAGAIN: self = .again
-    case ENOMEM: self = .noMemory
-    case EBUSY: self = .busy
-    case ENODEV: self = .noDevice
-    case EINVAL: self = .invalidArgument
-    case ETIMEDOUT: self = .timedOut
+    case Errno.permission: self = .permission
+    case Errno.noEntry: self = .noEntry
+    case Errno.io: self = .io
+    case Errno.again: self = .again
+    case Errno.noMemory: self = .noMemory
+    case Errno.busy: self = .busy
+    case Errno.noDevice: self = .noDevice
+    case Errno.invalidArgument: self = .invalidArgument
+    case Errno.timedOut: self = .timedOut
     default: self = .other(errno)
     }
   }
@@ -75,15 +74,15 @@ public extension ZephyrError {
   /// The positive errno value this error was decoded from.
   var errno: Int32 {
     switch self {
-    case .permission: EPERM
-    case .noEntry: ENOENT
-    case .io: EIO
-    case .again: EAGAIN
-    case .noMemory: ENOMEM
-    case .busy: EBUSY
-    case .noDevice: ENODEV
-    case .invalidArgument: EINVAL
-    case .timedOut: ETIMEDOUT
+    case .permission: Errno.permission
+    case .noEntry: Errno.noEntry
+    case .io: Errno.io
+    case .again: Errno.again
+    case .noMemory: Errno.noMemory
+    case .busy: Errno.busy
+    case .noDevice: Errno.noDevice
+    case .invalidArgument: Errno.invalidArgument
+    case .timedOut: Errno.timedOut
     case .other(let errno): errno
     }
   }

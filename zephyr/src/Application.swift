@@ -2,7 +2,7 @@
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
 import Zephyr
-import ZephyrSystem
+import ZephyrCore
 
 /// The C `main` that Zephyr calls once the kernel is up.
 ///
@@ -29,12 +29,5 @@ public func main() {
     Log.info("Swift Embedded Mode Active")
   #endif
 
-  entrypoint()
-}
-
-/// Raises a fatal kernel panic through Zephyr's `k_panic()`.
-// swift-format-ignore: AlwaysUseLowerCamelCase
-@c @implementation
-public func swift_panic_wrap() {
-  zephyr_panic()
+  Entrypoint.run()
 }

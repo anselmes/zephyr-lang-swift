@@ -3,6 +3,17 @@
 
 public import ZephyrSystem
 
+/// The kernel timeout type (`k_timeout_t`), under a name that code importing
+/// only ZephyrCore can spell.
+public typealias KernelTimeout = k_timeout_t
+
+// Two timeouts are equal when they carry the same tick value.
+extension k_timeout_t: @retroactive Equatable {
+  public static func == (lhs: k_timeout_t, rhs: k_timeout_t) -> Bool {
+    lhs.ticks == rhs.ticks
+  }
+}
+
 /// Swift spellings of Zephyr's timeout macros (`K_NO_WAIT`, `K_FOREVER`,
 /// `K_MSEC`). They are compound-literal and function-like macros
 /// (include/zephyr/sys/clock.h, include/zephyr/sys/time_units.h), which
@@ -26,6 +37,22 @@ extension k_timeout_t {
   /// The longest finite tick count: `k_ticks_t.max`, less one when the type is
   /// unsigned because `UInt32.max` is `K_TICKS_FOREVER`.
   private static var longestFinite: k_ticks_t { k_ticks_t.isSigned ? .max : .max - 1 }
+
+  /// Converts a `Duration` using integer math only (no floating point).
+  ///
+  /// Rounds up to whole ticks, so a positive duration never becomes
+  /// `K_NO_WAIT`. Zero and negative durations become `K_NO_WAIT`; durations
+  /// too long for `k_ticks_t` clamp to the longest finite timeout.
+  ///
+  /// - Parameter duration: The duration to convert.
+  public init(_ duration: Duration) {
+    let ticks = duration.kernelTicks
+    guard ticks > 0 else {
+      self = .noWait
+      return
+    }
+    self = k_timeout_t(clamping: ticks)
+  }
 
   /// Clamps a tick count to the finite range of `k_ticks_t`.
   private init(clamping ticks: Int64) {
@@ -78,22 +105,6 @@ extension k_timeout_t {
       .init(ticks: -2 - min(max(ticks, 0), k_ticks_t.max - 1))
     }
   #endif
-
-  /// Converts a `Duration` using integer math only (no floating point).
-  ///
-  /// Rounds up to whole ticks, so a positive duration never becomes
-  /// `K_NO_WAIT`. Zero and negative durations become `K_NO_WAIT`; durations
-  /// too long for `k_ticks_t` clamp to the longest finite timeout.
-  ///
-  /// - Parameter duration: The duration to convert.
-  public init(_ duration: Duration) {
-    let ticks = duration.kernelTicks
-    guard ticks > 0 else {
-      self = .noWait
-      return
-    }
-    self = k_timeout_t(clamping: ticks)
-  }
 }
 
 extension Duration {

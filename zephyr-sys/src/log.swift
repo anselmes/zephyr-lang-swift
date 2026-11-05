@@ -3,6 +3,38 @@
 
 import ZephyrSystem
 
+extension Kernel {
+  /// Logs `message` to Zephyr's `swift` log module (`zephyr_log`).
+  ///
+  /// The message is a `StaticString`, so it lives in read-only memory and the
+  /// logger keeps a pointer to it instead of copying the text; the logger still
+  /// records the message in its own buffer. Applications use `Log` from the
+  /// `Zephyr` library instead.
+  ///
+  /// - Parameters:
+  ///   - level: A Zephyr severity, `LOG_LEVEL_ERR` (1) to `LOG_LEVEL_DBG` (4).
+  ///   - message: The text to log.
+  public static func log(level: UInt32, _ message: StaticString) {
+    // A string literal is stored as a NUL-terminated UTF-8 C string. A
+    // single-scalar StaticString has no such storage, so it is skipped rather
+    // than trapping in `utf8Start`.
+    guard message.hasPointerRepresentation else { return }
+    // SAFETY: `utf8Start` points to static, immutable, NUL-terminated UTF-8
+    // that lives for the whole program, and UInt8 and CChar have the same
+    // size and alignment; zephyr_log only reads it.
+    unsafe zephyr_log(level, UnsafeRawPointer(message.utf8Start).assumingMemoryBound(to: CChar.self))
+  }
+
+  /// Logs `message` at `level` to Zephyr's `swift` log module.
+  ///
+  /// - Parameters:
+  ///   - level: The severity.
+  ///   - message: The text to log.
+  public static func log(_ level: LogLevel, _ message: StaticString) {
+    log(level: level.zephyrLevel, message)
+  }
+}
+
 /// Logs `msg` to Zephyr's `swift` log module: `LOG_ERR("%s", msg)` and the
 /// other `LOG_*` macros, written in Swift.
 ///
@@ -37,27 +69,4 @@ public func zephyr_log(_ level: UInt32, _ msg: UnsafePointer<CChar>?) {
     // while packaging the message, and copies it unless it is read-only.
     unsafe zephyr_swift_log_message(level, msg)
   #endif
-}
-
-extension Kernel {
-  /// Logs `message` to Zephyr's `swift` log module (`zephyr_log`).
-  ///
-  /// The message is a `StaticString`, so it lives in read-only memory and the
-  /// logger keeps a pointer to it instead of copying the text; the logger still
-  /// records the message in its own buffer. Applications use `Log` from the
-  /// `Zephyr` library instead.
-  ///
-  /// - Parameters:
-  ///   - level: A Zephyr severity, `LOG_LEVEL_ERR` (1) to `LOG_LEVEL_DBG` (4).
-  ///   - message: The text to log.
-  public static func log(level: UInt32, _ message: StaticString) {
-    // A string literal is stored as a NUL-terminated UTF-8 C string. A
-    // single-scalar StaticString has no such storage, so it is skipped rather
-    // than trapping in `utf8Start`.
-    guard message.hasPointerRepresentation else { return }
-    // SAFETY: `utf8Start` points to static, immutable, NUL-terminated UTF-8
-    // that lives for the whole program, and UInt8 and CChar have the same
-    // size and alignment; zephyr_log only reads it.
-    unsafe zephyr_log(level, UnsafeRawPointer(message.utf8Start).assumingMemoryBound(to: CChar.self))
-  }
 }

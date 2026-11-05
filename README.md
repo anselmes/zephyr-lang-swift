@@ -303,7 +303,7 @@ To add an architecture, map it to a Swift target triple in `_swift_map_target()`
 
 To add runtime support that Swift needs from C:
 
-1. Declare the C function in `zephyr-sys/include/core.h`, which `ZephyrSystem.h` includes.
+1. Declare the C function in `zephyr-sys/include/sys.h`, which `ZephyrSystem.h` includes.
 2. Implement it in `zephyr-sys/src` with `@c @implementation`, so the compiler checks the signature against the declaration.
 3. Document it. Target options belong in `_swift_write_toolset()` in `CMakeLists.txt`; language settings belong in the `settings` of each `Package.swift`.
 

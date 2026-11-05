@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
 import ZephyrCore
 
 /// Logging to Zephyr's `swift` log module, without heap allocation.
@@ -25,27 +24,27 @@ public enum Log {
   ///
   /// - Parameter message: The text to log.
   public static func error(_ message: StaticString) {
-    Kernel.log(level: UInt32(LOG_LEVEL_ERR), message)
+    Kernel.log(.error, message)
   }
 
   /// Logs `message` at warning level (`LOG_WRN`).
   ///
   /// - Parameter message: The text to log.
   public static func warning(_ message: StaticString) {
-    Kernel.log(level: UInt32(LOG_LEVEL_WRN), message)
+    Kernel.log(.warning, message)
   }
 
   /// Logs `message` at info level (`LOG_INF`).
   ///
   /// - Parameter message: The text to log.
   public static func info(_ message: StaticString) {
-    Kernel.log(level: UInt32(LOG_LEVEL_INF), message)
+    Kernel.log(.info, message)
   }
 
   /// Logs `message` at debug level (`LOG_DBG`).
   ///
   /// - Parameter message: The text to log.
   public static func debug(_ message: StaticString) {
-    Kernel.log(level: UInt32(LOG_LEVEL_DBG), message)
+    Kernel.log(.debug, message)
   }
 }
