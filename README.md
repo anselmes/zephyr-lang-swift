@@ -21,7 +21,8 @@ A Zephyr module that lets you write applications and libraries in Embedded Swift
 - **CMake functions**: `zephyr_swift_application()` runs `swift build` for the application's package with the target options of the Zephyr build and links the result, `zephyr_swift_library()` registers a library module with the Zephyr build, `zephyr_swift_include_directories()` adds header search paths to the Swift builds, and `zephyr_swift_traits()` enables traits of the application package.
 - **Kconfig options**: `CONFIG_SWIFT` turns Swift support on, and `CONFIG_SWIFT_DEBUG_INFO` defines `SWIFT_DEBUG_INFO` for `#if` blocks in Swift code.
 - **Runtime support** (`ZephyrCore`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
-- **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)`, and `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw.
+- **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)` and `Log`.
+- **Kernel wrappers** (`ZephyrCore`): `Kernel`, `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw, and, when their Kconfig option is on, `FileSystem`, `Directory` and `File` (`CONFIG_FILE_SYSTEM`), `CRC32` (`CONFIG_CRC`), and `Thread` (`CONFIG_DYNAMIC_THREAD`), plus `AtomicFlag`. Buffers are passed as `RawSpan` and `MutableRawSpan`.
 - **C interoperability** (`ZephyrSystem`): a Clang module exposes the Zephyr C APIs to Swift, and C functions can be implemented in Swift with `@c @implementation`.
 - **Claude Code plugin** (`plugins/`): scaffolds a project, an application or a library.
 
@@ -216,6 +217,7 @@ Every package of the build, dependencies included, is compiled as Embedded Swift
 
 ```swift
 import Zephyr
+import ZephyrCore                     // check(_:) and ZephyrError
 
 sleep(Duration.milliseconds(250))     // relative timeout, rounded up to whole ticks
 sleep(Forever())                      // K_FOREVER
@@ -264,7 +266,7 @@ swift/
 │   ├── include/       # ZephyrSystem: ZephyrSystem.h and module.modulemap
 │   └── src/           # ZephyrCore: init, kernel, log, malloc and timeout
 ├── zephyr/
-│   ├── lib/           # Zephyr: Duration, Timeout, Instant, sleep, Log, ZephyrError
+│   ├── lib/           # Zephyr: Duration, Timeout, Instant, sleep, Log
 │   └── src/           # ZephyrApplication: the C main that calls entrypoint()
 ├── samples/           # app, lib and app+lib
 ├── plugins/           # Claude Code plugin

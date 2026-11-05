@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-public import ZephyrCore
-
 /// A failed Zephyr call, decoded from the negative `-errno` it returned.
 ///
 /// Embedded Swift has no `Codable`, so this conforms to `Error`, `Sendable`,
@@ -31,6 +29,8 @@ public enum ZephyrError: Error, Sendable, Equatable {
   case noMemory
   /// `EBUSY`: the resource is busy.
   case busy
+  /// `EEXIST`: the file or directory already exists.
+  case exists
   /// `ENODEV`: no such device.
   case noDevice
   /// `EINVAL`: an argument is invalid.
@@ -41,14 +41,14 @@ public enum ZephyrError: Error, Sendable, Equatable {
   case other(Int32)
 }
 
-// MARK: - Extension
+// MARK: - Custom String
 
 extension ZephyrError: CustomStringConvertible {
   /// A short description that carries the errno value.
   public var description: String { "zephyr error errno:\(errno)" }
 }
 
-// MARK: - Public
+// MARK: - Public API
 
 public extension ZephyrError {
   /// Decodes an errno value into the matching case.
@@ -64,6 +64,7 @@ public extension ZephyrError {
     case Errno.again: self = .again
     case Errno.noMemory: self = .noMemory
     case Errno.busy: self = .busy
+    case Errno.exists: self = .exists
     case Errno.noDevice: self = .noDevice
     case Errno.invalidArgument: self = .invalidArgument
     case Errno.timedOut: self = .timedOut
@@ -80,6 +81,7 @@ public extension ZephyrError {
     case .again: Errno.again
     case .noMemory: Errno.noMemory
     case .busy: Errno.busy
+    case .exists: Errno.exists
     case .noDevice: Errno.noDevice
     case .invalidArgument: Errno.invalidArgument
     case .timedOut: Errno.timedOut
