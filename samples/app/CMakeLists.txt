@@ -42,7 +42,7 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(app)
 
-# Build the Swift package in this directory (Package.swift, product App) with
+# Build the Swift package in this directory (Package.swift, product app) with
 # SwiftPM and link it into the `app` target (see the root CMakeLists.txt of this
 # module).
 zephyr_swift_application()

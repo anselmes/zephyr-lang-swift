@@ -9,7 +9,7 @@ __name__/
 ├── Kconfig                  # created by add-library
 ├── Package.swift            # created by add-library: one target per library
 ├── app/                     # from add-app
-│   ├── Package.swift        # the app's Swift package (product App)
+│   ├── Package.swift        # the app's Swift package (product app)
 │   ├── CMakeLists.txt
 │   ├── prj.conf
 │   ├── sample.yaml

@@ -31,8 +31,8 @@ belong in `Zephyr`. Only the C `main` belongs in `ZephyrApplication`.
 
 ## Build system
 
-- Swift is built by SwiftPM, driven by CMake. `zephyr_swift_application()` runs one `swift build --product App` for the application's package (the nearest
-  `Package.swift` at or above the application, or `PACKAGE_DIR`) and links `.build/swift/<triple>/release/libApp.a` into `app`. Every Swift module the
+- Swift is built by SwiftPM, driven by CMake. `zephyr_swift_application()` runs one `swift build --product app` for the application's package (the nearest
+  `Package.swift` at or above the application, or `PACKAGE_DIR`) and links `.build/swift/<triple>/release/libapp.a` into `app`. Every Swift module the
   application uses, this module's included, is in that archive. There is no other Swift compile step.
 - Per-build options live in the toolset that `_swift_write_toolset()` writes to `.build/swift/toolset.json`: `-Osize`, `-Xfrontend -function-sections`, the
   Kconfig defines from `_swift_defines()`, the Zephyr include paths and the C library headers (`_swift_sysroot_flags()`). Never put them, or any
@@ -62,7 +62,7 @@ Every `Package.swift` (the root, the samples and the plugin templates) has the s
    then the `.enableExperimentalFeature` entries, each group in alphabetical order. No `unsafeFlags` and no `.define` for Kconfig symbols.
 3. `let package = Package(...)` with its arguments in this order: `name`, `products`, `dependencies`, `targets`, `swiftLanguageModes: [.v6]`. No
    `platforms`.
-4. `products` in alphabetical order by name. An application's product is `.library(name: "App", type: .static, targets: ["App"])`; other
+4. `products` in alphabetical order by name. An application's product is `.library(name: "app", type: .static, targets: ["App"])`; other
    products keep the default library type.
 5. `dependencies` in alphabetical order by package name. In-tree packages use `.package(name:path:)` with a relative path; others use
    `zephyrLangSwift()` or a pinned `.package(url:...)`.

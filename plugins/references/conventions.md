@@ -105,7 +105,7 @@ must not have), then `swift format lint --strict` and `swift package describe`.
   target triple, include paths and Kconfig defines to the build's toolset, so never add `unsafeFlags` or `platforms`. Manifests resolve zephyr-lang-swift
   with `zephyrLangSwift()`, which uses `ZEPHYR_LANG_SWIFT_PATH` from CMake.
 - An application is a CMake project and a Swift package: `find_package(Zephyr ...)`, `project(__project__)`, then `zephyr_swift_application()`, plus a
-  `Package.swift` with a static `App` product whose target (`path: "src"`) depends on `Zephyr` and `ZephyrApplication`. Its Swift sources live in `src/`.
+  `Package.swift` with a static `app` product whose target (`path: "src"`) depends on `Zephyr` and `ZephyrApplication`. Its Swift sources live in `src/`.
 - A library is a target and product of the project's root `Package.swift` and a Zephyr module: a `zephyr/module.yml` naming it and pointing
   `build.cmake` and `build.kconfig` at it, a `Kconfig` symbol that gates it, and a `CMakeLists.txt` calling `zephyr_swift_library(MODULE_NAME __Module__)`
   under `add_subdirectory_ifdef`. Apps enable it with `CONFIG___MODULE__=y` in `prj.conf`, depend on its product in their `Package.swift`, and see its

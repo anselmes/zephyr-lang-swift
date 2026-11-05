@@ -13,7 +13,7 @@
 # 1. writes a SwiftPM toolset (swift/toolset.json in the build directory) with
 #    the target options: -Osize, the Zephyr include paths, the C library
 #    headers and the Kconfig defines Swift code tests with `#if`;
-# 2. runs `swift build --product App` for the application's package, after
+# 2. runs `swift build --product app` for the application's package, after
 #    Zephyr has generated its headers;
 # 3. links the static library it produces into the `app` target.
 #
@@ -415,7 +415,7 @@ endfunction()
 # ~~~
 #
 # PACKAGE_DIR defaults to the nearest directory at or above the application that
-# holds a Package.swift. PRODUCT is the package's static library product, `App`
+# holds a Package.swift. PRODUCT is the package's static library product, `app`
 # by default; it holds the application, every Swift module it depends on and
 # ZephyrApplication's C `main`.
 #
@@ -434,7 +434,7 @@ function(zephyr_swift_application)
   endif()
   get_filename_component(package_dir "${SWIFTAPP_PACKAGE_DIR}" ABSOLUTE)
   if(NOT SWIFTAPP_PRODUCT)
-    set(SWIFTAPP_PRODUCT "App")
+    set(SWIFTAPP_PRODUCT "app")
   endif()
 
   _swift_map_target()
