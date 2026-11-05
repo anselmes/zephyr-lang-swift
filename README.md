@@ -329,7 +329,7 @@ Check a change by building both buildable samples:
 
 ```bash
 (cd samples/app && west build -p -t run)
-(cd samples/app+lib/app && west build -p -t run)
+(cd samples/app+lib && west build -p -t run)
 ```
 
 ### Using CLion

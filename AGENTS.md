@@ -20,7 +20,7 @@ application's package from `west build`, and samples. It has no application or d
 | `zephyr/src`                  | `ZephyrApplication` | `Application.swift`: the `@c(main)` entry point that calls the application's `entrypoint()`                                                                                                               |
 | `CMakeLists.txt`, `Kconfig`   | —                   | Target mapping, toolset generation, the `swift build` command and linking; `CONFIG_SWIFT` and `CONFIG_SWIFT_DEBUG_INFO`                                                                                   |
 | `zephyr/module.yml`           | —                   | Zephyr module definition                                                                                                                                                                                  |
-| `samples/{app,lib,app+lib}`   | —                   | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib/app`)                                                                                |
+| `samples/{app,lib,app+lib}`   | —                   | Sample application, standalone library module, and a module with the library plus the application using it (`app+lib`)                                                                                    |
 | `tests/`                      | —                   | Reserved for Ztest/Twister cases (empty today)                                                                                                                                                            |
 | `doc/`                        | —                   | Documentation                                                                                                                                                                                             |
 | `plugins/`, `.claude-plugin/` | `zephyr-swift`      | Claude Code plugin (`new-project`, `add-app`, `add-library`) and its marketplace manifest; templates use `__token__` placeholders                                                                         |
@@ -143,7 +143,7 @@ Today the check is a clean build of the samples; CI does not build or test yet (
 
 ```bash
 west build -p -b <board> samples/app
-west build -p -b <board> samples/app+lib/app
+west build -p -b <board> samples/app+lib
 ```
 
 Both must compile without new warnings. To iterate on Swift alone, generate the build directory and rebuild only the package:
