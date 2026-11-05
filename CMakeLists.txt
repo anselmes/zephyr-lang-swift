@@ -20,6 +20,8 @@
 # The entry points are:
 #   zephyr_swift_application()  Build the application package and link it.
 #   zephyr_swift_library()      Register a Swift library module with Kconfig.
+#   zephyr_swift_include_directories()
+#                               Add header search paths to the Swift builds.
 #
 # Cache options:
 #   ZEPHYR_SWIFT_OFFLINE       ON: use only the versions in Package.resolved and
@@ -249,6 +251,17 @@ function(_swift_write_toolset path)
   _swift_sysroot_flags()
   _swift_defines()
 
+  # The directories that modules registered with
+  # zephyr_swift_include_directories(), as -Xcc options for Swift and plain
+  # options for C.
+  get_property(extra_dirs GLOBAL PROPERTY ZEPHYR_SWIFT_INCLUDE_DIRECTORIES)
+  set(extra_options "")
+  set(extra_c_options "")
+  foreach(dir IN LISTS extra_dirs)
+    list(APPEND extra_options "-Xcc" "-I${dir}")
+    list(APPEND extra_c_options "-I${dir}")
+  endforeach()
+
   set(options
       # Optimize for size; comes after the -O that SwiftPM passes for release.
       "-Osize"
@@ -273,7 +286,8 @@ function(_swift_write_toolset path)
       "-imacros"
       "-Xcc"
       "${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr/autoconf.h"
-      ${SWIFT_SYSROOT_FLAGS})
+      ${SWIFT_SYSROOT_FLAGS}
+      ${extra_options})
 
   # SwiftPM does not hand the Swift compiler's -Xcc options on to the C and C++
   # targets of a package, so a C-backed dependency would not find Zephyr's or
@@ -285,6 +299,7 @@ function(_swift_write_toolset path)
       "-I${CMAKE_BINARY_DIR}/zephyr/include"
       "-I${ZEPHYR_BASE}/include"
       ${SWIFT_SYSROOT_FLAGS})
+  list(APPEND c_options ${extra_c_options})
   list(FILTER c_options EXCLUDE REGEX "^-Xcc$")
   # Zephyr compiles its C and C++ with the kernel configuration loaded as macros
   # (-imacros autoconf.h). Do the same, or a dependency that includes Zephyr
@@ -375,6 +390,21 @@ function(zephyr_swift_library)
                                       "${SWIFTLIB_MODULE_NAME}")
   message(STATUS "Swift: library ${SWIFTLIB_MODULE_NAME} "
                  "(built by the application's Package.swift)")
+endfunction()
+
+# Add header search paths to every Swift build of this Zephyr build, for the C
+# headers of a library that Swift modules import (a Clang module that includes
+# them) and that Zephyr itself does not provide.
+#
+# ~~~
+#   zephyr_swift_include_directories(<dir>...)
+# ~~~
+#
+# The directories become `-Xcc -I<dir>` options in the SwiftPM toolset and plain
+# `-I<dir>` options for the C targets of a package. Call it from a module's
+# CMakeLists.txt, before zephyr_swift_application() writes the toolset.
+function(zephyr_swift_include_directories)
+  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_INCLUDE_DIRECTORIES ${ARGN})
 endfunction()
 
 # Build the application's Swift package and link it into the Zephyr `app`
