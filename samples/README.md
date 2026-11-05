@@ -19,7 +19,7 @@ Three samples show how to build Swift applications and libraries for Zephyr with
 | Directory | What it is                                                              | Build it with `west` |
 | --------- | ----------------------------------------------------------------------- | -------------------- |
 | `app`     | A Swift application that prints a greeting and sleeps in a loop         | yes                  |
-| `app+lib` | A Zephyr module with the Hello library, plus an application using it    | in `app+lib/app`     |
+| `app+lib` | A Zephyr module with the Hello library, plus an application using it    | yes                  |
 | `lib`     | The Hello library as a standalone Zephyr module, without an application | no                   |
 
 `lib` and `app+lib/lib` contain the same Hello library. `app+lib` is the self-contained combined sample; `lib` is the standalone module for readers who want only the library. A module is not an application, so running `west build` in `lib` fails with `Unknown CMake command "add_subdirectory_ifdef"`.
@@ -39,11 +39,11 @@ cp .env.example .env
 source .env
 ```
 
-The combined sample keeps its `.env.example` one level above the application, so copy it from there:
+The combined sample is its own application, so its `.env.example` sits next to its `CMakeLists.txt`:
 
 ```bash
-cd samples/app+lib/app
-cp ../.env.example .env
+cd samples/app+lib
+cp .env.example .env
 source .env
 ```
 
@@ -82,7 +82,7 @@ Hello from Swift!!!
 
 ## Application with a library: app+lib
 
-The application is in `app+lib/app`. `app+lib/Package.swift` describes both the `Hello` library target (`lib/hello`) and the `App` target (`app/src`) that depends on it, and `zephyr_swift_application()` in `app/CMakeLists.txt` finds that manifest in the parent directory. The `CMakeLists.txt` also appends the parent directory to `ZEPHYR_EXTRA_MODULES`: it is a Zephyr module (`zephyr/module.yml`) that provides the library's Kconfig option, which the application's `prj.conf` enables with `CONFIG_HELLO=y`. The source imports the library:
+The application is `app+lib` itself, which is also a Zephyr module. `app+lib/Package.swift` describes both the `Hello` library target (`lib/hello`) and the `App` target (`src`) that depends on it, and `zephyr_swift_application()` in `CMakeLists.txt` finds that manifest in the same directory. The `CMakeLists.txt` also appends its own directory to `ZEPHYR_EXTRA_MODULES`: it is a Zephyr module (`zephyr/module.yml`) that provides the library's Kconfig option, which the application's `prj.conf` enables with `CONFIG_HELLO=y`. The source imports the library:
 
 ```swift
 import Hello
@@ -114,7 +114,7 @@ Hello from Swift!!!
 [00:00:02.030,000] <inf> swift: still running...
 ```
 
-The application's source files are in `app+lib/app/src`.
+The application's source files are in `app+lib/src`.
 
 ## Library: lib
 
@@ -151,7 +151,7 @@ To start an application, copy `app` and edit `src/Entrypoint.swift`, `prj.conf`,
 cp -r samples/app my_app
 ```
 
-To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib/Kconfig` and `app+lib/lib/`, not just `lib/hello`), rename the library, its Kconfig option and its `zephyr/module.yml` entry, and add it as a target to a `Package.swift`. Then add the library to the application's `Package.swift`, and the copied module root to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt` so Zephyr discovers its Kconfig option. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
+To start a library, copy the whole module (`app+lib/zephyr/module.yml` and `app+lib/lib/`, not just `lib/hello`), rename the library, its Kconfig option and its `zephyr/module.yml` entry, and add it as a target to a `Package.swift`. Then add the library to the application's `Package.swift`, and the copied module root to `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt` so Zephyr discovers its Kconfig option. The repository also ships a Claude Code plugin (`plugins/`) that scaffolds both.
 
 ## Troubleshooting
 

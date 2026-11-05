@@ -1,5 +1,8 @@
 name: app+lib
 
+# The module's Kconfig is lib/Kconfig, not a Kconfig at the sample root: Zephyr
+# treats <application>/Kconfig as the application's root Kconfig, which would
+# replace Zephyr's own.
 build:
   cmake: lib
-  kconfig: Kconfig
+  kconfig: lib/Kconfig

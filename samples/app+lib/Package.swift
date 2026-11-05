@@ -3,11 +3,11 @@
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
 // The application-with-library sample: the Hello library (lib/hello) and the
-// application that uses it (app/src), in one package. `west build` in app/
-// runs `swift build --product app` through zephyr_swift_application(), which
-// finds this manifest in the parent directory, and links the static `app`
-// library (application, Hello and the zephyr-lang-swift modules) into the
-// Zephyr image.
+// application that uses it (src), in one package. `west build` in this
+// directory runs `swift build --product app` through
+// zephyr_swift_application(), which finds this manifest here, and links the
+// static `app` library (application, Hello and the zephyr-lang-swift modules)
+// into the Zephyr image.
 
 import PackageDescription
 
@@ -41,7 +41,7 @@ let package = Package(
         .product(name: "Zephyr", package: "zephyr-lang-swift"),
         .product(name: "ZephyrApplication", package: "zephyr-lang-swift"),
       ],
-      path: "app/src",
+      path: "src",
       swiftSettings: settings,
     ),
     .target(
