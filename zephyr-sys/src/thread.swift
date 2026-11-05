@@ -31,6 +31,9 @@
 
     /// Frees the stack (`k_thread_stack_free`) and the thread object.
     deinit {
+      // SAFETY: `stack` came from `k_thread_stack_alloc` and `thread` from
+      // `allocate` in `init(stackSize:)`; this value owns both, and the owner
+      // guarantees the thread has terminated.
       _ = unsafe k_thread_stack_free(stack)
       unsafe thread.deinitialize(count: 1)
       unsafe thread.deallocate()
@@ -45,6 +48,8 @@
     /// - Parameter stackSize: The stack size in bytes.
     /// - Throws: `.noMemory` when the kernel heap has no room for the stack.
     init(stackSize: Int) throws(ZephyrError) {
+      // SAFETY: a nil stack is rejected; `thread` is freshly allocated for one
+      // `k_thread` and initialized before any use.
       guard let stack = unsafe k_thread_stack_alloc(stackSize, 0) else { throw .noMemory }
       let thread = UnsafeMutablePointer<k_thread>.allocate(capacity: 1)
       unsafe thread.initialize(to: .init())
@@ -60,6 +65,8 @@
     ///   - context: Passed to `entry` as its first argument.
     ///   - entry: The function the thread runs.
     func start(priority: Int32, context: UnsafeMutableRawPointer?, entry: Entry) {
+      // SAFETY: `thread` and `stack` (`stackSize` bytes) stay allocated until
+      // `deinit`; `entry` is a C function; the caller keeps `context` valid.
       _ = unsafe k_thread_create(thread, stack, stackSize, entry, context, nil, nil, priority, 0, .noWait)
     }
 
@@ -68,6 +75,7 @@
     ///
     /// - Parameter name: The name; Zephyr keeps a truncated copy.
     func setName(_ name: String) {
+      // SAFETY: NUL-terminated name outlives the call; Zephyr copies it.
       _ = name.withCString { unsafe k_thread_name_set(thread, $0) }
     }
 
@@ -76,16 +84,19 @@
     /// - Parameter timeout: How long to wait.
     /// - Returns: `true` when the thread has terminated.
     func join(timeout: KernelTimeout) -> Bool {
+      // SAFETY: `thread` stays allocated for the life of `self`.
       unsafe k_thread_join(thread, timeout) == 0
     }
 
     /// Wakes the thread from a sleep early (`k_wakeup`).
     func wakeup() {
+      // SAFETY: `thread` stays allocated for the life of `self`.
       unsafe k_wakeup(thread)
     }
 
     /// Terminates the thread wherever it is (`k_thread_abort`).
     func abort() {
+      // SAFETY: `thread` stays allocated for the life of `self`.
       unsafe k_thread_abort(thread)
     }
   }

@@ -36,6 +36,8 @@
       // `name` is a fixed `char[MAX_FILE_NAME + 1]`, imported as a tuple:
       // copy the bytes up to the NUL.
       name = withUnsafeBytes(of: entry.name) { raw in
+        // SAFETY: `raw` covers the whole tuple, and `prefix` stops at the first
+        // NUL or the end of the buffer, so only initialized bytes are copied.
         unsafe Array(raw.prefix { $0 != 0 })
       }
     }

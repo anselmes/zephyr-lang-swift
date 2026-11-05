@@ -40,6 +40,8 @@
 
     /// Closes the file (`fs_close`), which also flushes what was written.
     deinit {
+      // SAFETY: `handle` was allocated and initialized in `init(path:mode:)`,
+      // this value is its only owner, and it is closed and freed once.
       _ = unsafe fs_close(handle)
       unsafe handle.deinitialize(count: 1)
       unsafe handle.deallocate()
@@ -57,10 +59,13 @@
     /// - Throws: The error `fs_open` returned, such as `.noEntry`.
     init(path: String, mode: Mode) throws(ZephyrError) {
       let handle = UnsafeMutablePointer<fs_file_t>.allocate(capacity: 1)
+      // SAFETY: `handle` is freshly allocated for one `fs_file_t`; `withCString`
+      // gives `fs_open` a NUL-terminated path that outlives the call.
       unsafe handle.initialize(to: .init())
       unsafe fs_file_t_init(handle)
       let result = path.withCString { unsafe fs_open(handle, $0, mode.rawValue) }
       guard result == 0 else {
+        // SAFETY: the open failed, so nothing else refers to `handle`.
         unsafe handle.deinitialize(count: 1)
         unsafe handle.deallocate()
         throw ZephyrError(errno: -result)

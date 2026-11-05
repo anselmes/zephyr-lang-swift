@@ -22,6 +22,8 @@
     /// - Returns: The checksum including `bytes`.
     public static func ieee(_ bytes: RawSpan, updating crc: UInt32 = 0) -> UInt32 {
       bytes.withUnsafeBytes { raw in
+        // SAFETY: `raw` is `bytes`' storage, valid for `raw.count` bytes for the
+        // duration of the call; crc32_ieee_update only reads it.
         unsafe crc32_ieee_update(crc, raw.baseAddress?.assumingMemoryBound(to: UInt8.self), raw.count)
       }
     }

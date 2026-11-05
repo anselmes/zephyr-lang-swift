@@ -20,6 +20,8 @@
 
     /// Closes the directory (`fs_closedir`).
     deinit {
+      // SAFETY: `handle` was allocated and initialized in `init(path:)`, this
+      // value is its only owner, and it is closed, deinitialized and freed once.
       _ = unsafe fs_closedir(handle)
       unsafe handle.deinitialize(count: 1)
       unsafe handle.deallocate()
@@ -35,10 +37,13 @@
     /// - Throws: The error `fs_opendir` returned, such as `.noEntry`.
     init(path: String) throws(ZephyrError) {
       let handle = UnsafeMutablePointer<fs_dir_t>.allocate(capacity: 1)
+      // SAFETY: `handle` is freshly allocated for one `fs_dir_t`; `withCString`
+      // gives `fs_opendir` a NUL-terminated path that outlives the call.
       unsafe handle.initialize(to: .init())
       unsafe fs_dir_t_init(handle)
       let result = path.withCString { unsafe fs_opendir(handle, $0) }
       guard result == 0 else {
+        // SAFETY: the open failed, so nothing else refers to `handle`.
         unsafe handle.deinitialize(count: 1)
         unsafe handle.deallocate()
         throw ZephyrError(errno: -result)
@@ -52,6 +57,8 @@
     /// - Throws: The error `fs_readdir` returned.
     func next() throws(ZephyrError) -> DirectoryEntry? {
       var entry: fs_dirent = .init()
+      // SAFETY: `handle` is open until `deinit`; `&entry` points at one
+      // `fs_dirent` that lives across the call.
       try check(unsafe fs_readdir(handle, &entry))
       let next = DirectoryEntry(entry)
       // fs_readdir reports the end of the directory with an empty name.
