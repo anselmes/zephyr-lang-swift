@@ -38,6 +38,9 @@ set(SWIFT_MODULE_DIR
 
 option(ZEPHYR_SWIFT_OFFLINE
        "Build Swift packages without resolving dependencies" OFF)
+option(ZEPHYR_SWIFT_EMBEDDED
+       "Compile every Swift package, dependencies included, as Embedded Swift"
+       ON)
 option(ZEPHYR_SWIFT_LSP_CONFIG
        "Write .sourcekit-lsp/config.json into the application package" ON)
 # The default build system (swiftbuild) archives with the host's libtool, which
@@ -262,9 +265,17 @@ function(_swift_write_toolset path)
     list(APPEND extra_c_options "-I${dir}")
   endforeach()
 
+  # A dependency's manifest cannot know it is built for firmware, so it does not
+  # enable Embedded Swift itself; every module of the build has to agree on it.
+  set(embedded_options "")
+  if(ZEPHYR_SWIFT_EMBEDDED)
+    set(embedded_options "-enable-experimental-feature" "Embedded")
+  endif()
+
   set(options
       # Optimize for size; comes after the -O that SwiftPM passes for release.
       "-Osize"
+      ${embedded_options}
       # One section per function, so the linker's --gc-sections can drop unused
       # code.
       "-Xfrontend"
