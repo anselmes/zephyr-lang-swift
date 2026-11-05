@@ -10,7 +10,7 @@
   ///
   /// ```swift
   /// var crc: UInt32 = 0
-  /// crc = CRC32.ieee(chunk.span.bytes, updating: crc)
+  /// crc = CRC32.ieee(chunk.span, updating: crc)
   /// ```
   public enum CRC32 {
     /// The IEEE 802.3 CRC-32 of `bytes`, continued from `crc`
@@ -20,12 +20,8 @@
     ///   - bytes: The bytes to add.
     ///   - crc: The checksum so far; zero to start.
     /// - Returns: The checksum including `bytes`.
-    public static func ieee(_ bytes: RawSpan, updating crc: UInt32 = 0) -> UInt32 {
-      bytes.withUnsafeBytes { raw in
-        // SAFETY: `raw` is `bytes`' storage, valid for `raw.count` bytes for the
-        // duration of the call; crc32_ieee_update only reads it.
-        unsafe crc32_ieee_update(crc, raw.baseAddress?.assumingMemoryBound(to: UInt8.self), raw.count)
-      }
+    public static func ieee(_ bytes: Span<UInt8>, updating crc: UInt32 = 0) -> UInt32 {
+      zephyr_crc32_ieee_update(crc, bytes)
     }
   }
 
