@@ -418,6 +418,22 @@ function(zephyr_swift_include_directories)
   set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_INCLUDE_DIRECTORIES ${ARGN})
 endfunction()
 
+# Enable traits of the application's Swift package in every `swift build` of
+# this Zephyr build, for example to turn on a runtime that its manifest forwards
+# to a dependency (`.package(…, traits: [.trait(name: "X", condition: …)])`).
+#
+# ~~~
+#   zephyr_swift_traits(<trait>...)
+# ~~~
+#
+# SwiftPM's `--traits` replaces the package's default traits, and rejects
+# `defaults` for a package that declares none, so the application should leave
+# its default traits empty and choose all of them here. Call it from a module's
+# CMakeLists.txt, or from the application's, before zephyr_swift_application().
+function(zephyr_swift_traits)
+  set_property(GLOBAL APPEND PROPERTY ZEPHYR_SWIFT_TRAITS ${ARGN})
+endfunction()
+
 # Build the application's Swift package and link it into the Zephyr `app`
 # target.
 #
@@ -483,6 +499,12 @@ function(zephyr_swift_application)
       ${SWIFTAPP_PRODUCT})
   if(ZEPHYR_SWIFT_OFFLINE)
     list(APPEND build_args --disable-automatic-resolution)
+  endif()
+  get_property(traits GLOBAL PROPERTY ZEPHYR_SWIFT_TRAITS)
+  if(traits)
+    list(REMOVE_DUPLICATES traits)
+    list(JOIN traits "," traits)
+    list(APPEND build_args --traits "${traits}")
   endif()
 
   # Environment for `swift build`: the toolchain selection, and where this
