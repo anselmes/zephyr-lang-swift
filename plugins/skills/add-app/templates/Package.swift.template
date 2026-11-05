@@ -22,22 +22,29 @@ let settings: [SwiftSetting] = [
   .enableExperimentalFeature("Extern"),
 ]
 
+// The zephyr-lang-swift checkout that `west build` uses, when CMake sets it.
+let langSwiftPath = Context.environment["ZEPHYR_LANG_SWIFT_PATH"].flatMap { $0.isEmpty ? nil : $0 }
+
 let package = Package(
   name: "__project__",
   products: [
     .library(name: "app", type: .static, targets: ["App"])
   ],
   dependencies: [
+    localOrRemotePackage(
+      name: "zephyr-lang-swift",
+      url: "https://github.com/anselmes/zephyr-lang-swift.git",
+      path: langSwiftPath ?? "../modules/lang/swift",
+    ),
     __library-package__
-    zephyrLangSwift(),
   ],
   targets: [
     .target(
       name: "App",
       dependencies: [
-        __library-products__
         .product(name: "Zephyr", package: "zephyr-lang-swift"),
         .product(name: "ZephyrApplication", package: "zephyr-lang-swift"),
+        __library-products__
       ],
       path: "src",
       swiftSettings: settings,
@@ -48,12 +55,31 @@ let package = Package(
 
 // MARK: - Helpers
 
-/// zephyr-lang-swift: the checkout that `west build` uses, which CMake passes
-/// in `ZEPHYR_LANG_SWIFT_PATH`, or the repository when SwiftPM runs on its own
-/// (for example in an editor).
-func zephyrLangSwift() -> Package.Dependency {
-  if let path = Context.environment["ZEPHYR_LANG_SWIFT_PATH"], !path.isEmpty {
-    return .package(name: "zephyr-lang-swift", path: path)
+/// A dependency from a sibling checkout of the west workspace, or from its
+/// repository.
+///
+/// The checkout is used when `__NAME___LOCAL_DEPS` is `1` or `true` (relative
+/// `path`s resolve against this package), or names the directory that a
+/// relative `path` is relative to. `west build` is always inside such a
+/// workspace: CMake sets `ZEPHYR_LANG_SWIFT_PATH` for every `swift build` it
+/// runs, which counts as `__NAME___LOCAL_DEPS=1`. An absolute `path` is used as
+/// is. Every package that depends on zephyr-lang-swift should resolve it the
+/// same way, so SwiftPM sees one package identity.
+func localOrRemotePackage(
+  name: String,
+  url: String,
+  path: String,
+  from version: Version? = nil,
+  branch: String = "main",
+  traits: Set<Package.Dependency.Trait> = [.defaults],
+) -> Package.Dependency {
+  let local = Context.environment["__NAME___LOCAL_DEPS"].flatMap { $0.isEmpty ? nil : $0 } ?? (langSwiftPath == nil ? nil : "1")
+  if let local {
+    let root = (local == "1" || local == "true") ? Context.packageDirectory : local
+    return .package(name: name, path: path.hasPrefix("/") ? path : "\(root)/\(path)", traits: traits)
   }
-  return .package(url: "https://github.com/anselmes/zephyr-lang-swift", branch: "main")
+  if let version {
+    return .package(url: url, from: version, traits: traits)
+  }
+  return .package(url: url, branch: branch, traits: traits)
 }
