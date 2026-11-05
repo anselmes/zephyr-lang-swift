@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
+import ZephyrCore
 
 /// A timeout that does not block (`K_NO_WAIT`).
 public struct NoWait {

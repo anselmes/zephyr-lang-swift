@@ -5,7 +5,7 @@
 # CMake support for building Embedded Swift with Zephyr through SwiftPM.
 #
 # Swift code is described by Package.swift manifests: this module's root
-# package (ZephyrCore, ZephyrSystem, Zephyr, ZephyrApplication) and one package
+# package (ZephyrSystem, ZephyrCore, Zephyr, ZephyrApplication) and one package
 # per application. Swift needs the headers that a Zephyr build generates
 # (autoconf.h, syscalls) and flags that depend on Kconfig, so `swift build`
 # cannot run on its own. Instead, for every Zephyr build this file:
@@ -248,8 +248,8 @@ endfunction()
 
 # Write the SwiftPM toolset for this build to `path`: the target options every
 # Swift module is compiled with, and the Zephyr SDK's llvm-ar for archives. All
-# modules get the same Clang options, so they share one build of the ZephyrCore
-# Clang module.
+# modules get the same Clang options, so they share one build of the
+# ZephyrSystem Clang module.
 function(_swift_write_toolset path)
   _swift_sysroot_flags()
   _swift_defines()
@@ -597,7 +597,7 @@ exec env ${command}\"$@\"
     WORLD_READ
     WORLD_EXECUTE)
 
-  # SourceKit-LSP configuration, so the editor resolves ZephyrCore and the
+  # SourceKit-LSP configuration, so the editor resolves ZephyrSystem and the
   # Zephyr headers of this build. It has its own scratch path: the editor's
   # builds must not race the image build.
   if(ZEPHYR_SWIFT_LSP_CONFIG)

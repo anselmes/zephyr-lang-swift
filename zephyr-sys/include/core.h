@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-// ZephyrCore C Interface Declarations
+// ZephyrSystem C Interface Declarations
 //
 // Functions declared here are implemented in Swift with `@c @implementation`,
 // which makes the compiler check each Swift signature against this C
@@ -22,7 +22,7 @@ static inline void zephyr_panic(void) { k_panic(); }
 // `aligned_alloc` from Zephyr's common libc malloc.
 int posix_memalign(void **memptr, size_t alignment, size_t size);
 
-// Reserved initialization hook for the ZephyrCore runtime support. Currently
+// Reserved initialization hook for the ZephyrSystem runtime support. Currently
 // empty (zephyr-sys/src/init.swift).
 void zephyr_sys_init(void);
 

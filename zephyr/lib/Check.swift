@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
+import ZephyrCore
 
 /// Turns a Zephyr return code into a typed throw.
 ///
 /// ```swift
-/// // `code` is the return value of a ZephyrSystem wrapper over a Zephyr call.
+/// // `code` is the return value of a ZephyrCore wrapper over a Zephyr call.
 /// try check(code)
 /// ```
 ///

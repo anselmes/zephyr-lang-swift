@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrCore
 import ZephyrSystem
+import ZephyrCore
 
 #if CONFIG_TIMEOUT_64BIT
   /// The integer type of a kernel tick count: `Int64` when the build passes

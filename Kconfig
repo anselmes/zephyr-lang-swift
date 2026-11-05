@@ -12,8 +12,8 @@
 #
 # When CONFIG_SWIFT is enabled, the module's CMakeLists.txt:
 # 1. provides zephyr_swift_application(), which builds the application's
-#    Swift package with SwiftPM (including this module's ZephyrCore,
-#    ZephyrSystem, Zephyr and ZephyrApplication) and links it into the image
+#    Swift package with SwiftPM (including this module's ZephyrSystem,
+#    ZephyrCore, Zephyr and ZephyrApplication) and links it into the image
 # 2. provides zephyr_swift_library(), which registers a Swift library module
 # 3. discards the sections swiftc emits that no image needs
 
@@ -27,15 +27,15 @@ config SWIFT
     - zephyr_swift_application(), which runs swift build for the
       application's Package.swift with the target options of the build
     - Cross-compilation for Arm Cortex-M, AArch64 and RISC-V targets
-    - Swift runtime support through the ZephyrSystem package target
-    - C-Swift interoperability through the ZephyrCore Clang module
+    - Swift runtime support through the ZephyrCore package target
+    - C-Swift interoperability through the ZephyrSystem Clang module
     - zephyr_swift_library() for library modules
 
     Requirements:
     - A Swift 6.4 or later toolchain from swift.org with Embedded Swift
       support, not the one in Xcode. Select it with TOOLCHAINS=swift.
     - A libc with a heap, for example CONFIG_MINIMAL_LIBC=y. The Embedded
-      Swift runtime allocates through posix_memalign, which ZephyrSystem
+      Swift runtime allocates through posix_memalign, which ZephyrCore
       implements on top of the libc's aligned_alloc.
     - A target architecture that the toolchain supports and the module maps
       to a Swift target triple.

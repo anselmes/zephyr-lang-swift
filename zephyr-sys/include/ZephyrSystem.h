@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-// Umbrella header of the ZephyrCore module.
+// Umbrella header of the ZephyrSystem module.
 //
 // It exposes the Zephyr C APIs to Swift, and declares the C functions that
-// ZephyrCore implements in Swift with `@c @implementation`
-// (see zephyr-sys/src). It is the umbrella header of the ZephyrCore Clang
-// module (module.modulemap), which Swift code imports with `import ZephyrCore`.
+// ZephyrSystem implements in Swift with `@c @implementation`
+// (see zephyr-sys/src). It is the umbrella header of the ZephyrSystem Clang
+// module (module.modulemap), which Swift code imports with `import
+// ZephyrSystem`.
 
 #pragma once
 

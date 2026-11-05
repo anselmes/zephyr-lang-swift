@@ -161,5 +161,5 @@ To start a library, copy the whole module (`app+lib/zephyr/module.yml`, `app+lib
 | `Unable to find 'x86_64-zephyr-elf'` in the SDK | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Source `.env` (it sets `zephyr/llvm`).                     |
 | `BOARD is not being defined`                    | Neither `ZEPHYR_BOARD` nor `-b <board>` gave a board. Source `.env`, or pass `-b <board>`.        |
 | `no such module 'Hello'`                        | The application's `Package.swift` does not depend on the `Hello` target or product.               |
-| `could not build C module 'ZephyrCore'`         | Zephyr has not generated its headers yet. Build with `west build`, not `swift build` alone.       |
+| `could not build C module 'ZephyrSystem'`       | Zephyr has not generated its headers yet. Build with `west build`, not `swift build` alone.       |
 | `west twister -T samples/` finds nothing        | The `sample.yml` files have no `tests:` section yet, so twister has no test cases to run.         |

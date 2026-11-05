@@ -17,12 +17,12 @@ A Zephyr module that lets you write applications and libraries in Embedded Swift
 
 ## Features
 
-- **SwiftPM packages**: Swift code is described by `Package.swift`. This module's package provides `ZephyrCore`, `ZephyrSystem`, `Zephyr` and `ZephyrApplication`; applications and libraries depend on it by path or URL, and may use other Embedded-compatible packages.
+- **SwiftPM packages**: Swift code is described by `Package.swift`. This module's package provides the products `ZephyrCore`, `Zephyr` and `ZephyrApplication` (the `ZephyrSystem` C module is internal: only `ZephyrCore` imports it); applications and libraries depend on it by path or URL, and may use other Embedded-compatible packages.
 - **CMake functions**: `zephyr_swift_application()` runs `swift build` for the application's package with the target options of the Zephyr build and links the result, `zephyr_swift_library()` registers a library module with the Zephyr build, `zephyr_swift_include_directories()` adds header search paths to the Swift builds, and `zephyr_swift_traits()` enables traits of the application package.
 - **Kconfig options**: `CONFIG_SWIFT` turns Swift support on, and `CONFIG_SWIFT_DEBUG_INFO` defines `SWIFT_DEBUG_INFO` for `#if` blocks in Swift code.
-- **Runtime support** (`ZephyrSystem`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
+- **Runtime support** (`ZephyrCore`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
 - **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)`, and `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw.
-- **C interoperability** (`ZephyrCore`): a Clang module exposes the Zephyr C APIs to Swift, and C functions can be implemented in Swift with `@c @implementation`.
+- **C interoperability** (`ZephyrSystem`): a Clang module exposes the Zephyr C APIs to Swift, and C functions can be implemented in Swift with `@c @implementation`.
 - **Claude Code plugin** (`plugins/`): scaffolds a project, an application or a library.
 
 ## Prerequisites
@@ -257,12 +257,12 @@ These CMake cache options change how the Swift package is built. Pass them to `w
 
 ```text
 swift/
-├── Package.swift      # ZephyrCore, ZephyrSystem, Zephyr, ZephyrApplication
+├── Package.swift      # ZephyrSystem, ZephyrCore, Zephyr, ZephyrApplication
 ├── CMakeLists.txt     # zephyr_swift_application(), zephyr_swift_library(), ...
 ├── Kconfig            # CONFIG_SWIFT, CONFIG_SWIFT_DEBUG_INFO
 ├── zephyr-sys/
-│   ├── include/       # ZephyrCore: ZephyrCore.h and module.modulemap
-│   └── src/           # ZephyrSystem: init, kernel, log, malloc and timeout
+│   ├── include/       # ZephyrSystem: ZephyrSystem.h and module.modulemap
+│   └── src/           # ZephyrCore: init, kernel, log, malloc and timeout
 ├── zephyr/
 │   ├── lib/           # Zephyr: Duration, Timeout, Instant, sleep, Log, ZephyrError
 │   └── src/           # ZephyrApplication: the C main that calls entrypoint()
@@ -272,7 +272,7 @@ swift/
 └── tests/             # Reserved for Ztest/Twister cases (empty)
 ```
 
-The package's targets depend on each other in this order: `ZephyrCore` (a Clang module over `ZephyrCore.h`) ← `ZephyrSystem` ← `Zephyr` ← `ZephyrApplication` ← the application.
+The package's targets depend on each other in this order: `ZephyrSystem` (a Clang module over `ZephyrSystem.h`) ← `ZephyrCore` ← `Zephyr` ← `ZephyrApplication` ← the application.
 
 Swift imports headers that only a Zephyr build generates, and its target options depend on Kconfig, so `swift build` does not run on its own. `west build` drives it:
 
@@ -303,13 +303,13 @@ To add an architecture, map it to a Swift target triple in `_swift_map_target()`
 
 To add runtime support that Swift needs from C:
 
-1. Declare the C function in `zephyr-sys/include/core.h`, which `ZephyrCore.h` includes.
+1. Declare the C function in `zephyr-sys/include/core.h`, which `ZephyrSystem.h` includes.
 2. Implement it in `zephyr-sys/src` with `@c @implementation`, so the compiler checks the signature against the declaration.
 3. Document it. Target options belong in `_swift_write_toolset()` in `CMakeLists.txt`; language settings belong in the `settings` of each `Package.swift`.
 
 ### Working on Swift code
 
-`west build` remains the way to build and run an image. To iterate on Swift without building the whole image, let CMake generate the build directory first. Configuring writes the SwiftPM toolset, `.build/swift/swift-build.sh` with the exact `swift build` command, and `.sourcekit-lsp/config.json` in the application package, so SourceKit-LSP in your editor resolves `ZephyrCore` and the Zephyr headers of that build:
+`west build` remains the way to build and run an image. To iterate on Swift without building the whole image, let CMake generate the build directory first. Configuring writes the SwiftPM toolset, `.build/swift/swift-build.sh` with the exact `swift build` command, and `.sourcekit-lsp/config.json` in the application package, so SourceKit-LSP in your editor resolves `ZephyrSystem` and the Zephyr headers of that build:
 
 ```bash
 cd samples/app
@@ -347,26 +347,26 @@ CLion with the Noctule Swift plugin gives completion, navigation and diagnostics
    | Toolsets     | `.build/swift/toolset.json`                          |
    | Build system | Native                                               |
 
-7. Reload the project. Noctule then prepares `ZephyrSystem`, `Zephyr`, `ZephyrApplication` and the application in `.build/swift-lsp`, and navigation resolves the Zephyr declarations.
+7. Reload the project. Noctule then prepares `ZephyrCore`, `Zephyr`, `ZephyrApplication` and the application in `.build/swift-lsp`, and navigation resolves the Zephyr declarations.
 
 The triple is the one CMake printed as `Swift: package ..., target <triple>` when it configured the build. The generated `.sourcekit-lsp/config.json` holds the same values for editors that read it directly.
 
 ## Troubleshooting
 
-| Symptom                                                      | Likely cause and fix                                                                                                                                       |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unable to load standard library for target`                 | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org.                                                          |
-| `Unable to find 'x86_64-zephyr-elf'` in the SDK              | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                                                                                  |
-| `could not build C module 'ZephyrCore'`                      | Zephyr has not generated its headers. Build the `swift_build` target or the image, not `swift build` alone.                                                |
-| `no Package.swift in ... or a parent directory`              | The application has no Swift package. Add a `Package.swift`, or pass `PACKAGE_DIR`.                                                                        |
-| `undefined reference to 'entrypoint'`                        | The application has no `@c(entrypoint) func entrypoint()`.                                                                                                 |
-| `no such module` for a library                               | The application's `Package.swift` does not depend on the library's target or product.                                                                      |
-| Package resolution fails                                     | A dependency cannot be fetched. Check the network, or build with `-DZEPHYR_SWIFT_OFFLINE=ON` from a committed `Package.resolved`, with the sources cached. |
-| Noctule log: `Invalid manifest` and `Argument list too long` | Noctule runs Xcode's Swift. Select the swift.org toolchain in its settings and reload the project.                                                         |
-| Noctule cannot resolve `Zephyr` or `ZephyrCore` declarations | The triple and toolset are not set, or the headers are missing. See [Using CLion](#using-clion).                                                           |
-| Stale Swift errors after moving a build                      | `.build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                                                                      |
-| A header edit changes nothing                                | SwiftPM does not rebuild when only a `ZephyrCore` header changes. Edit a Swift file too, or `west build -p`.                                               |
-| `'--build-system native' has been deprecated`                | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).                                                 |
+| Symptom                                                        | Likely cause and fix                                                                                                                                       |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unable to load standard library for target`                   | Xcode's Swift was selected. Set `TOOLCHAINS=swift` and use a Swift 6.4+ toolchain from swift.org.                                                          |
+| `Unable to find 'x86_64-zephyr-elf'` in the SDK                | `ZEPHYR_TOOLCHAIN_VARIANT` is not set. Use `zephyr/llvm`.                                                                                                  |
+| `could not build C module 'ZephyrSystem'`                      | Zephyr has not generated its headers. Build the `swift_build` target or the image, not `swift build` alone.                                                |
+| `no Package.swift in ... or a parent directory`                | The application has no Swift package. Add a `Package.swift`, or pass `PACKAGE_DIR`.                                                                        |
+| `undefined reference to 'entrypoint'`                          | The application has no `@c(entrypoint) func entrypoint()`.                                                                                                 |
+| `no such module` for a library                                 | The application's `Package.swift` does not depend on the library's target or product.                                                                      |
+| Package resolution fails                                       | A dependency cannot be fetched. Check the network, or build with `-DZEPHYR_SWIFT_OFFLINE=ON` from a committed `Package.resolved`, with the sources cached. |
+| Noctule log: `Invalid manifest` and `Argument list too long`   | Noctule runs Xcode's Swift. Select the swift.org toolchain in its settings and reload the project.                                                         |
+| Noctule cannot resolve `Zephyr` or `ZephyrSystem` declarations | The triple and toolset are not set, or the headers are missing. See [Using CLion](#using-clion).                                                           |
+| Stale Swift errors after moving a build                        | `.build/swift` holds SwiftPM's state for the old paths. Rebuild with `west build -p`.                                                                      |
+| A header edit changes nothing                                  | SwiftPM does not rebuild when only a `ZephyrSystem` header changes. Edit a Swift file too, or `west build -p`.                                             |
+| `'--build-system native' has been deprecated`                  | Expected: SwiftPM's default build system cannot archive ELF objects yet (see `ZEPHYR_SWIFT_BUILD_SYSTEM`).                                                 |
 
 ## License
 

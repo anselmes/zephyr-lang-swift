@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrSystem
+import ZephyrCore
 
 // MARK: - Extension
 
 extension Duration: TimeoutConvertible {}
 
-// MARK: - Public
+// MARK: - Public API
 
 public extension Duration {
   /// The duration in whole kernel ticks, rounded to the nearest tick (integer

@@ -2,7 +2,7 @@
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
 import Zephyr
-import ZephyrCore
+import ZephyrSystem
 
 /// The C `main` that Zephyr calls once the kernel is up.
 ///

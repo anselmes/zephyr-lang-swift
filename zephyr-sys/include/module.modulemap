@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2025 Schubert Anselme <schubert@anselm.es>
 
-// Clang module map for ZephyrCore: the Zephyr C APIs and the C functions
-// implemented in Swift, as declared in ZephyrCore.h. Package.swift exposes
-// it as the ZephyrCore system library target.
-module ZephyrCore {
-  umbrella header "ZephyrCore.h"
+// Clang module map for ZephyrSystem: the Zephyr C APIs and the C functions
+// implemented in Swift, as declared in ZephyrSystem.h. Package.swift exposes
+// it as the ZephyrSystem system library target.
+module ZephyrSystem {
+  umbrella header "ZephyrSystem.h"
   export *
 }

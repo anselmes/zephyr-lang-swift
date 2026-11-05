@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
 
-import ZephyrCore
+import ZephyrSystem
 
 /// Logs `msg` to Zephyr's `swift` log module: `LOG_ERR("%s", msg)` and the
 /// other `LOG_*` macros, written in Swift.
