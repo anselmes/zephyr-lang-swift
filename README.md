@@ -35,7 +35,7 @@ A Zephyr module that lets you write applications and libraries in Embedded Swift
    export TOOLCHAINS=swift
    ```
 
-2. A Zephyr workspace with the Zephyr SDK and its LLVM toolchain (`ZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm`). The module was built and run with Zephyr SDK 1.0.1.
+2. A Zephyr workspace with the Zephyr SDK and its LLVM toolchain (`ZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm`). The module was built and run with Zephyr SDK 1.0.1. Espressif boards (ESP32-C6) need the SDK's GNU toolchain instead, because the Espressif HAL passes `-fstrict-volatile-bitfields`, which Clang rejects: install it with `west sdk install --gnu-toolchains riscv64-zephyr-elf` and set `ZEPHYR_TOOLCHAIN_VARIANT=zephyr`.
 3. CMake 3.29 or later, `west`, and Git. SwiftPM comes with the Swift toolchain.
 
 ## Installation
