@@ -80,18 +80,17 @@
     ///   at the end of the file.
     /// - Throws: The error `fs_read` returned.
     func read(into buffer: inout MutableRawSpan) throws(ZephyrError) -> Int {
-      try buffer.withUnsafeMutableBytes { (raw) throws(ZephyrError) -> Int in
-        var offset = 0
-        while offset < raw.count, let base = raw.baseAddress {
-          // SAFETY: offset < raw.count, so at most raw.count - offset bytes
-          // are written, all inside `buffer`.
-          let count = unsafe fs_read(handle, base + offset, raw.count - offset)
-          guard count >= 0 else { throw ZephyrError(errno: Int32(-count)) }
-          if count == 0 { break }
-          offset += count
-        }
-        return offset
+      var offset = 0
+      while offset < buffer.byteCount {
+        var rest = buffer._mutatingExtracting(droppingFirst: offset)
+        // SAFETY: `handle` is open until `deinit`; the span bounds the write to
+        // the unread part of `buffer`.
+        let count = unsafe zephyr_fs_read(handle, &rest)
+        guard count >= 0 else { throw ZephyrError(errno: Int32(-count)) }
+        if count == 0 { break }
+        offset += count
       }
+      return offset
     }
 
     /// Writes all of `bytes` (`fs_write`).
@@ -100,15 +99,13 @@
     /// - Throws: The error `fs_write` returned; `.noMemory` when the volume is
     ///   full.
     func write(_ bytes: RawSpan) throws(ZephyrError) {
-      try bytes.withUnsafeBytes { (raw) throws(ZephyrError) in
-        var offset = 0
-        while offset < raw.count, let base = raw.baseAddress {
-          // SAFETY: offset < raw.count, so at most raw.count - offset bytes
-          // are read, all inside `bytes`.
-          let count = unsafe fs_write(handle, base + offset, raw.count - offset)
-          guard count > 0 else { throw count < 0 ? ZephyrError(errno: Int32(-count)) : .noMemory }
-          offset += count
-        }
+      var offset = 0
+      while offset < bytes.byteCount {
+        // SAFETY: `handle` is open until `deinit`; the span bounds the read to
+        // the unwritten part of `bytes`.
+        let count = unsafe zephyr_fs_write(handle, bytes.extracting(droppingFirst: offset))
+        guard count > 0 else { throw count < 0 ? ZephyrError(errno: Int32(-count)) : .noMemory }
+        offset += count
       }
     }
   }

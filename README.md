@@ -22,7 +22,7 @@ A Zephyr module that lets you write applications and libraries in Embedded Swift
 - **Kconfig options**: `CONFIG_SWIFT` turns Swift support on, and `CONFIG_SWIFT_DEBUG_INFO` defines `SWIFT_DEBUG_INFO` for `#if` blocks in Swift code.
 - **Runtime support** (`ZephyrCore`): `posix_memalign` on top of the libc's `aligned_alloc`, which the Embedded Swift runtime calls for every heap allocation, and thin wrappers over the kernel (`Kernel`, `k_timeout_t` helpers).
 - **Zephyr library** (`Zephyr`): `Duration`, `Timeout`, `Instant`, `sleep(_:)` and `Log`.
-- **Kernel wrappers** (`ZephyrCore`): `Kernel`, `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw, and, when their Kconfig option is on, `FileSystem`, `Directory` and `File` (`CONFIG_FILE_SYSTEM`), `CRC32` (`CONFIG_CRC`), and `Thread` (`CONFIG_DYNAMIC_THREAD`), plus `AtomicFlag`. Buffers are passed as `RawSpan` and `MutableRawSpan`.
+- **Kernel wrappers** (`ZephyrCore`): `Kernel`, `ZephyrError` with `check(_:)`, which turns a `-errno` return code into a typed throw, and, when their Kconfig option is on, `FileSystem`, `Directory` and `File` (`CONFIG_FILE_SYSTEM`), `CRC32` (`CONFIG_CRC`), and `Thread` (`CONFIG_DYNAMIC_THREAD`), plus `AtomicFlag`. Buffers are passed as `Span`, `RawSpan` and `MutableRawSpan`: `sys.h` wraps `fs_read`, `fs_write` and `crc32_ieee_update` with bounds annotations, so Swift imports them as spans.
 - **C interoperability** (`ZephyrSystem`): a Clang module exposes the Zephyr C APIs to Swift, and C functions can be implemented in Swift with `@c @implementation`.
 - **Claude Code plugin** (`plugins/`): scaffolds a project, an application or a library.
 

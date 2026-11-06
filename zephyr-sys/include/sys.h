@@ -13,6 +13,48 @@
 extern "C" {
 #endif
 
+// Bounds annotations from clang's <ptrcheck.h>. Swift imports a pointer that
+// carries them, together with its length parameter, as a `Span` or
+// `MutableRawSpan`. They expand to nothing where the header is missing.
+#if __has_include(<ptrcheck.h>)
+#include <ptrcheck.h>
+#define ZEPHYR_COUNTED_BY(n) __counted_by(n)
+#define ZEPHYR_SIZED_BY(n) __sized_by(n)
+#define ZEPHYR_NOESCAPE __attribute__((noescape))
+#else
+#define ZEPHYR_COUNTED_BY(n)
+#define ZEPHYR_SIZED_BY(n)
+#define ZEPHYR_NOESCAPE
+#endif
+
+#if defined(CONFIG_CRC)
+// `crc32_ieee_update` with the length attached to the buffer, so Swift calls it
+// with a `Span<UInt8>` instead of a pointer and a count.
+static inline uint32_t zephyr_crc32_ieee_update(
+    uint32_t crc, const uint8_t *ZEPHYR_COUNTED_BY(len) ZEPHYR_NOESCAPE data,
+    size_t len) {
+  return crc32_ieee_update(crc, data, len);
+}
+#endif
+
+#if defined(CONFIG_FILE_SYSTEM)
+// `fs_read` and `fs_write` with the size attached to the buffer, so Swift calls
+// them with a `MutableRawSpan` and a `RawSpan`.
+static inline ssize_t zephyr_fs_read(struct fs_file_t *zfp,
+                                     void *ZEPHYR_SIZED_BY(size)
+                                         ZEPHYR_NOESCAPE ptr,
+                                     size_t size) {
+  return fs_read(zfp, ptr, size);
+}
+
+static inline ssize_t zephyr_fs_write(struct fs_file_t *zfp,
+                                      const void *ZEPHYR_SIZED_BY(size)
+                                          ZEPHYR_NOESCAPE ptr,
+                                      size_t size) {
+  return fs_write(zfp, ptr, size);
+}
+#endif
+
 // `k_panic()` is a function-like macro, which Swift cannot import. This inline
 // wrapper gives Swift a real function to call.
 static inline void zephyr_panic(void) { k_panic(); }
