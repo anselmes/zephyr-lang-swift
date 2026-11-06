@@ -55,5 +55,6 @@
 
 // ===== Zephyr Core Imports =====
 
-#include "log.h"  // NOLINT(build/include_subdir)
-#include "sys.h"  // NOLINT(build/include_subdir)
+#include "bounds.h"  // NOLINT(build/include_subdir)
+#include "log.h"     // NOLINT(build/include_subdir)
+#include "sys.h"     // NOLINT(build/include_subdir)

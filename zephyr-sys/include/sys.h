@@ -9,22 +9,10 @@
 
 #pragma once
 
+#include "bounds.h"  // NOLINT(build/include_subdir)
+
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-// Bounds annotations from clang's <ptrcheck.h>. Swift imports a pointer that
-// carries them, together with its length parameter, as a `Span` or
-// `MutableRawSpan`. They expand to nothing where the header is missing.
-#if __has_include(<ptrcheck.h>)
-#include <ptrcheck.h>
-#define ZEPHYR_COUNTED_BY(n) __counted_by(n)
-#define ZEPHYR_SIZED_BY(n) __sized_by(n)
-#define ZEPHYR_NOESCAPE __attribute__((noescape))
-#else
-#define ZEPHYR_COUNTED_BY(n)
-#define ZEPHYR_SIZED_BY(n)
-#define ZEPHYR_NOESCAPE
 #endif
 
 #if defined(CONFIG_CRC)
@@ -77,7 +65,7 @@ void swift_panic_wrap(void);
 // the other `LOG_*` macros. Implemented in zephyr-sys/src/log.swift. Does
 // nothing when `CONFIG_LOG` is off or `CONFIG_LOG_MODE_MINIMAL` is on. C code
 // may call it too.
-void zephyr_log(uint32_t level, const char *msg);
+void zephyr_log(uint32_t level, const char *ZEPHYR_NULL_TERMINATED msg);
 
 // The application's entry point, which every Swift application implements with
 // `@c(entrypoint) func entrypoint()`. The C `main` in

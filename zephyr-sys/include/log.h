@@ -103,7 +103,9 @@ static inline bool zephyr_swift_log_enabled(uint32_t level) {
 // them for a runtime message, so that CONFIG_LOG_USE_TAGGED_ARGUMENTS, which
 // needs every argument preceded by its type tag, and CONFIG_LOG_FMT_SECTION,
 // which keeps the format string in a dedicated section, work too.
-static inline void zephyr_swift_log_message(uint32_t level, const char *msg) {
+static inline void
+zephyr_swift_log_message(uint32_t level,
+                         const char *ZEPHYR_NULL_TERMINATED msg) {
   Z_LOG_MSG_STR_VAR(_fmt, "%s", msg)
   z_log_msg_runtime_create(
       Z_LOG_LOCAL_DOMAIN_ID, zephyr_swift_log_source(), (uint8_t)level, NULL, 0,
@@ -119,7 +121,9 @@ static inline bool zephyr_swift_log_enabled(uint32_t level) {
   return false;
 }
 
-static inline void zephyr_swift_log_message(uint32_t level, const char *msg) {
+static inline void
+zephyr_swift_log_message(uint32_t level,
+                         const char *ZEPHYR_NULL_TERMINATED msg) {
   (void)level;
   (void)msg;
 }
