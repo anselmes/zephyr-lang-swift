@@ -28,6 +28,7 @@
     /// - Throws: `.exists` when it already exists, or the error `fs_mkdir`
     ///   returned.
     static func makeDirectory(_ path: String) throws(ZephyrError) {
+      // SAFETY: `withCString` gives a NUL-terminated path that outlives the call.
       try check(path.withCString { unsafe fs_mkdir($0) })
     }
 
@@ -39,6 +40,7 @@
     ///   returned.
     static func entry(at path: String) throws(ZephyrError) -> DirectoryEntry {
       var entry: fs_dirent = .init()
+      // SAFETY: NUL-terminated path outlives the call; `&entry` is one `fs_dirent`.
       try check(path.withCString { unsafe fs_stat($0, &entry) })
       return .init(entry)
     }
@@ -47,6 +49,7 @@
     ///
     /// - Parameter path: The entry to remove.
     static func remove(_ path: String) throws(ZephyrError) {
+      // SAFETY: `withCString` gives a NUL-terminated path that outlives the call.
       try check(path.withCString { unsafe fs_unlink($0) })
     }
   }

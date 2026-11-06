@@ -18,6 +18,8 @@ import ZephyrSystem
   private let storage: UnsafeMutablePointer<atomic_t>
 
   deinit {
+    // SAFETY: `storage` was allocated and initialized in `init()`, and this
+    // value is its only owner.
     unsafe storage.deinitialize(count: 1)
     unsafe storage.deallocate()
   }
@@ -28,23 +30,27 @@ import ZephyrSystem
 public extension AtomicFlag {
   /// Whether the flag is set (`atomic_get`).
   var isSet: Bool {
+    // SAFETY: `storage` stays allocated for the life of `self`.
     unsafe atomic_get(storage) != 0
   }
 
   /// Creates a cleared flag.
   init() {
     let storage = UnsafeMutablePointer<atomic_t>.allocate(capacity: 1)
+    // SAFETY: freshly allocated for one `atomic_t`, initialized before use.
     unsafe storage.initialize(to: 0)
     unsafe self.storage = storage
   }
 
   /// Sets the flag (`atomic_set`).
   func set() {
+    // SAFETY: `storage` stays allocated for the life of `self`.
     _ = unsafe atomic_set(storage, 1)
   }
 
   /// Clears the flag (`atomic_set`).
   func clear() {
+    // SAFETY: `storage` stays allocated for the life of `self`.
     _ = unsafe atomic_set(storage, 0)
   }
 }
