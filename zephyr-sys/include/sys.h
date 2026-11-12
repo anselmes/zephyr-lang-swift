@@ -47,6 +47,12 @@ static inline ssize_t zephyr_fs_write(struct fs_file_t *zfp,
 // wrapper gives Swift a real function to call.
 static inline void zephyr_panic(void) { k_panic(); }
 
+// `irq_lock()` and `irq_unlock()` are macros, which Swift cannot import. The
+// atomic library calls in zephyr-sys/src/atomics.swift use these wrappers to
+// mask interrupts around each read-modify-write.
+static inline unsigned int zephyr_irq_lock(void) { return irq_lock(); }
+static inline void zephyr_irq_unlock(unsigned int key) { irq_unlock(key); }
+
 // POSIX aligned allocation, implemented in zephyr-sys/src/malloc.swift. The
 // Embedded Swift runtime calls it for every heap allocation. It is built on
 // `aligned_alloc` from Zephyr's common libc malloc.

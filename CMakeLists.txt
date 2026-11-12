@@ -253,6 +253,32 @@ function(_swift_write_if_changed path content)
   file(RENAME "${tmp}" "${path}")
 endfunction()
 
+# Set SWIFT_ARCH_OPTIONS in the parent scope to the plain Clang options that
+# select the ISA and ABI the application's C code is compiled for. Swift does
+# not read Zephyr's compiler flags: without them it targets its own default
+# for the triple (riscv32 includes the M, A and C extensions), so Swift code
+# can contain multiplies, atomics and 16-bit compressed instructions that a
+# core without them (Nios V/m is rv32i) traps on as illegal instructions, even
+# though Zephyr's C code runs. Zephyr computes these two values from Kconfig in
+# cmake/compiler/gcc/target_riscv.cmake; reuse them so that Swift always agrees
+# with the C code and the kernel.
+function(_swift_arch_options)
+  set(options "")
+  if(CONFIG_RISCV)
+    if(riscv_march AND riscv_mabi)
+      list(APPEND options "-march=${riscv_march}" "-mabi=${riscv_mabi}")
+      message(STATUS "Swift: ISA ${riscv_march}, ABI ${riscv_mabi}")
+    else()
+      message(
+        WARNING "Swift: riscv_march/riscv_mabi are not set; Swift uses its "
+                "default ISA for ${SWIFT_TARGET}, which may not match the core")
+    endif()
+  endif()
+  set(SWIFT_ARCH_OPTIONS
+      "${options}"
+      PARENT_SCOPE)
+endfunction()
+
 # Write the SwiftPM toolset for this build to `path`: the target options every
 # Swift module is compiled with, and the Zephyr SDK's llvm-ar for archives. All
 # modules get the same Clang options, so they share one build of the
@@ -260,6 +286,14 @@ endfunction()
 function(_swift_write_toolset path)
   _swift_sysroot_flags()
   _swift_defines()
+  _swift_arch_options()
+
+  # The same options for swiftc (through -Xcc) and for the C and C++ targets of
+  # a package.
+  set(swift_arch_options "")
+  foreach(option IN LISTS SWIFT_ARCH_OPTIONS)
+    list(APPEND swift_arch_options "-Xcc" "${option}")
+  endforeach()
 
   # The directories that modules registered with
   # zephyr_swift_include_directories(), as -Xcc options for Swift and plain
@@ -305,6 +339,7 @@ function(_swift_write_toolset path)
       "-Xcc"
       "${CMAKE_BINARY_DIR}/zephyr/include/generated/zephyr/autoconf.h"
       ${SWIFT_SYSROOT_FLAGS}
+      ${swift_arch_options}
       ${extra_options})
 
   # SwiftPM does not hand the Swift compiler's -Xcc options on to the C and C++
@@ -319,6 +354,7 @@ function(_swift_write_toolset path)
       ${SWIFT_SYSROOT_FLAGS})
   list(APPEND c_options ${extra_c_options})
   list(FILTER c_options EXCLUDE REGEX "^-Xcc$")
+  list(APPEND c_options ${SWIFT_ARCH_OPTIONS})
   # Zephyr compiles its C and C++ with the kernel configuration loaded as macros
   # (-imacros autoconf.h). Do the same, or a dependency that includes Zephyr
   # headers sees no CONFIG_* symbols and can lay a type out differently from the
