@@ -1,7 +1,7 @@
 # Agent and Contributor Guide
 
 This file is the engineering guide for `__name__`, for people and for coding agents alike. `CLAUDE.md` is a symlink to it, so there is exactly
-one copy. Change the rules here. Anything not stated here follows the owner's global guide (`~/.claude/AGENTS.md`).
+one copy. Change the rules here. Anything not stated here follows the owner's global guide (`~/.claude/AGENTS.md`), where present.
 
 ## What this repository is
 
@@ -27,12 +27,12 @@ __description__ It is an Embedded Swift application on Zephyr RTOS, built on the
   // Copyright (c) __year__ __author__
   ```
 
-- **Commits**: conventional commits (`feature`, not `feat`), `!` for breaking changes. Every commit is GPG-signed (`git commit -S`); never bypass
-  signing. Commits Claude wrote carry `Co-authored-by: Claude <81847+claude@users.noreply.github.com>`.
+- **Commits**: conventional commits (`feature`, not `feat`), `!` for breaking changes. Every commit is GPG-signed (`git commit -S`) and signed off (`git commit -s`, the DCO `Signed-off-by` trailer); never bypass
+  either. Commits Claude wrote carry `Co-authored-by: Claude <81847+claude@users.noreply.github.com>`.
 - **Swift**: 6.4, Embedded Swift: no `async`/`await`, actors, `Codable` or existentials; no heap in ISRs. One type per file. Typed throws
   (`throws(E)`), never `Result`; wrap `-errno` returns with `try check(_:)`. Implicit member syntax where the type is inferable.
   Annotate unsafe pointer use with `// SAFETY:`. Format with `swift format` and `trunk fmt`.
-- **Configuration**: board and toolchain come from `.env` (copy `app/.env.example`); never commit `.env`, keys or certificates.
+- **Configuration**: board and toolchain come from `.env` (copy `app/example.env`); never commit `.env`, keys or certificates.
 - **Swift packages**: `west build` builds the Swift code with SwiftPM. Manifests hold only the Embedded Swift `settings`, declared before
   `package`; never add `unsafeFlags`, `platforms` or include paths, which zephyr-lang-swift's CMake writes to the build's toolset. Commit
   `Package.resolved` when a manifest uses a package by URL. To iterate on Swift alone: `west build -d .build -t swift_build`, then
@@ -44,7 +44,7 @@ __description__ It is an Embedded Swift application on Zephyr RTOS, built on the
 west init -l .
 west update
 west build -p -d .build -b __board__ app
-west twister -T tests
+west twister -T app
 ```
 
 The build must succeed, and the tests pass, without new warnings before a PR merges.

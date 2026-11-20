@@ -20,7 +20,7 @@ manifest:
       revision: __zephyr-rev__
       import:
         name-allowlist:
-          - __hal-module__ # repeat this line for each HAL module the board needs
+          - __hal-module__ # repeat this line for each HAL module the board needs; remove it when the board needs none
           - picolibc # Built as a module so headers are visible to Swift
     # Declared here, not imported: the Zephyr fork keeps Swift in its disabled `optional` group at `main`.
     - name: zephyr-lang-swift

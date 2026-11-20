@@ -6,11 +6,11 @@ and the `anselmes/repository` template fetched from GitHub with this kit's tooli
 
 ## Features
 
-| Skill         | Scaffolds                                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `new-project` | A standalone Swift application repository: `west.yml`, `app/`, `AGENTS.md`, CI that builds with `west`                      |
-| `add-app`     | An application in an existing project: `Package.swift`, `CMakeLists.txt`, `prj.conf`, `sample.yaml`, `.env.example`, `src/` |
-| `add-library` | A library module: its `Kconfig` symbol, `CMakeLists.txt`, `zephyr/module.yml` entry and Swift sources                       |
+| Skill         | Scaffolds                                                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `new-project` | A standalone Swift application repository: `west.yml`, `app/`, `AGENTS.md`, CI that builds with `west`                     |
+| `add-app`     | An application in an existing project: `Package.swift`, `CMakeLists.txt`, `prj.conf`, `sample.yaml`, `example.env`, `src/` |
+| `add-library` | A library module: its `Kconfig` symbol, `CMakeLists.txt`, `zephyr/module.yml` entry and Swift sources                      |
 
 Each skill infers what it can from the project it runs in (`west.yml`, the Git remote, `hack/copyright.txt`) and asks once for the rest.
 Generated code is built with `west build` when `west` and the SDK are present; nothing is committed.
@@ -31,13 +31,14 @@ Generated code is built with `west build` when `west` and the SDK are present; n
 
 ## Usage
 
-Ask for what you want, such as "create a new Zephyr Swift project called blinky" or "add a sensor library", or invoke a skill directly,
+Ask for what you want, such as "create a new Zephyr Swift project called blinky" or "add a ledstrip library", or invoke a skill directly,
 such as `/zephyr-swift:add-app`.
 
 ## Development
 
 This directory is the plugin root. Each skill is `skills/<name>/SKILL.md` with its own `references/` and `templates/`; `references/` at
 the plugin root holds what every skill shares. Templates use `__token__` placeholders, listed in `references/conventions.md`.
+Bump `version` in `.claude-plugin/plugin.json` and in each skill's `SKILL.md` together.
 Check a change by following the skill into a scratch directory and running `west build` on the result against this checkout.
 
 ## License

@@ -1,6 +1,6 @@
 {
   "name": "zephyr-swift",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scaffold Embedded Swift on Zephyr RTOS: a new application repository, and in an existing project an application or a library module, built on the zephyr-lang-swift module.",
   "author": {
     "name": "Schubert Anselme",
