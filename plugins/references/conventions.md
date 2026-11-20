@@ -22,7 +22,7 @@ Infer every input before asking. Read, in order:
 3. `hack/copyright.txt`, or else the SPDX header of an existing source file: the license and the copyright line. With neither, use `GPL-3.0`
    and the Git `user.name` and `user.email`.
 4. Existing sources: the application and library directories, Kconfig symbols and module names already used.
-5. `.env` or `.env.example`: the board (`ZEPHYR_BOARD`).
+5. `.env` or `example.env`: the board (`ZEPHYR_BOARD`).
 
 Ask only for what is still missing, in a single `AskUserQuestion` round, offering the inferred value as the first, recommended option.
 Never ask follow-up questions one at a time. If something an input depends on cannot be found locally or with `gh repo view`, ask for its path
@@ -112,7 +112,7 @@ must not have), then `swift format lint --strict` and `swift package describe`.
   under `add_subdirectory_ifdef`. Apps enable it with `CONFIG___MODULE__=y` in `prj.conf`, depend on its product in their `Package.swift`, and see its
   Kconfig option through `ZEPHYR_EXTRA_MODULES`.
 - `prj.conf` always has `CONFIG_SWIFT=y`, `CONFIG_MINIMAL_LIBC=y` and a nonzero `CONFIG_COMMON_LIBC_MALLOC_ARENA_SIZE`.
-- Board, toolchain and paths come from environment variables in `.env` (copied from `.env.example`, git-ignored); never hard-code them.
+- Board, toolchain and paths come from environment variables in `.env` (copied from `example.env`, git-ignored); never hard-code them.
 - `.env`, keys and certificates are never committed.
 
 ## Formatting

@@ -6,8 +6,8 @@
 | ----------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
 | `templates/CMakeLists.txt`                | `__app__/CMakeLists.txt`       | Fill `__extra-modules__` (below)                                                     |
 | `templates/prj.conf`                      | `__app__/prj.conf`             | Fill `__library-configs__`                                                           |
-| `templates/sample.yml`                    | `__app__/sample.yaml`          | Twister metadata (it only finds `sample.yaml`); `build_only` until Ztest cases exist |
-| `templates/env.example`                   | `__app__/.env.example`         | Copy as `.env.example`; skip if a project-level one exists                           |
+| `templates/sample.yaml`                   | `__app__/sample.yaml`          | Twister metadata (it only finds `sample.yaml`); `build_only` until Ztest cases exist |
+| `templates/example.env`                   | `__app__/example.env`          | Copy to `.env`; skip if the project root already has an `example.env`               |
 | `templates/src/Entrypoint.swift.template` | `__app__/src/Entrypoint.swift` | Fill `__library-imports__`                                                           |
 | `templates/Package.swift.template`        | `__app__/Package.swift`        | Fill `__library-package__` and `__library-products__`                                |
 

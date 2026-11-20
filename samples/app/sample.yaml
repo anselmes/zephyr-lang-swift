@@ -10,7 +10,7 @@
 #
 # There is no `tests:` section, so `west twister` has nothing to run for this
 # sample yet. Build and run it by hand, for example
-# `west build -p -t run` with the environment from .env.example.
+# `west build -p -t run` with the environment from example.env.
 
 sample:
   name: Swift Application Sample

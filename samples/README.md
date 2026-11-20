@@ -31,19 +31,19 @@ Three samples show how to build Swift applications and libraries for Zephyr with
 3. This repository registered as a Zephyr module in that workspace. The samples do not register it: without it `CONFIG_SWIFT` and `zephyr_swift_application()` do not exist. Add it to the west manifest first, then enable the `optional` group and fetch it (`west config manifest.group-filter -- +optional`, `west update zephyr-lang-swift`), as described in [Add through the west manifest](../doc/README.md#add-through-the-west-manifest).
 4. A board, physical or emulated. The samples use QEMU.
 
-The samples read the board and toolchain from environment variables. Copy `.env.example` to `.env` in the application directory, adjust `ZEPHYR_WORKSPACE`, and source it:
+The samples read the board and toolchain from environment variables. Copy `example.env` to `.env` in the application directory, adjust `ZEPHYR_WORKSPACE`, and source it:
 
 ```bash
 cd samples/app
-cp .env.example .env
+cp example.env .env
 source .env
 ```
 
-The combined sample is its own application, so its `.env.example` sits next to its `CMakeLists.txt`:
+The combined sample is its own application, so its `example.env` sits next to its `CMakeLists.txt`:
 
 ```bash
 cd samples/app+lib
-cp .env.example .env
+cp example.env .env
 source .env
 ```
 
@@ -162,4 +162,4 @@ To start a library, copy the whole module (`app+lib/zephyr/module.yml` and `app+
 | `BOARD is not being defined`                    | Neither `ZEPHYR_BOARD` nor `-b <board>` gave a board. Source `.env`, or pass `-b <board>`.        |
 | `no such module 'Hello'`                        | The application's `Package.swift` does not depend on the `Hello` target or product.               |
 | `could not build C module 'ZephyrSystem'`       | Zephyr has not generated its headers yet. Build with `west build`, not `swift build` alone.       |
-| `west twister -T samples/` finds nothing        | The `sample.yml` files have no `tests:` section yet, so twister has no test cases to run.         |
+| `west twister -T samples/` finds nothing        | The `sample.yaml` files have no `tests:` section yet, so twister has no test cases to run.         |

@@ -48,7 +48,7 @@ git clone https://github.com/anselmes/zephyr-lang-swift modules/lang/swift
 
 Then make Zephyr find it, in one of two ways.
 
-**From your application.** Set `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`, before `find_package(Zephyr)`. The clone lives in the Zephyr workspace, not beside the application, so the path starts at `ZEPHYR_WORKSPACE` (set by the samples' `.env.example`); replace it with the checkout's location if you keep the clone elsewhere:
+**From your application.** Set `ZEPHYR_EXTRA_MODULES` in the application's `CMakeLists.txt`, before `find_package(Zephyr)`. The clone lives in the Zephyr workspace, not beside the application, so the path starts at `ZEPHYR_WORKSPACE` (set by the samples' `example.env`); replace it with the checkout's location if you keep the clone elsewhere:
 
 ```cmake
 set(ZEPHYR_EXTRA_MODULES $ENV{ZEPHYR_WORKSPACE}/modules/lang/swift)
@@ -166,7 +166,7 @@ west update zephyr-lang-swift
    west build -p -t run
    ```
 
-`samples/` has working versions of all of this, including the `.env.example` that sets the board and toolchain. See [samples/README.md](samples/README.md).
+`samples/` has working versions of all of this, including the `example.env` that sets the board and toolchain. See [samples/README.md](samples/README.md).
 
 ### A library
 
@@ -337,7 +337,7 @@ Check a change by building both buildable samples:
 CLion with the Noctule Swift plugin gives completion, navigation and diagnostics for the Swift sources. Building and running stay with `west`, through CLion's West run configuration. Noctule's own build tasks stay off ("Run `swift build` or `xcodebuild` for project build tasks" unchecked), because only `west build` knows the Zephyr configuration.
 
 1. Install a Swift 6.4+ toolchain from swift.org, for example with swiftly. Xcode's Swift lacks the Embedded Swift backends.
-2. In Settings, open Build, Execution, Deployment, then Embedded Development, then West. Point West executable at the `west` of your Zephyr workspace's virtual environment, set Build directory to `.build`, and set Build options to `-- -DZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm`. Board name can stay on Let CMake decide. The samples take the board and the swift.org toolchain from environment variables, as `.env.example` shows, so CLion's West builds need `ZEPHYR_BOARD` and `TOOLCHAINS=swift` too.
+2. In Settings, open Build, Execution, Deployment, then Embedded Development, then West. Point West executable at the `west` of your Zephyr workspace's virtual environment, set Build directory to `.build`, and set Build options to `-- -DZEPHYR_TOOLCHAIN_VARIANT=zephyr/llvm`. Board name can stay on Let CMake decide. The samples take the board and the swift.org toolchain from environment variables, as `example.env` shows, so CLion's West builds need `ZEPHYR_BOARD` and `TOOLCHAINS=swift` too.
 3. Generate the build directory and Zephyr's headers once, as in [Working on Swift code](#working-on-swift-code). Repeat the `swift_build` target after every `west build -p`, which deletes `.build`.
 4. Open the application directory, such as `samples/app`, as a CMake project. When CLion offers two project configurations, choose CMake. Opening the same directory as a Noctule project did not work. Noctule still indexes the Swift sources of a CMake project.
 5. In Settings, open Build, Execution, Deployment, then Noctule, the Swift IDE. Select the swift.org toolchain as the default Swift toolchain, not the one inside Xcode.

@@ -123,7 +123,7 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
 - **Style**: use implicit member syntax (`.noWait`, `.init(ticks:)`) wherever the type is inferable. It does not apply to namespaces such as `Kernel`
   or to arguments of generic parameters such as `sleep(_:)`.
 - **Documentation**: every public symbol has a DocC comment. Keep `README.md` and `doc/` in step with the code in the same PR.
-- **Secrets**: never commit keys, certificates or `.env` files; samples ship `.env.example` only.
+- **Secrets**: never commit keys, certificates or `.env` files; samples ship `example.env` only.
 
 ## Errors and time
 

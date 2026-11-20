@@ -57,4 +57,4 @@ fastlane/test_output
 
 
 # Exceptions
-!.env.example
+!example.env

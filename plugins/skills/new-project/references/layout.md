@@ -13,7 +13,7 @@ __name__/
 │   ├── CMakeLists.txt
 │   ├── prj.conf
 │   ├── sample.yaml
-│   ├── .env.example
+│   ├── example.env
 │   └── src/Entrypoint.swift
 ├── lib/                     # from add-library (empty until the first library)
 ├── tests/                   # Ztest/Twister cases

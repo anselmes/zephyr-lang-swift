@@ -2,7 +2,7 @@
 name: add-app
 description: >
   Add a Swift application to a Zephyr project built on zephyr-lang-swift: a Package.swift, a CMake project
-  with zephyr_swift_application(), prj.conf, sample.yaml, .env.example and a src/Entrypoint.swift with the
+  with zephyr_swift_application(), prj.conf, sample.yaml, example.env and a src/Entrypoint.swift with the
   @c(entrypoint) function. Use when the user wants a new app, application, firmware image or board target
   in a Zephyr Swift project, or says "add an app".
 license: GPL-3.0
@@ -27,7 +27,7 @@ Infer what you can, then ask the user one combined question listing every missin
 
 - **Directory and name**: `__app__` (default `app`; may be nested, such as `apps/blinky`) and `__project__`, its basename with any character outside `[A-Za-z0-9_]` replaced by `_`. CMake derives target names from the project name, so it must not contain a slash. Stop if the directory exists and is not empty.
 - **Title**: a human-readable name for `sample.yaml` and the greeting (`__Title__`). Any text is allowed, so never insert it raw: `sample.yaml` takes `__Title-yaml__` and the greeting takes `__Title-swift__`, each escaping backslashes and double quotes for its own syntax and refusing newlines.
-- **Board**: `__board__`, from `.env`/`.env.example` if present; otherwise ask.
+- **Board**: `__board__`, from `.env`/`example.env` if present; otherwise ask.
 - **Libraries**: which of the project's `lib/` modules the app enables (their `CONFIG___MODULE__` symbols and `import` names);
   list them from `lib/Kconfig`. None is fine.
 - **License, author, year**: from `hack/copyright.txt` or an existing source file.
@@ -35,7 +35,7 @@ Infer what you can, then ask the user one combined question listing every missin
 ## 3. Write it
 
 Fill the templates in `templates/` as `references/app.md` describes, honoring the project's `.editorconfig` (see conventions). Replace every `__token__`; the output must contain none.
-Do not overwrite `.env`; only create `.env.example` when missing and tell the user to copy it.
+Do not overwrite `.env`; only create `example.env` when missing and tell the user to copy it.
 
 ## 4. Verify
 

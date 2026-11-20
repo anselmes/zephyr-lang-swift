@@ -9,7 +9,7 @@
 # which prj.conf enables with CONFIG_HELLO=y. The application is the Swift code
 # in src/; Package.swift describes both.
 #
-# Environment variables read here (all set by .env.example): ZEPHYR_BOARD Board
+# Environment variables read here (all set by example.env): ZEPHYR_BOARD Board
 # to build for unless `west build -b` gives one, for example
 # qemu_riscv32/qemu_virt_riscv32/smp ZEPHYR_TOOLCHAIN_VARIANT  zephyr/llvm for
 # the Zephyr SDK's LLVM toolchain ZEPHYR_BASE               Zephyr tree, set by
