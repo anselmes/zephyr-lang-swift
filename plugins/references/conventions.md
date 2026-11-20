@@ -36,33 +36,37 @@ remembered or placeholder value.
 
 ## Tokens
 
-Templates use `__token__` placeholders. Replace every one; none may remain in the output (`grep -rnE '__[a-zA-Z0-9_-]+__' . | grep -v '"__copyright__"'` must find nothing; the `.swift-format` key `__copyright__` is a real key, not a token).
+Templates use `__token__` placeholders. Replace every one; none may remain in the files you created or edited (`grep -nE '__[a-zA-Z0-9_-]+__'` on them, minus the `.swift-format` key `__copyright__`, which is a real key, must find nothing; do not scan `.build/` or other generated directories).
 
-| Token               | Meaning                                                                      | Example                                 |
-| ------------------- | ---------------------------------------------------------------------------- | --------------------------------------- |
-| `__name__`          | Repository name                                                              | `blinky`                                |
-| `__NAME__`          | Repository name, uppercase, `_` for `-`: the prefix of `__NAME___LOCAL_DEPS` | `BLINKY`                                |
-| `__dir__`           | Directory the repository is created in                                       | `./firmware`                            |
-| `__owner__`         | GitHub owner                                                                 | `anselmes`                              |
-| `__app__`           | Application directory, relative to the project root                          | `app`, `apps/blinky`                    |
-| `__project__`       | CMake project name: `__app__`'s basename, `[A-Za-z0-9_]`                     | `app`, `blinky`                         |
-| `__Module__`        | Swift module name of a library, `UpperCamelCase`                             | `Sensor`                                |
-| `__module__`        | Directory name of a library, lowercase                                       | `sensor`                                |
-| `__MODULE__`        | Kconfig symbol, uppercase, no `CONFIG_` prefix                               | `SENSOR`                                |
-| `__board__`         | Zephyr board identifier                                                      | `esp32c6_devkitc`                       |
-| `__year__`          | Copyright year                                                               | `2026`                                  |
-| `__author__`        | Author name and email                                                        | `Schubert Anselme <schubert@anselm.es>` |
-| `__license__`       | SPDX license identifier                                                      | `GPL-3.0`                               |
-| `__zephyr-rev__`    | Zephyr revision, looked up                                                   | a release tag                           |
-| `__zephyr-owner__`  | GitHub owner of the Zephyr source (default `anselmes`)                       | `anselmes`                              |
-| `__zephyr-repo__`   | Repository name of the Zephyr source (default `zephyr`)                      | `zephyr`                                |
-| `__swift-rev__`     | `zephyr-lang-swift` revision, looked up                                      | a tag or commit SHA                     |
-| `__Title__`         | Human-readable application name, as typed                                    | `Blinky: ESP32`                         |
-| `__Title-yaml__`    | `__Title__` for a YAML double-quoted scalar (`\` and `"` escaped)            | `Blinky: ESP32`                         |
-| `__Title-swift__`   | `__Title__` for a Swift string literal (`\` and `"` escaped)                 | `Blinky: ESP32`                         |
-| `__swift-version__` | Swift toolchain version for CI, looked up (6.4 or later)                     | `6.4.2`                                 |
-| `__description__`   | One-sentence description of the project or library                           | `Blinks an LED.`                        |
-| `__hal-module__`    | A HAL module the board needs; one allowlist line per module                  | `hal_espressif`                         |
+| Token                 | Meaning                                                                                                                                                                    | Example                                 |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `__name__`            | Repository name                                                                                                                                                            | `blinky`                                |
+| `__NAME__`            | Repository name, uppercase, `_` for `-`: the prefix of `__NAME___LOCAL_DEPS`                                                                                               | `BLINKY`                                |
+| `__dir__`             | Directory the repository is created in                                                                                                                                     | `./firmware`                            |
+| `__owner__`           | GitHub owner                                                                                                                                                               | `anselmes`                              |
+| `__app__`             | Application directory, relative to the project root                                                                                                                        | `app`, `apps/blinky`                    |
+| `__project__`         | CMake project name: `__app__`'s basename, `[A-Za-z0-9_]`                                                                                                                   | `app`, `blinky`                         |
+| `__Module__`          | Swift module name of a library, `UpperCamelCase`                                                                                                                           | `SensorHub`                             |
+| `__module__`          | Directory name of a library, lowercase, `_` for `-`                                                                                                                        | `sensor_hub`                            |
+| `__MODULE__`          | Kconfig symbol, uppercase, no `CONFIG_` prefix                                                                                                                             | `SENSOR_HUB`                            |
+| `__board__`           | Zephyr board identifier                                                                                                                                                    | `esp32c6_devkitc`                       |
+| `__year__`            | Copyright year                                                                                                                                                             | `2026`                                  |
+| `__author__`          | Author name and email                                                                                                                                                      | `Schubert Anselme <schubert@anselm.es>` |
+| `__license__`         | SPDX license identifier                                                                                                                                                    | `GPL-3.0`                               |
+| `__zephyr-rev__`      | Zephyr revision, looked up                                                                                                                                                 | a release tag                           |
+| `__zephyr-owner__`    | GitHub owner of the Zephyr source (default `anselmes`)                                                                                                                     | `anselmes`                              |
+| `__zephyr-repo__`     | Repository name of the Zephyr source (default `zephyr`)                                                                                                                    | `zephyr`                                |
+| `__toolchain__`       | `ZEPHYR_TOOLCHAIN_VARIANT` for the board: `zephyr/llvm`, or `zephyr` for `esp32*`                                                                                          | `zephyr/llvm`                           |
+| `__sdk-args__`        | Arguments of `west sdk install` for the toolchain: `--no-gnu-toolchains --llvm`, or `--gnu-toolchains riscv64-zephyr-elf` for ESP32-C6                                     | `--no-gnu-toolchains --llvm`            |
+| `__toolchain-note__`  | One-line comment on the toolchain choice in `example.env`                                                                                                                  | `Zephyr SDK LLVM toolchain`             |
+| `__swift-rev__`       | `zephyr-lang-swift` revision, looked up; pinned in `Package.swift` and `west.yml`                                                                                          | a tag or commit SHA                     |
+| `__lang-swift-path__` | Relative path from the manifest's directory to the zephyr-lang-swift checkout (`../modules/lang/swift` for the root `Package.swift`; the app's `<up>` prefixed for an app) | `../../modules/lang/swift`              |
+| `__Title__`           | Human-readable application name, as typed                                                                                                                                  | `Blinky: ESP32`                         |
+| `__Title-yaml__`      | `__Title__` for a YAML double-quoted scalar (`\` and `"` escaped)                                                                                                          | `Blinky: ESP32`                         |
+| `__Title-swift__`     | `__Title__` for a Swift string literal (`\` and `"` escaped)                                                                                                               | `Blinky: ESP32`                         |
+| `__swift-version__`   | Swift toolchain version for CI, looked up (6.4 or later)                                                                                                                   | `6.4.2`                                 |
+| `__description__`     | One-sentence description of the project or library                                                                                                                         | `Blinks an LED.`                        |
+| `__hal-module__`      | A HAL module the board needs; one allowlist line per module                                                                                                                | `hal_espressif`                         |
 
 ## Swift files
 
@@ -94,7 +98,7 @@ Every generated `Package.swift` follows the layout in zephyr-lang-swift's `AGENT
   `name`, `dependencies`, `path`, `exclude`, `swiftSettings`.
 - Target dependencies: `.target(name:)` entries first, then `.product(name:package:)` entries by package and then name. Every imported module is
   listed.
-- Helpers such as `zephyrLangSwift()` after `package`, under `// MARK: - Helpers`.
+- Helpers such as `localOrRemotePackage` after `package`, under `// MARK: - Helpers`.
 
 When adding to an existing manifest, insert each new product, dependency and target at its alphabetical position instead of appending it. After
 filling a template or editing a manifest, run `swift format format --in-place` on it (it drops the trailing comma a single remaining element
@@ -104,7 +108,7 @@ must not have), then `swift format lint --strict` and `swift package describe`.
 
 - Swift code is built by SwiftPM from `west build`. Manifests hold only the Embedded Swift `settings` (declared before `package`); CMake writes the
   target triple, include paths and Kconfig defines to the build's toolset, so never add `unsafeFlags` or `platforms`. Manifests resolve zephyr-lang-swift
-  with `zephyrLangSwift()`, which uses `ZEPHYR_LANG_SWIFT_PATH` from CMake.
+  with `localOrRemotePackage(name:url:path:revision:)`, which uses `ZEPHYR_LANG_SWIFT_PATH` from CMake (or `__NAME___LOCAL_DEPS`) and otherwise pins `revision` (`__swift-rev__`).
 - An application is a CMake project and a Swift package: `find_package(Zephyr ...)`, `project(__project__)`, then `zephyr_swift_application()`, plus a
   `Package.swift` with a static `app` product whose target (`path: "src"`) depends on `Zephyr` and `ZephyrApplication`. Its Swift sources live in `src/`.
 - A library is a target and product of the project's root `Package.swift` and a Zephyr module: a `zephyr/module.yml` naming it and pointing
@@ -138,6 +142,7 @@ sources and `trunk check` when available.
 ## Finishing
 
 Do not commit. Tell the user what was created, which `__token__` values were inferred, and what to run next. When they commit: signed (`git commit -S`),
+signed off (`git commit -s`, the DCO `Signed-off-by` trailer, with the author's real name and email; check `git log --format='%h %(trailers:key=Signed-off-by,valueonly)'`),
 a conventional-commit subject (`feature`, not `feat`), and a `Co-authored-by: Claude <81847+claude@users.noreply.github.com>` trailer.
 
 Swift templates end in `.template` so linters skip their tokens; write the result without that suffix.
