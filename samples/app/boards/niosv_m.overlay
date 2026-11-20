@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: GPL-3.0
+// Copyright (c) 2026 Schubert Anselme <schubert@anselm.es>
+//
+// Nios V/m in the GHRD niosv_subsys (DE25-Nano). The address map below is the
+// Platform Designer Global Address Map (data_manager view); keep the two in sync.
+//
+//   0x00000000  u_niosv_onchip_memory (512 KiB; reset vector)
+//   0x00210000  u_niosv_m.dm_agent (64 KiB, debug)
+//   0x00220000  timer_sw_agent (mtime / mtimecmp)
+//   0x00220060  u_jtag_uart (platform_irq_rx 0, Zephyr IRQ 16)
+//   0x40000000  fpga2hps window / 0x80000000 f2sdram window: unused. Never touch them:
+//               an access into the HPS windows can hang the HPS interconnect.
+//
+// The core is rv32i. Zephyr's own niosv-m.dtsi lists the "a" extension, and the
+// first AMO the kernel executed trapped as an illegal instruction on the hardware, so "a"
+// is dropped here: Zephyr then selects its interrupt-locking C atomics. The Swift code is
+// built for the same ISA by the module (see _swift_arch_options in CMakeLists.txt).
+// Remove the property if the core is confirmed to implement the A extension.
+
+#include <mem.h>
+
+&sram0 {
+	reg = <0x0 DT_SIZE_K(512)>;
+};
+
+&cpu0 {
+	clock-frequency = <100000000>;
+	riscv,isa-extensions = "i", "zicsr", "zifencei";
+};
+
+&mtimer {
+	reg = <0x220000 0x8 0x220008 0x8>;
+};
+
+&uart0 {
+	reg = <0x220060 0x8>;
+	interrupts = <16>;
+};
