@@ -1,5 +1,7 @@
+# cmake-format: off
 # SPDX-License-Identifier: __license__
 # Copyright (c) __year__ __author__
+# cmake-format: on
 
 cmake_minimum_required(VERSION 3.29)
 

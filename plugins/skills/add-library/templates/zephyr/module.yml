@@ -1,8 +1,11 @@
 name: __name__
 
+# The module's Kconfig is lib/Kconfig, not a Kconfig at the repository root: Zephyr
+# treats <application>/Kconfig as the application's root Kconfig, which would
+# replace Zephyr's own.
 build:
   cmake: lib
-  kconfig: Kconfig
+  kconfig: lib/Kconfig
   # zephyr_swift_library() comes from the lang-swift module, so Zephyr must load
   # it before processing lib/CMakeLists.txt.
   depends:

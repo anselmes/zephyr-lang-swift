@@ -33,7 +33,8 @@ let package = Package(
     localOrRemotePackage(
       name: "zephyr-lang-swift",
       url: "https://github.com/anselmes/zephyr-lang-swift.git",
-      path: langSwiftPath ?? "../modules/lang/swift",
+      path: langSwiftPath ?? "__lang-swift-path__",
+      revision: "__swift-rev__",
     )
   ],
   targets: [
@@ -66,8 +67,7 @@ func localOrRemotePackage(
   name: String,
   url: String,
   path: String,
-  from version: Version? = nil,
-  branch: String = "main",
+  revision: String,
   traits: Set<Package.Dependency.Trait> = [.defaults],
 ) -> Package.Dependency {
   let local = Context.environment["__NAME___LOCAL_DEPS"].flatMap { $0.isEmpty ? nil : $0 } ?? (langSwiftPath == nil ? nil : "1")
@@ -75,8 +75,5 @@ func localOrRemotePackage(
     let root = (local == "1" || local == "true") ? Context.packageDirectory : local
     return .package(name: name, path: path.hasPrefix("/") ? path : "\(root)/\(path)", traits: traits)
   }
-  if let version {
-    return .package(url: url, from: version, traits: traits)
-  }
-  return .package(url: url, branch: branch, traits: traits)
+  return .package(url: url, revision: revision, traits: traits)
 }

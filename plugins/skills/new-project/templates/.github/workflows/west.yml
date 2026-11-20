@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -38,9 +42,9 @@ jobs:
           swift build --version
           echo "${SWIFTLY_BIN_DIR:-${HOME}/.local/share/swiftly/bin}" >> "${GITHUB_PATH}"
       - name: Install the SDK
-        run: west sdk install --no-gnu-toolchains --llvm
+        run: west sdk install __sdk-args__
       - name: Build
         env:
-          ZEPHYR_TOOLCHAIN_VARIANT: zephyr/llvm
+          ZEPHYR_TOOLCHAIN_VARIANT: __toolchain__
         # Package.resolved pins any package used by URL; never resolve in CI.
         run: west build -p -d .build -b __board__ __name__/app -- -DZEPHYR_SWIFT_OFFLINE=ON
