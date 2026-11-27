@@ -65,6 +65,7 @@ jobs:
       contents: read
     env:
       BOARD: qemu_riscv32/qemu_virt_riscv32/smp
+      NINJA_VERSION: 1.13.2
       SWIFT_VERSION: 6.4.3
       WEST_VERSION: 1.5.0
       ZEPHYR_REVISION: v4.5.0
@@ -73,16 +74,23 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            codeload.github.com:443
+            download.swift.org:443
+            files.pythonhosted.org:443
+            github.com:443
+            pypi.org:443
+            release-assets.githubusercontent.com:443
+            results-receiver.actions.githubusercontent.com:443
+            swift.org:443
+            www.swift.org:443
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: zephyr-lang-swift
           persist-credentials: false
-      - name: Install host tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends device-tree-compiler ninja-build
       - name: Install Swift
         run: |
           base="swift-${SWIFT_VERSION}-RELEASE"
@@ -104,7 +112,7 @@ jobs:
         run: |
           python3 -m venv .venv
           . .venv/bin/activate
-          pip install --quiet "west==${WEST_VERSION}"
+          pip install --quiet "west==${WEST_VERSION}" "ninja==${NINJA_VERSION}"
           west init -m https://github.com/zephyrproject-rtos/zephyr --mr "${ZEPHYR_REVISION}" .
           west config manifest.project-filter -- '-.*,+picolibc'
           west update --narrow --fetch-opt=--depth=1
