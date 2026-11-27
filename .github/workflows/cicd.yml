@@ -53,6 +53,74 @@ jobs:
           VALIDATE_NATURAL_LANGUAGE: false
           VALIDATE_SPELL_CODESPELL: false
 
+  # Builds both sample applications with west, the check AGENTS.md asks for before
+  # a merge. Zephyr is pinned by tag, and its SDK_VERSION file pins the Zephyr SDK;
+  # the project filter keeps `west update` to Zephyr and picolibc, since the QEMU
+  # board needs no HAL. The module comes from this checkout through
+  # ZEPHYR_EXTRA_MODULES.
+  build:
+    runs-on: ubuntu-24.04
+    if: github.ref_type != 'tag'
+    permissions:
+      contents: read
+    env:
+      BOARD: qemu_riscv32/qemu_virt_riscv32/smp
+      SWIFT_VERSION: 6.4.3
+      WEST_VERSION: 1.5.0
+      ZEPHYR_REVISION: v4.5.0
+      ZEPHYR_TOOLCHAIN_VARIANT: zephyr/llvm
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zephyr-lang-swift
+          persist-credentials: false
+      - name: Install host tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends device-tree-compiler ninja-build
+      - name: Install Swift
+        run: |
+          base="swift-${SWIFT_VERSION}-RELEASE"
+          url="https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu2404/${base}/${base}-ubuntu24.04.tar.gz"
+          curl -fsSL --retry 3 -o swift.tar.gz "${url}"
+          curl -fsSL --retry 3 -o swift.tar.gz.sig "${url}.sig"
+          # Verify the toolchain against swift.org's signing keys before using it.
+          export GNUPGHOME="${RUNNER_TEMP}/gnupg"
+          mkdir -m 700 "${GNUPGHOME}"
+          curl -fsSL --retry 3 https://swift.org/keys/all-keys.asc | gpg --batch --quiet --import -
+          gpg --batch --verify swift.tar.gz.sig swift.tar.gz
+          mkdir -p "${RUNNER_TEMP}/swift"
+          tar -xzf swift.tar.gz -C "${RUNNER_TEMP}/swift" --strip-components=1
+          rm swift.tar.gz swift.tar.gz.sig
+          echo "${RUNNER_TEMP}/swift/usr/bin" >> "${GITHUB_PATH}"
+      - name: Show Swift version
+        run: swift --version
+      - name: Set up west workspace
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install --quiet "west==${WEST_VERSION}"
+          west init -m https://github.com/zephyrproject-rtos/zephyr --mr "${ZEPHYR_REVISION}" .
+          west config manifest.project-filter -- '-.*,+picolibc'
+          west update --narrow --fetch-opt=--depth=1
+          west packages pip --install
+          west sdk install --no-gnu-toolchains --llvm
+          echo "VIRTUAL_ENV=${PWD}/.venv" >> "${GITHUB_ENV}"
+          echo "${PWD}/.venv/bin" >> "${GITHUB_PATH}"
+      - name: Build samples/app
+        run: >-
+          west build -p -d build/app -b "${BOARD}" zephyr-lang-swift/samples/app --
+          "-DZEPHYR_EXTRA_MODULES=${GITHUB_WORKSPACE}/zephyr-lang-swift"
+      - name: Build samples/app+lib
+        run: >-
+          west build -p -d build/app+lib -b "${BOARD}" zephyr-lang-swift/samples/app+lib --
+          "-DZEPHYR_EXTRA_MODULES=${GITHUB_WORKSPACE}/zephyr-lang-swift"
+
   # dependabot auto-approve/merge and tag-triggered draft-release creation are
   # provided by anselmes/cicd's bot.yml. releaser publishes as a draft — a
   # published release becomes immutable immediately — and release.yml flips it
