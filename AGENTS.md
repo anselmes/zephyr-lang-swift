@@ -140,7 +140,8 @@ Every Swift target is compiled with this flag set, from the manifest's `settings
 
 ## Testing and verification
 
-Today the check is a clean build of the samples; CI does not build or test yet (`.github/workflows/cicd.yml` runs only the bot, Trivy and Scorecard workflows).
+Today the check is a clean build of the samples. The `build` job in `.github/workflows/cicd.yml` runs it on every push, for `qemu_riscv32/qemu_virt_riscv32/smp` with the
+Zephyr SDK's LLVM toolchain, at the Zephyr tag and Swift version pinned in the job's `env`; bump them there. CI does not run tests yet.
 
 ```bash
 west build -p -b <board> samples/app
